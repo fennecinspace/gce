@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:10
+    container_name: django_db
+    environment:
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: django
+    volumes:
+      - ./data:/var/lib/postgresql/data
+  web:
+    build: .
+    container_name: django
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
