@@ -1,14 +1,15 @@
 from django.db import models
+
 ####################################
-## Modifications : 
+###### this is not final ! #########
+########################################################################
+#######  Modifications : 
 ##   1 - added OneToOneFields
 ##   2 - Ordered Tables
 ##   3 - Added Validators
 ##   4 - Changed Fields Labels
-####################################
-###### this is not final ! #########
-####################################
-
+##   5 - Replaced Relation Tables with ManyToManyFields
+########################################################################
 
 class Utilisateur(models.Model):
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100,unique=True)  # Field name made lowercase.
@@ -35,17 +36,10 @@ class Notification(models.Model):
 
 class ChefDepartement(models.Model):
     id_chef_departement = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-
+    modules = models.ManyToManyField('Module', blank = False)
     class Meta:
         db_table = 'Chef_Departement'
         
-class Technicien(models.Model):
-    id_technicien = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-
-    class Meta:
-        db_table = 'Technicien'
-
-
 class Universite(models.Model):
     id_universite = models.CharField(db_column='id_Universite', primary_key=True, max_length=100)  # Field name made lowercase.
     nom = models.CharField(max_length=1000, blank=True, null=True)
@@ -62,7 +56,6 @@ class Faculte(models.Model):
     class Meta:
         db_table = 'Faculte'
 
-
 class Domaine(models.Model):
     id_domaine = models.CharField(db_column='id_Domaine', primary_key=True, max_length=100)  # Field name made lowercase.
     nom = models.CharField(max_length=1000)
@@ -70,7 +63,6 @@ class Domaine(models.Model):
 
     class Meta:
         db_table = 'Domaine'
-
 
 class Filiere(models.Model):
     id_filiere = models.CharField(db_column='id_Filiere', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -114,10 +106,19 @@ class Groupe(models.Model):
         db_table = 'Groupe'
 
 
+class Technicien(models.Model):
+    id_technicien = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
+    id_faculte = models.ForeignKey('Faculte', models.CASCADE, db_column='id_Faculte', unique=False, null=True)  # Field name made lowercase.
+
+    class Meta:
+        db_table = 'Technicien'
+
 class Enseignant(models.Model):
     id_enseignant = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-    id_filiere = models.ForeignKey('Filiere', models.CASCADE, db_column='id_Filiere')  # Field name made lowercase.
-
+    #id_filiere = models.ForeignKey('Filiere', models.CASCADE, db_column='id_Filiere')  # Field name made lowercase.
+    filieres = models.ManyToManyField('Filiere', blank = True)
+    modules = models.ManyToManyField('Module', blank = True)
+    
     class Meta:
         db_table = 'Enseignant'
 
@@ -125,7 +126,7 @@ class Enseignant(models.Model):
 class Etudiant(models.Model):
     id_etudiant = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
     id_groupe = models.ForeignKey('Groupe', models.CASCADE, db_column='id_Groupe')  # Field name made lowercase.
-    #modules = models.ManyToManyField('Module',through='Etudier')
+    modules = models.ManyToManyField('Module', blank=True)
     
     class Meta:
         db_table = 'Etudiant'
@@ -238,37 +239,37 @@ class MessagesReclamation(models.Model):
         db_table = 'Messages_Reclamation'
 
 
-class Appartientfaculte(models.Model):
-    id_technicien = models.OneToOneField('Technicien', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-    id_faculte = models.ForeignKey('Faculte', models.CASCADE, db_column='id_Faculte')  # Field name made lowercase.
+# class Appartientfiliere(models.Model):
+#     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur')  # Field name made lowercase.
+#     id_filiere = models.ForeignKey('Filiere', models.CASCADE, db_column='id_Filiere')  # Field name made lowercase.
 
-    class Meta:
-        db_table = 'appartientFaculte'
-        unique_together = (('id_technicien', 'id_faculte'),)
-
-
-class Etudier(models.Model):
-    id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur')  # Field name made lowercase.
-    id_module = models.OneToOneField('Module', models.CASCADE, db_column='id_Module', primary_key=True)  # Field name made lowercase.
-
-    class Meta:
-        db_table = 'etudier'
-        unique_together = (('id_module', 'id_etudiant'),)
+#     class Meta:
+#         db_table = 'appartientFiliere'
+#         unique_together = (('id_filiere', 'id_enseignant'),)
 
 
-class Gerermod(models.Model):
-    id_chef_departement = models.OneToOneField('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-    id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module')  # Field name made lowercase.
+# class Etudier(models.Model):
+#     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', unique=False)  # Field name made lowercase.
+#     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', primary_key=True, unique=False)  # Field name made lowercase.
 
-    class Meta:
-        db_table = 'gererMod'
-        unique_together = (('id_chef_departement', 'id_module'),)
+#     class Meta:
+#         db_table = 'etudier'
+#         unique_together = (('id_module', 'id_etudiant'),)
 
 
-class Enseigne(models.Model):
-    id_enseignant = models.OneToOneField('Enseignant', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-    id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module')  # Field name made lowercase.
+# class Gerermod(models.Model):
+#     id_chef_departement = models.ForeignKey('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', primary_key=True, unique=False)  # Field name made lowercase.
+#     id_module = models.OneToOneField('Module', models.CASCADE, db_column='id_Module')  # Field name made lowercase.
 
-    class Meta:
-        db_table = 'Enseigne'
-        unique_together = (('id_enseignant', 'id_module'),)
+#     class Meta:
+#         db_table = 'gererMod'
+#         unique_together = (('id_chef_departement', 'id_module'),)
+
+
+# class Enseigne(models.Model):
+#     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', primary_key=True, unique=False)  # Field name made lowercase.
+#     id_module = models.OneToOneField    ('Module', models.CASCADE, db_column='id_Module')  # Field name made lowercase.
+
+#     class Meta:
+#         db_table = 'Enseigne'
+#         unique_together = (('id_enseignant', 'id_module'),)
