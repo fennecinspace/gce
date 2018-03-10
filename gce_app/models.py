@@ -37,6 +37,7 @@ class Notification(models.Model):
 class ChefDepartement(models.Model):
     id_chef_departement = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
     modules = models.ManyToManyField('Module', blank = False)
+    
     class Meta:
         db_table = 'Chef_Departement'
         
@@ -137,6 +138,7 @@ class Module(models.Model):
     titre_module = models.CharField(db_column='titre_Module', max_length=1000, blank=True, null=True)  # Field name made lowercase.
     #uniteenseignement_module = models.CharField(db_column='uniteEnseignement_Module', max_length=100, blank=True, null=True)  # Field name made lowercase.
     finsaisie_module = models.BooleanField(db_column='FinSaisie_Module', blank=True, default=False)  # Field name made lowercase.
+    id_specialite = models.ForeignKey('Specialite', models.CASCADE , blank = True, null = True, unique = False)
 
     class Meta:
         db_table = 'Module'
@@ -172,15 +174,6 @@ class Correction(models.Model):
     class Meta:
         db_table = 'Correction'
 
-class DiscussionAdministrative(models.Model):
-    id_discussion = models.CharField(db_column='id_Discussion', primary_key=True, max_length=100)  # Field name made lowercase.
-    id_chef_departement = models.ForeignKey('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
-    id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur_1', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        db_table = 'Discussion_Administrative'
-
-
 class Reclamation(models.Model):
     id_reclamation = models.CharField(db_column='id_Reclamation', primary_key=True, max_length=100)  # Field name made lowercase.
     sujet_reclamation = models.CharField(db_column='Sujet_Reclamation', max_length=500, blank=True, null=True)  # Field name made lowercase.
@@ -190,15 +183,6 @@ class Reclamation(models.Model):
 
     class Meta:
         db_table = 'Reclamation'
-
- 
-class DiscussionReclamation(models.Model):
-    id_discussion = models.CharField(db_column='id_Discussion', primary_key=True, max_length=100)  # Field name made lowercase.
-    id_reclamation = models.ForeignKey('Reclamation', models.CASCADE, db_column='id_Reclamation', blank=True, null=True)  # Field name made lowercase.
-    id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        db_table = 'Discussion_Reclamation'
 
 class Consultation(models.Model):
     id_consultation = models.CharField(db_column='id_Consultation', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -212,6 +196,21 @@ class Consultation(models.Model):
     class Meta:
         db_table = 'Consultation'
 
+class DiscussionAdministrative(models.Model):
+    id_discussion = models.CharField(db_column='id_Discussion', primary_key=True, max_length=100)  # Field name made lowercase.
+    id_chef_departement = models.ForeignKey('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
+    id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur_1', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        db_table = 'Discussion_Administrative'
+
+class DiscussionReclamation(models.Model):
+    id_discussion = models.CharField(db_column='id_Discussion', primary_key=True, max_length=100)  # Field name made lowercase.
+    id_reclamation = models.ForeignKey('Reclamation', models.CASCADE, db_column='id_Reclamation', blank=True, null=True)  # Field name made lowercase.
+    id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        db_table = 'Discussion_Reclamation'
 
 class MessagesAdministrative(models.Model):
     id_message = models.CharField(db_column='id_Message', primary_key=True, max_length=100)  # Field name made lowercase.

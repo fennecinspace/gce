@@ -1,5 +1,5 @@
 from django.contrib import admin
-from gce_app.models import *  
+from gce_app.models import *
 
 # Register your models here.
 
@@ -27,7 +27,9 @@ admin.site.register(DiscussionReclamation)
 admin.site.register(Consultation)
 admin.site.register(MessagesAdministrative)
 admin.site.register(MessagesReclamation)
-admin.site.register(Appartientfaculte)
-admin.site.register(Etudier)
-admin.site.register(Gerermod)
-admin.site.register(Enseigne)
+
+#admin.site.register(Appartientfiliere)
+# admin.site.register(Appartientfaculte)
+# admin.site.register(Etudier)
+# admin.site.register(Gerermod)
+# admin.site.register(Enseigne)
