@@ -41,6 +41,7 @@ def GenerateId(id_value, id_number):
     return str(id_value) + str(id_number)
 
 def CreateUtilisateur(user_type, counter):
+    allUsers = Utilisateur.objects.all()
     if user_type == "etudiant":
         gen_id = GenerateId(IDS[0],counter)
 
@@ -55,7 +56,14 @@ def CreateUtilisateur(user_type, counter):
 
     gen_lastName = random.choice(NOMS)
     gen_firstName = random.choice(PRENOMS)
-    gen_email = gen_firstName + gen_lastName + "@" + random.choice(MAILS) + "." + random.choice(SITEDOMAINS)
+    found = True
+    while found:
+        gen_email = gen_firstName + gen_lastName + "@" + random.choice(MAILS) + "." + random.choice(SITEDOMAINS)
+        found = False
+        for ussr in allUsers:
+            if ussr.email_utilisateur == gen_email:
+                found = True
+                break          
     gen_userId = user_type + str(counter)
     gen_userPassword = "password" + str(random.randint(0,500))
 
@@ -72,48 +80,29 @@ def PopulateUtilisateur(nbEtud = 200, nbEnsen = 10, nbTech = 5, nbChef = 6): # i
     nbOfUsers = 0
     sys.stdout.write('[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbEtud):
-        while True:
-            try:
-                obj = CreateUtilisateur("etudiant",counter)
-                obj.save()
-            except: 
-                continue
-            nbOfUsers += 1
-            sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-            break
+        obj = CreateUtilisateur("etudiant",counter)
+        obj.save()
+        nbOfUsers += 1
+        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
 
     for counter in range (0, nbEnsen):
-        while True:
-            try:
-                obj = CreateUtilisateur("enseignant",counter)
-                obj.save()
-            except: 
-                continue
-            nbOfUsers += 1
-            sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-            break
+        obj = CreateUtilisateur("enseignant",counter)
+        obj.save()
+        nbOfUsers += 1
+        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
 
     for counter in range (0, nbTech):
-        while True:
-            try:
-                obj = CreateUtilisateur("technicien",counter)
-                obj.save()
-            except: 
-                continue
-            nbOfUsers += 1
-            sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-            break
+        obj = CreateUtilisateur("technicien",counter)
+        obj.save()
+        nbOfUsers += 1
+        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
 
     for counter in range (0, nbChef):
-        while True:
-            try:
-                obj = CreateUtilisateur("chef departement",counter)
-                obj.save()
-            except: 
-                continue
-            nbOfUsers += 1
-            sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-            break
+        obj = CreateUtilisateur("chef departement",counter)
+        obj.save()
+        nbOfUsers += 1
+        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
+
 
 def PopulateNotification():
     allUsers = Utilisateur.objects.filter(Q(id_utilisateur__contains = IDS[0]) | Q(id_utilisateur__contains = IDS[1]) | Q(id_utilisateur__contains = IDS[3]))
