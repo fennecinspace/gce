@@ -1,7 +1,12 @@
 from django.db import models
+# This is an auto-generated Django model module.
+# You'll have to do the following manually to clean this up:
+#   * Rearrange models' order
+#   * Make sure each model has one field with primary_key=True
+#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
+#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
+# Feel free to rename the models, but don't rename db_table values or field names.
 
-####################################
-###### this is not final ! #########
 ########################################################################
 #######  Modifications : 
 ##   1 - added OneToOneFields
@@ -10,6 +15,8 @@ from django.db import models
 ##   4 - Changed Fields Labels
 ##   5 - Replaced Relation Tables with ManyToManyFields
 ########################################################################
+
+
 
 class Utilisateur(models.Model):
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100,unique=True)  # Field name made lowercase.
@@ -36,7 +43,7 @@ class Notification(models.Model):
 
 class ChefDepartement(models.Model):
     id_chef_departement = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
-    modules = models.ManyToManyField('Module', blank = False)
+    #modules = models.ManyToManyField('Module', blank = False)
     
     class Meta:
         db_table = 'Chef_Departement'
@@ -127,7 +134,7 @@ class Enseignant(models.Model):
 class Etudiant(models.Model):
     id_etudiant = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
     id_groupe = models.ForeignKey('Groupe', models.CASCADE, db_column='id_Groupe')  # Field name made lowercase.
-    modules = models.ManyToManyField('Module', blank=True)
+    #modules = models.ManyToManyField('Module', blank=True)
     
     class Meta:
         db_table = 'Etudiant'

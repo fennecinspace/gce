@@ -1,0 +1,5 @@
+get modules of a student
+Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = Etudiant.objects.all()[150].id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
+
+get modules of chef departement
+Module.objects.all().filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = (ChefDepartement.objects.all()[2])))))
