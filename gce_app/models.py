@@ -17,7 +17,6 @@ from django.db import models
 ########################################################################
 
 
-
 class Utilisateur(models.Model):
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100,unique=True)  # Field name made lowercase.
     nom_utilisateur = models.CharField(db_column='nom_Utilisateur', max_length=255, blank=True, null=True)  # Field name made lowercase.
@@ -164,13 +163,21 @@ class Annonce(models.Model):
 
 class Copie(models.Model):
     id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)  # Field name made lowercase.
-    note_copie = models.FloatField(db_column='note_Copie', blank=True, null=True)  # Field name made lowercase.
-    emplacement_copie = models.CharField(db_column='emplacement_Copie', max_length=10000, blank=True, null=True)  # Field name made lowercase.
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)  # Field name made lowercase.
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         db_table = 'Copie'
+
+class VersionCopie(models.Model):
+    id_version = models.CharField(db_column='id_Version', primary_key=True, max_length=100)  # Field name made lowercase.
+    numero_version = models.IntegerField(db_column='numero_Version', blank=True, null=True)
+    note_copie = models.FloatField(db_column='note_Copie', blank=True, null=True)  # Field name made lowercase.
+    emplacement_copie = models.CharField(db_column='emplacement_Copie', max_length=10000, blank=True, null=True)  # Field name made lowercase.
+    id_copie = models.ForeignKey('Copie', models.CASCADE, db_column='id_Copie', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        db_table = 'VersionCopie'
 
 class Correction(models.Model):
     id_correction = models.CharField(db_column='id_Correction', primary_key=True, max_length=100)  # Field name made lowercase.

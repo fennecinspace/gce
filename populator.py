@@ -20,7 +20,7 @@ print ('models imported')
 
 #########################
 ## Predifining Constants
-NBTABLES = 26
+NBTABLES = 27
 SITEDOMAINS = ("dz","com","fr","net","org","info","us","it","co.jp")
 PRENOMS = ("mohamed","amine","yassine","karim","fouad","wael","abdallah","othmane","abdelrahmane","abdekarim","youssra","fatima","khadidja","wafaa","radia","raya","assia")
 NOMS = ("belhadj kacem","benkedadra","henni","benkourreche","belkaid","benguetate","khelil","belhadj","benahmed","youcefi","zendagi","khouja","abbas","naffousi")
@@ -31,8 +31,8 @@ DOMAINS = (('Math Info','Science Matiere'),('Droit','Sciences Politiques'))
 BRANCHES = (('Math','Informatique','Math Info Tronc Commun'),('Physique','Chemie','Science Matiere Tronc Commun'))
 PARCOURS = ('L1','L2','L3','M1','M2')
 SPECIALTIES = ('Math Info Tronc Commun','Systeme Information','Systeme Information Geographique','Ingenierie Systeme Information')
-IDS = ('etud','ensg','tech','chef','univ','fclt','domn','filr','prcr','spec','sect','grop','modl','crct','annc','copy','notf','dadm','rclm','drcl','cnsl','madm','mrcl')
-######   0      1      2      3      4       5      6     7      8       9     10     11     12     13     14     15     16     17     18     19     20     21     22
+IDS = ('etud','ensg','tech','chef','univ','fclt','domn','filr','prcr','spec','sect','grop','modl','crct','annc','copy','notf','dadm','rclm','drcl','cnsl','madm','mrcl','vers')
+######   0      1      2      3      4       5      6     7      8       9     10     11     12     13     14     15     16     17     18     19     20     21     22     23
 
 
 #######################################
@@ -102,7 +102,6 @@ def PopulateUtilisateur(nbEtud = 200, nbEnsen = 10, nbTech = 5, nbChef = 6): # i
         obj.save()
         nbOfUsers += 1
         sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-
 
 def PopulateNotification():
     allUsers = Utilisateur.objects.filter(Q(id_utilisateur__contains = IDS[0]) | Q(id_utilisateur__contains = IDS[1]) | Q(id_utilisateur__contains = IDS[3]))
@@ -400,66 +399,6 @@ def RelationEnseignantModule():
         nbOfEntries += 1
         sys.stdout.write('\r[18/{}]Relation ENSEIGNANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
-def RelationChefDepartementModule():
-    allModules = Module.objects.all()
-    nbOfEntries = 0
-    nbOfEntriesToCreate = len(allModules)
-    sys.stdout.write('\n[19/{}]Relation CHEF MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for module in allModules:
-        (module.id_specialite.id_parcours.id_filiere.id_chef_departement).modules.add(module)
-        nbOfEntries += 1
-        sys.stdout.write('\r[19/{}]Relation CHEF MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-
-def RelationEtudiantModule():
-    allModules = Module.objects.all()
-    allStudents  = Etudiant.objects.all()
-    nbOfEntries = 0
-    nbOfEntriesToCreate = 0
-    sys.stdout.write('\n[20/{}]Relation ETUDIANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for student in allStudents:
-        for module in allModules:
-            if student.id_groupe.id_section.id_specialite == module.id_specialite:
-                nbOfEntriesToCreate += 1
-    for student in allStudents:
-        for module in allModules:
-            if student.id_groupe.id_section.id_specialite == module.id_specialite:
-                student.modules.add(module)
-                nbOfEntries += 1
-                sys.stdout.write('\r[20/{}]Relation ETUDIANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-        
-def PopulateCopie2():
-    student_module_relations = Etudiant.modules.through.objects.all()
-    nbOfEntries = 0
-    x = 0
-    nbOfEntriesToCreate = 0
-    sys.stdout.write('\n[21/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for relation in student_module_relations:
-        if x == 0: ### 80% entries creation
-            x += 1
-            continue
-        elif x < 4:
-            x += 1
-        else:
-            x = 0
-        nbOfEntriesToCreate += 1
-    for relation in student_module_relations:
-        if x == 0:
-            x += 1
-            continue
-        elif x < 4:
-            x += 1
-        else:
-            x = 0
-        gen_id = IDS[15] + str(nbOfEntries)
-        note_copie = str(random.randint(0,20))
-        gen_emplacement_copie = "/media/copies/" + gen_id
-        gen_id_module = relation.module
-        gen_id_etudiant = relation.etudiant
-        obj = Copie(id_copie = gen_id, note_copie = note_copie, emplacement_copie = gen_emplacement_copie, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
-        obj.save()
-        nbOfEntries += 1
-        sys.stdout.write('\r[21/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-
 def PopulateCopie():
     allStudents = Etudiant.objects.all()
     nbOfEntries = 0
@@ -476,7 +415,7 @@ def PopulateCopie():
             else:
                 x = 0
             nbOfEntriesToCreate += 1
-    sys.stdout.write('\n[21/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for student in allStudents:
         allModules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
         for module in allModules:
@@ -488,21 +427,40 @@ def PopulateCopie():
             else:
                 x = 0
             gen_id = IDS[15] + str(nbOfEntries)
-            note_copie = str(random.randint(0,20))
-            gen_emplacement_copie = "/media/copies/" + gen_id
             gen_id_module = module
             gen_id_etudiant = student
-            obj = Copie(id_copie = gen_id, note_copie = note_copie, emplacement_copie = gen_emplacement_copie, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
+            obj = Copie(id_copie = gen_id, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
             obj.save()
             nbOfEntries += 1
-            sys.stdout.write('\r[21/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+            sys.stdout.write('\r[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+
+def PopulateVersionCopie():
+    allCopies = Copie.objects.all()
+    nbOfEntries = 0
+    nbOfEntriesToCreate = len(allCopies) + len(allCopies) //2
+    sys.stdout.write('\n[20/{}]VersionCopie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    x = 1
+    for copy in allCopies:
+        for i in range (0,x):
+            gen_id = IDS[23] + str(nbOfEntries)
+            gen_numero_version = i + 1
+            gen_note_copie = str(random.randint(0,20))
+            gen_emplacement_copie = "/media/copies/" + gen_id
+            obj = VersionCopie(id_version = gen_id, numero_version = gen_numero_version, note_copie = gen_note_copie, emplacement_copie = gen_emplacement_copie, id_copie = copy)
+            obj.save()
+            nbOfEntries += 1
+            sys.stdout.write('\r[20/{}]VersionCopie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        if  x == 1:
+            x = 2
+        else:
+            x = 1
 
 def PopulateCorrection():
     teacher_module_relations = Enseignant.modules.through.objects.all()
     nbOfEntries = 0
     x = 0
     nbOfEntriesToCreate = 0
-    sys.stdout.write('\n[20/{}]Correction : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[21/{}]Correction : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for relation in teacher_module_relations:
         if x == 0:
             x += 1
@@ -527,24 +485,7 @@ def PopulateCorrection():
         obj = Correction(id_correction = gen_id, emplacement_correction = gen_emplacement_correction, id_module = gen_id_module, id_enseignant = gen_id_enseignant)
         obj.save()
         nbOfEntries += 1
-        sys.stdout.write('\r[20/{}]Correction : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-
-def PopulateReclamation2():
-    student_module_relations = Etudiant.modules.through.objects.all()
-    nbOfEntries = 0
-    x = 0
-    nbOfEntriesToCreate = len(student_module_relations) // 10
-    sys.stdout.write('\n[21/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for i in range(0,nbOfEntriesToCreate):
-        gen_id = IDS[18] + str(nbOfEntries)
-        gen_sujet_reclamation = fake.text(30)
-        gen_description_reclamation = fake.text(300)
-        gen_id_etudiant = random.choice(student_module_relations).etudiant
-        gen_id_module = random.choice(student_module_relations).module
-        obj = Reclamation(id_reclamation = gen_id, sujet_reclamation = gen_sujet_reclamation, description_reclamation = gen_description_reclamation, id_etudiant = gen_id_etudiant, id_module = gen_id_module)
-        obj.save()
-        nbOfEntries += 1
-        sys.stdout.write('\r[21/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        sys.stdout.write('\r[21/{}]Correction : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateReclamation():
     allStudents = Etudiant.objects.all()
@@ -555,7 +496,7 @@ def PopulateReclamation():
             nbOfEntriesToCreate += 1
     nbOfEntries = 0
     nbOfEntriesToCreate = nbOfEntriesToCreate // 10
-    sys.stdout.write('\n[21/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[22/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for i in range(0,nbOfEntriesToCreate):
         gen_id = IDS[18] + str(nbOfEntries)
         gen_sujet_reclamation = fake.text(30)
@@ -565,14 +506,14 @@ def PopulateReclamation():
         obj = Reclamation(id_reclamation = gen_id, sujet_reclamation = gen_sujet_reclamation, description_reclamation = gen_description_reclamation, id_etudiant = gen_id_etudiant, id_module = gen_id_module)
         obj.save()
         nbOfEntries += 1
-        sys.stdout.write('\r[21/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        sys.stdout.write('\r[22/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateConsultation():
     teacher_module_relations = Enseignant.modules.through.objects.all()
     nbOfEntries = 0
     x = 0
     nbOfEntriesToCreate = 0
-    sys.stdout.write('\n[22/{}]Consultation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[23/{}]Consultation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for relation in teacher_module_relations:
         if x == 0 or x <3: ### 25% entries creation
             x += 1
@@ -595,13 +536,13 @@ def PopulateConsultation():
         obj = Consultation(id_consultation = gen_id, sale_consultation = gen_sale, date_consultation = gen_date, heure_consultation = gen_time, afficher_consultation = False, id_enseignant = gen_id_enseignant, id_module = gen_id_module)
         obj.save()
         nbOfEntries += 1
-        sys.stdout.write('\r[22/{}]Consultation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        sys.stdout.write('\r[23/{}]Consultation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateDiscussionAdministrative():
     allConsultations = Consultation.objects.all()
     nbOfEntries = 0
     nbOfEntriesToCreate = len(allConsultations)
-    sys.stdout.write('\n[23/{}]DiscussionAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[24/{}]DiscussionAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for consult in allConsultations:
         gen_id = IDS[17] + str(nbOfEntries)
         gen_id_enseignant = consult.id_enseignant
@@ -609,13 +550,13 @@ def PopulateDiscussionAdministrative():
         obj = DiscussionAdministrative(id_discussion = gen_id, id_chef_departement = gen_id_chef_departement, id_enseignant = gen_id_enseignant)
         obj.save()
         nbOfEntries += 1
-        sys.stdout.write('\r[23/{}]DiscussionAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        sys.stdout.write('\r[24/{}]DiscussionAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateDiscussionReclamation():
     allReclamations = Reclamation.objects.all()
     nbOfEntries = 0
     nbOfEntriesToCreate = len(allReclamations)
-    sys.stdout.write('\n[24/{}]DiscussionReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[25/{}]DiscussionReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for reclam in allReclamations:
         gen_id = IDS[19] + str(nbOfEntries)
         gen_id_reclamation = reclam
@@ -623,13 +564,13 @@ def PopulateDiscussionReclamation():
         obj = DiscussionReclamation(id_discussion = gen_id, id_reclamation = gen_id_reclamation, id_enseignant = gen_id_enseignant)
         obj.save()
         nbOfEntries += 1
-        sys.stdout.write('\r[24/{}]DiscussionReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        sys.stdout.write('\r[25/{}]DiscussionReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateMessagesAdministrative(nbMess = 10):
     allDiscussions = DiscussionAdministrative.objects.all()
     nbOfEntries = 0
     nbOfEntriesToCreate = len(allDiscussions) * nbMess
-    sys.stdout.write('\n[25/{}]MessagesAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[26/{}]MessagesAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for discu in allDiscussions:    
         members_discu = [discu.id_chef_departement.id_chef_departement.id_utilisateur,\
          discu.id_enseignant.id_enseignant.id_utilisateur]
@@ -647,13 +588,13 @@ def PopulateMessagesAdministrative(nbMess = 10):
              heure_message = gen_time, id_emetteur = gen_emeteur, id_recepteur = gen_recepteur, id_discussion = discu)
             obj.save()
             nbOfEntries += 1
-            sys.stdout.write('\r[25/{}]MessagesAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+            sys.stdout.write('\r[26/{}]MessagesAdministrative : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateMessagesReclamation(nbMess = 10):
     allDiscussions = DiscussionReclamation.objects.all()
     nbOfEntries = 0
     nbOfEntriesToCreate = len(allDiscussions) * nbMess
-    sys.stdout.write('\n[26/{}]MessagesReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[27/{}]MessagesReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for discu in allDiscussions:    
         members_discu = [discu.id_enseignant.id_enseignant.id_utilisateur,\
          discu.id_reclamation.id_etudiant.id_etudiant.id_utilisateur]
@@ -671,7 +612,7 @@ def PopulateMessagesReclamation(nbMess = 10):
              heure_message = gen_time, id_emetteur = gen_emeteur, id_recepteur = gen_recepteur, id_discussion = discu)
             obj.save()
             nbOfEntries += 1
-            sys.stdout.write('\r[26/{}]MessagesReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+            sys.stdout.write('\r[27/{}]MessagesReclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 
 def Populate():
@@ -693,9 +634,10 @@ def Populate():
     PopulateAnnonce()
     RelationEnseignantFiliere()
     RelationEnseignantModule()
-    ####RelationChefDepartementModule()
-    ####RelationEtudiantModule()
+    ###RelationChefDepartementModule()
+    ###RelationEtudiantModule()
     PopulateCopie()
+    PopulateVersionCopie()
     PopulateCorrection()
     PopulateReclamation()
     PopulateConsultation()
@@ -737,3 +679,120 @@ if __name__ == '__main__':
 #         obj.save()
 #         nbOfEntries += 1
 #         sys.stdout.write('\r[/{}]Enseignant : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+
+
+#### NOT USED ANYMORE 
+
+def RelationChefDepartementModule():
+    allModules = Module.objects.all()
+    nbOfEntries = 0
+    nbOfEntriesToCreate = len(allModules)
+    sys.stdout.write('\n[19/{}]Relation CHEF MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    for module in allModules:
+        (module.id_specialite.id_parcours.id_filiere.id_chef_departement).modules.add(module)
+        nbOfEntries += 1
+        sys.stdout.write('\r[19/{}]Relation CHEF MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+
+def RelationEtudiantModule():
+    allModules = Module.objects.all()
+    allStudents  = Etudiant.objects.all()
+    nbOfEntries = 0
+    nbOfEntriesToCreate = 0
+    sys.stdout.write('\n[20/{}]Relation ETUDIANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    for student in allStudents:
+        for module in allModules:
+            if student.id_groupe.id_section.id_specialite == module.id_specialite:
+                nbOfEntriesToCreate += 1
+    for student in allStudents:
+        for module in allModules:
+            if student.id_groupe.id_section.id_specialite == module.id_specialite:
+                student.modules.add(module)
+                nbOfEntries += 1
+                sys.stdout.write('\r[20/{}]Relation ETUDIANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+
+def PopulateCopie3():
+    student_module_relations = Etudiant.modules.through.objects.all()
+    nbOfEntries = 0
+    x = 0
+    nbOfEntriesToCreate = 0
+    sys.stdout.write('\n[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    for relation in student_module_relations:
+        if x == 0: ### 80% entries creation
+            x += 1
+            continue
+        elif x < 4:
+            x += 1
+        else:
+            x = 0
+        nbOfEntriesToCreate += 1
+    for relation in student_module_relations:
+        if x == 0:
+            x += 1
+            continue
+        elif x < 4:
+            x += 1
+        else:
+            x = 0
+        gen_id = IDS[15] + str(nbOfEntries)
+        note_copie = str(random.randint(0,20))
+        gen_emplacement_copie = "/media/copies/" + gen_id
+        gen_id_module = relation.module
+        gen_id_etudiant = relation.etudiant
+        obj = Copie(id_copie = gen_id, note_copie = note_copie, emplacement_copie = gen_emplacement_copie, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
+        obj.save()
+        nbOfEntries += 1
+        sys.stdout.write('\r[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+
+def PopulateCopie2():
+    allStudents = Etudiant.objects.all()
+    nbOfEntries = 0
+    x = 0
+    nbOfEntriesToCreate = 0
+    for student in allStudents:
+        allModules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
+        for module in allModules:
+            if x == 0: ### 80% entries creation
+                x += 1
+                continue
+            elif x < 4:
+                x += 1
+            else:
+                x = 0
+            nbOfEntriesToCreate += 1
+    sys.stdout.write('\n[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    for student in allStudents:
+        allModules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
+        for module in allModules:
+            if x == 0: ### 80% entries creation
+                x += 1
+                continue
+            elif x < 4:
+                x += 1
+            else:
+                x = 0
+            gen_id = IDS[15] + str(nbOfEntries)
+            note_copie = str(random.randint(0,20))
+            gen_emplacement_copie = "/media/copies/" + gen_id
+            gen_id_module = module
+            gen_id_etudiant = student
+            obj = Copie(id_copie = gen_id, note_copie = note_copie, emplacement_copie = gen_emplacement_copie, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
+            obj.save()
+            nbOfEntries += 1
+            sys.stdout.write('\r[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+
+def PopulateReclamation2():
+    student_module_relations = Etudiant.modules.through.objects.all()
+    nbOfEntries = 0
+    x = 0
+    nbOfEntriesToCreate = len(student_module_relations) // 10
+    sys.stdout.write('\n[22/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    for i in range(0,nbOfEntriesToCreate):
+        gen_id = IDS[18] + str(nbOfEntries)
+        gen_sujet_reclamation = fake.text(30)
+        gen_description_reclamation = fake.text(300)
+        gen_id_etudiant = random.choice(student_module_relations).etudiant
+        gen_id_module = random.choice(student_module_relations).module
+        obj = Reclamation(id_reclamation = gen_id, sujet_reclamation = gen_sujet_reclamation, description_reclamation = gen_description_reclamation, id_etudiant = gen_id_etudiant, id_module = gen_id_module)
+        obj.save()
+        nbOfEntries += 1
+        sys.stdout.write('\r[22/{}]Reclamation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
