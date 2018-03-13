@@ -173,20 +173,36 @@ class VersionCopie(models.Model):
     id_version = models.CharField(db_column='id_Version', primary_key=True, max_length=100)  # Field name made lowercase.
     numero_version = models.IntegerField(db_column='numero_Version', blank=True, null=True)
     note_copie = models.FloatField(db_column='note_Copie', blank=True, null=True)  # Field name made lowercase.
-    emplacement_copie = models.CharField(db_column='emplacement_Copie', max_length=10000, blank=True, null=True)  # Field name made lowercase.
+    #emplacement_copie = models.CharField(db_column='emplacement_Copie', max_length=10000, blank=True, null=True)  # Field name made lowercase.
     id_copie = models.ForeignKey('Copie', models.CASCADE, db_column='id_Copie', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         db_table = 'VersionCopie'
 
+class FichierCopie(models.Model):
+    id_fichier = models.CharField(db_column='id_Fichier', primary_key=True, max_length=100)
+    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True)
+    id_version = models.ForeignKey('VersionCopie', models.CASCADE, db_column='id_Version', blank=True, null=True)
+
+    class Meta:
+        db_table = 'FichierCopie'
+
 class Correction(models.Model):
     id_correction = models.CharField(db_column='id_Correction', primary_key=True, max_length=100)  # Field name made lowercase.
-    emplacement_correction = models.CharField(db_column='emplacement_Correction', max_length=10000, blank=True, null=True)  # Field name made lowercase.
+    #emplacement_correction = models.CharField(db_column='emplacement_Correction', max_length=10000, blank=True, null=True)  # Field name made lowercase.
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)  # Field name made lowercase.
     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         db_table = 'Correction'
+
+class FichierCorrection(models.Model):
+    id_fichier = models.CharField(db_column='id_Fichier', primary_key=True, max_length=100)
+    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True)
+    id_correction = models.ForeignKey('Correction', models.CASCADE, db_column='id_Correction', blank=True, null=True)
+
+    class Meta:
+        db_table = 'FichierCorrection'
 
 class Reclamation(models.Model):
     id_reclamation = models.CharField(db_column='id_Reclamation', primary_key=True, max_length=100)  # Field name made lowercase.

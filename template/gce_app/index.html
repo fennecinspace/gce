@@ -8,7 +8,12 @@
     <title>Document</title>
 </head>
 <body>
+    <h3>STATIC FILES TEST</h3>
     <img src="{% static 'test.jpg' %}" alt="" width="80px">
     <div>{{ testing }}</div>
+    <br>
+    <h3>MEDIA FILES TEST</h3>
+    <img src="{{ MEDIA_URL }}{{ copySample }}" alt="" width="400px">
+    <img src="{{ MEDIA_URL }}{{ correctionSample }}" alt="" width="400px">
 </body>
 </html>
