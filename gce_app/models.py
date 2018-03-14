@@ -1,3 +1,4 @@
+import os, uuid
 from django.db import models
 # This is an auto-generated Django model module.
 # You'll have to do the following manually to clean this up:
@@ -16,7 +17,19 @@ from django.db import models
 ##   5 - Replaced Relation Tables with ManyToManyFields
 ########################################################################
 
+## FUNCTIONS
+def copies_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('copies', filename)
 
+def corrections_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('corrections', filename)
+
+
+## MODELS 
 class Utilisateur(models.Model):
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100,unique=True)  # Field name made lowercase.
     nom_utilisateur = models.CharField(db_column='nom_Utilisateur', max_length=255, blank=True, null=True)  # Field name made lowercase.
@@ -46,7 +59,8 @@ class ChefDepartement(models.Model):
     
     class Meta:
         db_table = 'Chef_Departement'
-        
+
+
 class Universite(models.Model):
     id_universite = models.CharField(db_column='id_Universite', primary_key=True, max_length=100)  # Field name made lowercase.
     nom = models.CharField(max_length=1000, blank=True, null=True)
@@ -63,6 +77,7 @@ class Faculte(models.Model):
     class Meta:
         db_table = 'Faculte'
 
+
 class Domaine(models.Model):
     id_domaine = models.CharField(db_column='id_Domaine', primary_key=True, max_length=100)  # Field name made lowercase.
     nom = models.CharField(max_length=1000)
@@ -70,6 +85,7 @@ class Domaine(models.Model):
 
     class Meta:
         db_table = 'Domaine'
+
 
 class Filiere(models.Model):
     id_filiere = models.CharField(db_column='id_Filiere', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -80,6 +96,7 @@ class Filiere(models.Model):
     class Meta:
         db_table = 'Filiere'
 
+
 class Parcours(models.Model):
     id_parcours = models.CharField(db_column='id_Parcours', primary_key=True, max_length=100)  # Field name made lowercase.
     nom = models.CharField(max_length=100)
@@ -87,6 +104,7 @@ class Parcours(models.Model):
 
     class Meta:
         db_table = 'Parcours'
+
 
 class Specialite(models.Model):
     id_specialite = models.CharField(db_column='id_Specialite', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -96,6 +114,7 @@ class Specialite(models.Model):
     class Meta:
         db_table = 'Specialite'
 
+
 class Section(models.Model):
     id_section = models.CharField(db_column='id_Section', primary_key=True, max_length=100)  # Field name made lowercase.
     numero = models.IntegerField()
@@ -103,6 +122,7 @@ class Section(models.Model):
 
     class Meta:
         db_table = 'Section'
+
 
 class Groupe(models.Model):
     id_groupe = models.CharField(db_column='id_Groupe', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -119,6 +139,7 @@ class Technicien(models.Model):
 
     class Meta:
         db_table = 'Technicien'
+
 
 class Enseignant(models.Model):
     id_enseignant = models.OneToOneField('Utilisateur', models.CASCADE, db_column='id_Utilisateur', primary_key=True)  # Field name made lowercase.
@@ -149,6 +170,7 @@ class Module(models.Model):
     class Meta:
         db_table = 'Module'
 
+
 class Annonce(models.Model):
     id_annonce = models.CharField(db_column='id_Annonce', primary_key=True, max_length=100)  # Field name made lowercase.
     sujet_annonce = models.CharField(db_column='sujet_Annonce', max_length=500, blank=True, null=True)  # Field name made lowercase.
@@ -161,6 +183,7 @@ class Annonce(models.Model):
     class Meta:
         db_table = 'Annonce'
 
+
 class Copie(models.Model):
     id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)  # Field name made lowercase.
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)  # Field name made lowercase.
@@ -168,6 +191,7 @@ class Copie(models.Model):
 
     class Meta:
         db_table = 'Copie'
+
 
 class VersionCopie(models.Model):
     id_version = models.CharField(db_column='id_Version', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -179,13 +203,15 @@ class VersionCopie(models.Model):
     class Meta:
         db_table = 'VersionCopie'
 
+
 class FichierCopie(models.Model):
     id_fichier = models.CharField(db_column='id_Fichier', primary_key=True, max_length=100)
-    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True)
+    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to = copies_file_path)
     id_version = models.ForeignKey('VersionCopie', models.CASCADE, db_column='id_Version', blank=True, null=True)
 
     class Meta:
         db_table = 'FichierCopie'
+
 
 class Correction(models.Model):
     id_correction = models.CharField(db_column='id_Correction', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -196,13 +222,15 @@ class Correction(models.Model):
     class Meta:
         db_table = 'Correction'
 
+
 class FichierCorrection(models.Model):
     id_fichier = models.CharField(db_column='id_Fichier', primary_key=True, max_length=100)
-    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True)
+    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to=corrections_file_path)
     id_correction = models.ForeignKey('Correction', models.CASCADE, db_column='id_Correction', blank=True, null=True)
 
     class Meta:
         db_table = 'FichierCorrection'
+
 
 class Reclamation(models.Model):
     id_reclamation = models.CharField(db_column='id_Reclamation', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -213,6 +241,7 @@ class Reclamation(models.Model):
 
     class Meta:
         db_table = 'Reclamation'
+
 
 class Consultation(models.Model):
     id_consultation = models.CharField(db_column='id_Consultation', primary_key=True, max_length=100)  # Field name made lowercase.
@@ -226,6 +255,7 @@ class Consultation(models.Model):
     class Meta:
         db_table = 'Consultation'
 
+
 class DiscussionAdministrative(models.Model):
     id_discussion = models.CharField(db_column='id_Discussion', primary_key=True, max_length=100)  # Field name made lowercase.
     id_chef_departement = models.ForeignKey('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)  # Field name made lowercase.
@@ -234,6 +264,7 @@ class DiscussionAdministrative(models.Model):
     class Meta:
         db_table = 'Discussion_Administrative'
 
+
 class DiscussionReclamation(models.Model):
     id_discussion = models.CharField(db_column='id_Discussion', primary_key=True, max_length=100)  # Field name made lowercase.
     id_reclamation = models.ForeignKey('Reclamation', models.CASCADE, db_column='id_Reclamation', blank=True, null=True)  # Field name made lowercase.
@@ -241,6 +272,7 @@ class DiscussionReclamation(models.Model):
 
     class Meta:
         db_table = 'Discussion_Reclamation'
+
 
 class MessagesAdministrative(models.Model):
     id_message = models.CharField(db_column='id_Message', primary_key=True, max_length=100)  # Field name made lowercase.

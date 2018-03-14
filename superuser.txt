@@ -1,3 +1,0 @@
-username : root
-password : a123456789
-emailadr : root@root.su
