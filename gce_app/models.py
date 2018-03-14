@@ -1,12 +1,6 @@
 import os, uuid
 from django.db import models
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
+from django.contrib.auth.models import User
 
 ########################################################################
 #######  Modifications : 
@@ -28,16 +22,30 @@ def corrections_file_path(instance, filename):
     filename = "%s.%s" % (uuid.uuid4(), ext)
     return os.path.join('corrections', filename)
 
+def avatars_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join('avatars', filename)
 
-## MODELS 
+
+## MODELS
 class Utilisateur(models.Model):
-    id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100,unique=True)  # Field name made lowercase.
-    nom_utilisateur = models.CharField(db_column='nom_Utilisateur', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    prenom_utilisateur = models.CharField(db_column='prenom_Utilisateur', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    identifiant_utilisateur = models.CharField(db_column='identifiant_Utilisateur', max_length=255, blank=True, null=True,unique=True)  # Field name made lowercase.
-    password_utilisateur = models.CharField(db_column='password_Utilisateur', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    email_utilisateur = models.EmailField(db_column='email_Utilisateur', max_length=255, blank=True, null=True, unique=True)
+    user_choices = (('etud','Etudiant'),('ensg','Enseignant'),('tech','Technicien'),('chef','Chef Departement'))
+    info_utilisateur = models.OneToOneField(User,models.CASCADE)
+    type_utilisateur = models.CharField(db_column='type_Utilisateur', max_length=255, null=True, choices = user_choices)
+    id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100, unique=True, blank=True, editable=False)
+    avatar_utilisateur = models.FileField(db_column='Avatar', blank=True, null=True, upload_to = avatars_file_path)
+    #nom_utilisateur = models.CharField(db_column='nom_Utilisateur', max_length=255, blank=True, null=True)
+    #prenom_utilisateur = models.CharField(db_column='prenom_Utilisateur', max_length=255, blank=True, null=True)
+    #identifiant_utilisateur = models.CharField(db_column='identifiant_Utilisateur', max_length=255, blank=True, null=True,unique=True)
+    #password_utilisateur = models.CharField(db_column='password_Utilisateur', max_length=100, blank=True, null=True)
+    #email_utilisateur = models.EmailField(db_column='email_Utilisateur', max_length=255, blank=True, null=True, unique=True)
+
+    def save(self,*args, **kwargs):
+        self.id_utilisateur = self.type_utilisateur + str(self.info_utilisateur.id)
+        super().save(*args, **kwargs)
     
+
     class Meta:
         db_table = 'Utilisateur'
 

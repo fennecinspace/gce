@@ -40,20 +40,8 @@ IDS = ('etud','ensg','tech','chef','univ','fclt','domn','filr','prcr','spec','se
 def GenerateId(id_value, id_number):
     return str(id_value) + str(id_number)
 
-def CreateUtilisateur(user_type, counter):
+def CreateUtilisateur(user_type, counter, gen_avatar):
     allUsers = Utilisateur.objects.all()
-    if user_type == "etudiant":
-        gen_id = GenerateId(IDS[0],counter)
-
-    elif user_type == "enseignant":
-        gen_id = GenerateId(IDS[1],counter)
-
-    elif user_type == "technicien":
-        gen_id = GenerateId(IDS[2],counter)
-
-    else: #user_type == "chef departement"
-        gen_id = GenerateId(IDS[3],counter)
-
     gen_lastName = random.choice(NOMS)
     gen_firstName = random.choice(PRENOMS)
     found = True
@@ -61,47 +49,55 @@ def CreateUtilisateur(user_type, counter):
         gen_email = gen_firstName + gen_lastName + "@" + random.choice(MAILS) + "." + random.choice(SITEDOMAINS)
         found = False
         for ussr in allUsers:
-            if ussr.email_utilisateur == gen_email:
+            if ussr.info_utilisateur.email == gen_email:
                 found = True
                 break          
-    gen_userId = user_type + str(counter)
+    gen_userId = "username" + str(counter)
     gen_userPassword = "password" + str(random.randint(0,500))
-
-    return Utilisateur(id_utilisateur = gen_id,\
-     nom_utilisateur = gen_lastName, prenom_utilisateur = gen_firstName,\
-     identifiant_utilisateur = gen_userId, password_utilisateur = gen_userPassword,\
-     email_utilisateur = gen_email)
-
+    # Saving User Objects
+    obj = User(username = gen_userId, password = gen_userPassword,last_name = gen_lastName, first_name = gen_firstName, email = gen_email)
+    obj.save()
+    if user_type == "etudiant":
+        #gen_id = GenerateId(IDS[0],counter)
+        gen_type = IDS[0]
+    elif user_type == "enseignant":
+        #gen_id = GenerateId(IDS[1],counter)
+        gen_type = IDS[1]
+    elif user_type == "technicien":
+        #gen_id = GenerateId(IDS[2],counter)
+        gen_type = IDS[2]
+    else: #user_type == "chef departement"
+        #gen_id = GenerateId(IDS[3],counter)
+        gen_type = IDS[3] 
+    return Utilisateur(info_utilisateur = obj, type_utilisateur = gen_type, avatar_utilisateur = gen_avatar)
 
 ########################
 ## defining Populators
 def PopulateUtilisateur(nbEtud = 200, nbEnsen = 10, nbTech = 5, nbChef = 6): # i use try and except to solve the unique fields issue 
+    default_avatar = os.path.join('avatars','default_avatar.png')
     nbOfUsersToCreate = nbEtud + nbEnsen + nbTech + nbChef
     nbOfUsers = 0
-    sys.stdout.write('[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
+    sys.stdout.write('[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbEtud):
-        obj = CreateUtilisateur("etudiant",counter)
+        obj = CreateUtilisateur("etudiant",nbOfUsers,default_avatar)
         obj.save()
         nbOfUsers += 1
-        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-
+        sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbEnsen):
-        obj = CreateUtilisateur("enseignant",counter)
+        obj = CreateUtilisateur("enseignant",nbOfUsers,default_avatar)
         obj.save()
         nbOfUsers += 1
-        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-
+        sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbTech):
-        obj = CreateUtilisateur("technicien",counter)
+        obj = CreateUtilisateur("technicien",nbOfUsers,default_avatar)
         obj.save()
         nbOfUsers += 1
-        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
-
+        sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbChef):
-        obj = CreateUtilisateur("chef departement",counter)
+        obj = CreateUtilisateur("chef departement",nbOfUsers,default_avatar)
         obj.save()
         nbOfUsers += 1
-        sys.stdout.write('\r[01/{}]Utilisateur : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
+        sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
 
 def PopulateNotification():
     allUsers = Utilisateur.objects.filter(Q(id_utilisateur__contains = IDS[0]) | Q(id_utilisateur__contains = IDS[1]) | Q(id_utilisateur__contains = IDS[3]))
