@@ -53,9 +53,10 @@ def CreateUtilisateur(user_type, counter, gen_avatar):
                 found = True
                 break          
     gen_userId = "username" + str(counter)
-    gen_userPassword = "password" + str(random.randint(0,500))
+    gen_userPassword = "password" + str(10) #str(random.randint(0,500))
     # Saving User Objects
-    obj = User(username = gen_userId, password = gen_userPassword,last_name = gen_lastName, first_name = gen_firstName, email = gen_email)
+    obj = User(username = gen_userId,last_name = gen_lastName, first_name = gen_firstName, email = gen_email)
+    obj.set_password(gen_userPassword)
     obj.save()
     if user_type == "etudiant":
         #gen_id = GenerateId(IDS[0],counter)

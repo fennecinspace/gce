@@ -1,5 +1,5 @@
-#login_area{
-    background: url('../images/logo.png') no-repeat center 3em;
+#login_area {
+    background: url('../images/login_pic.png') no-repeat center 3em;
     background-size: 8em;
 	width: 20em;
 	height: 22em;
@@ -7,7 +7,8 @@
 	margin: 4em auto;
 	margin-bottom: 0;
 	text-align: center;
-} 
+	animation: login_area_animation 1s;
+}
 
 #login_title {
 	margin: 0 auto;
@@ -34,7 +35,7 @@ form {
 }
 
 .login_input { /*style input & password  */ 
-	width: 100%;
+	width: 95%;
 	height: 3em;
 	border: none;
 	font-size: 14px;
@@ -45,8 +46,7 @@ form {
 	background-repeat: no-repeat;  
 	background-position: 95% 50%;
 	background-color: #f0f0f0;
-	background-size: 1.2em;
-	font-size: 1em;
+	background-size: 1.2em;	font-size: 1em;
 }
 
 .login_input#username {
@@ -87,4 +87,19 @@ form {
 	-moz-transition: opacity 0.35s ease-in-out;
 	-o-transition: opacity 0.35s ease-in-out;
 	transition: opacity 0.35s ease-in-out
+}
+
+
+/* Animations */
+
+@keyframes login_area_animation {
+	from {
+		transform: translateY(500px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0px);
+		opacity: 1;
+	}
 }

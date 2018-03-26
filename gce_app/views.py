@@ -2,9 +2,13 @@ from django.shortcuts import render
 from gce_app.models import FichierCopie, FichierCorrection
 from django.views.generic import TemplateView
 
+#importing needed models
+from gce_app.models import Utilisateur
+
 #importing authentification modules
 from django.contrib.auth import login, logout, authenticate 
 from django.http import HttpResponse
+from django.contrib import messages
 
 def testpage(req):
     copie = FichierCopie.objects.all()[0].emplacement_fichier
@@ -32,11 +36,27 @@ class mainView(TemplateView):
         else:
             if req.POST.get('logout'):
                 logout(req)
-                return render(req, 'gce_app/login.html', context = None) # return login page after logging out
-        return render(req, 'gce_app/index.html', context = None) # return home page in case of login
+                return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+
+        loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [req.user])[0]
+        if loggedin_user.type_utilisateur == 'etud':
+            return render(req, 'gce_app/etud/etud_index.html', context = None)
+        if loggedin_user.type_utilisateur == 'tech':
+            return render(req, 'gce_app/tech/tech_index.html', context = None)
+        if loggedin_user.type_utilisateur == 'ensg':
+            return render(req, 'gce_app/ensg/ensg_index.html', context = None)
+        if loggedin_user.type_utilisateur == 'chef':
+            return render(req, 'gce_app/chef/chef_index.html', context = None)
 
     def get(self,req):
         if req.user.is_anonymous: # if user is not logged in return login page
-            return render(req, 'gce_app/login.html', context = None)
-        else: # if user is logged in return home page
-            return render(req, 'gce_app/index.html', context = None)
+            return render(req, 'gce_app/common/login.html', context = None)
+        loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [req.user])[0]
+        if loggedin_user.type_utilisateur == 'etud':
+            return render(req, 'gce_app/etud/etud_index.html', context = None)
+        if loggedin_user.type_utilisateur == 'tech':
+            return render(req, 'gce_app/tech/tech_index.html', context = None)
+        if loggedin_user.type_utilisateur == 'ensg':
+            return render(req, 'gce_app/ensg/ensg_index.html', context = None)
+        if loggedin_user.type_utilisateur == 'chef':
+            return render(req, 'gce_app/chef/chef_index.html', context = None)

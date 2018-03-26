@@ -17,7 +17,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'template')
 STATIC_DIR = os.path.join(BASE_DIR,'static')
 MEDIA_DIR = os.path.join(BASE_DIR,'media')
+
+#LOGIN SETTINGS
 LOGIN_URL = ''
+LOGIN_REDIRECT_URL = ''
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -29,7 +32,6 @@ SECRET_KEY = '7*9@g3^$ha^&q&_&o7isl4_)3j2jeeav#3bkgz&op1r2yh3sx)'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
