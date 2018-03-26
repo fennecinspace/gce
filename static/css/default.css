@@ -1,0 +1,30 @@
+@font-face {
+    font-family: Roboto-Bold;
+    src: url("../fonts/Roboto-Bold.ttf");
+}
+
+@font-face {
+    font-family: Roboto-Light;
+    src: url("../fonts/Roboto-Light.ttf");
+}
+
+@font-face {
+    font-family: Roboto-Regular;
+    src: url("../fonts/Roboto-Regular.ttf");
+}
+
+* {
+    box-sizing: border-box;
+    font-family: Roboto-Regular;
+    font-size: 16px;
+}
+
+.fill_100 {
+    height: 100%;
+    width: 100%;
+    min-height: 100%;
+}
+
+:focus {
+    outline: none;
+}

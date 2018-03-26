@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 {% load staticfiles %}
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/normalize.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/default.css' %}" />
+    <title>Login</title>
 </head>
-<body>
-    <h3>STATIC FILES TEST</h3>
-    <img src="{% static 'test.jpg' %}" alt="" width="80px">
-    <div>{{ testing }}</div>
-    <br>
-    <h3>MEDIA FILES TEST</h3>
-    <img src="{{ MEDIA_URL }}{{ copySample }}" alt="" width="400px">
-    <img src="{{ MEDIA_URL }}{{ correctionSample }}" alt="" width="400px">
+<body class=".fill_100">     
+    <form method="POST">
+        {% csrf_token %}
+        <input name = "logout" type="submit" value="Logout">
+        <input type="submit" value="do something">
+    </form>
 </body>
 </html>

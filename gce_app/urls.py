@@ -1,8 +1,9 @@
 from django.urls import path
-from gce_app import views as v
+from gce_app.views import mainView, testpage
 
 app_name = 'gce_app'
 
 urlpatterns = [
-    path('', v.index, name = 'index')
+    path('testpage/', testpage, name = 'testpage'),
+    path('', mainView.as_view(), name = 'home'),
 ]

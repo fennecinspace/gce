@@ -19,10 +19,9 @@ from gce_app import urls as gce_app_urls
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('gce_app/', include(gce_app_urls)),
+    path('', include(gce_app_urls)),
 ]
 
 # MEDIA FILES SERVING SETTINGS (not recommended in production)

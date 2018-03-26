@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/normalize.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/default.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/login.css' %}" />
+    <title>Login</title>
+</head>
+<body class=".fill_100">   
+    <div id="login_area">
+        <div id="login_title">Login</div>
+        <form method="POST">
+            {% csrf_token %}
+            <input id="username" class="login_input" type="text" name="username" placeholder="Identifiant"/>
+            <input id="password" class="login_input" type="password" name="password" placeholder="Mot de pass"/>
+            <input id="login_submit" type="submit" value="s'identifier">
+        </form>
+    </div>  
+</body>
+</html>
