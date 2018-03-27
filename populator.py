@@ -110,7 +110,9 @@ def PopulateNotification():
             gen_id = IDS[16] + str(nbOfEntries)
             gen_sujet = fake.text(30)
             gen_description = fake.text(120)
-            obj = Notification(id_notification = gen_id, sujet_notification = gen_sujet, description_notification = gen_description, vue_notification = False, id_utilisateur = user)
+            gen_date = dt.strptime(fake.date(),'%Y-%M-%d').date()
+            gen_time = dt.strptime(fake.time(),'%H:%M:%S').time()
+            obj = Notification(id_notification = gen_id, sujet_notification = gen_sujet, description_notification = gen_description, vue_notification = False, date_notification = gen_date, heure_notification = gen_time, id_utilisateur = user)
             obj.save()
             nbOfEntries += 1 
             sys.stdout.write('\r[02/{}]Notification : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
@@ -426,7 +428,7 @@ def PopulateCopie():
             gen_id = IDS[15] + str(nbOfEntries)
             gen_id_module = module
             gen_id_etudiant = student
-            obj = Copie(id_copie = gen_id, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
+            obj = Copie(id_copie = gen_id, annee_copie = '2017-2018', id_module = gen_id_module, id_etudiant = gen_id_etudiant)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
