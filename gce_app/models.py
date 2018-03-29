@@ -52,8 +52,8 @@ class Notification(models.Model):
     vue_notification = models.BooleanField(db_column='vue_Notification',default = False)
     date_notification = models.DateField(db_column='date_Notification', blank=True, null=True)
     heure_notification = models.TimeField(db_column='heure_Notification', blank=True, null=True)
+    icon_notification = models.CharField(db_column='IconPath', blank=True, null=True,max_length=1000)
     id_utilisateur = models.ForeignKey('Utilisateur', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
-
     class Meta:
         db_table = 'Notification'
 

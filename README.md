@@ -1,3 +1,13 @@
+# Pour Tester
+peupler la base :
+
+    python populator.py
+
+identifier a l'aide du mot de pass `password10` des comptes suivants:
+- username120 pour etudiant
+- username200 pour enseignant
+- username210 pour technicien
+- username216 pour chef departement
 
 
 # Pour utiliser livereload (browser-sync alternative)

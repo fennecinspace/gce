@@ -112,7 +112,8 @@ def PopulateNotification():
             gen_description = fake.text(120)
             gen_date = dt.strptime(fake.date(),'%Y-%M-%d').date()
             gen_time = dt.strptime(fake.time(),'%H:%M:%S').time()
-            obj = Notification(id_notification = gen_id, sujet_notification = gen_sujet, description_notification = gen_description, vue_notification = False, date_notification = gen_date, heure_notification = gen_time, id_utilisateur = user)
+            gen_icon = os.path.join('static/images',random.choice(['email_notification.png','save_notification.png']))
+            obj = Notification(id_notification = gen_id, sujet_notification = gen_sujet, description_notification = gen_description, vue_notification = False, date_notification = gen_date, heure_notification = gen_time, icon_notification = gen_icon, id_utilisateur = user)
             obj.save()
             nbOfEntries += 1 
             sys.stdout.write('\r[02/{}]Notification : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
