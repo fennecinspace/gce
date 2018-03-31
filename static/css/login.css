@@ -7,7 +7,7 @@
 	margin: 4em auto;
 	margin-bottom: 0;
 	text-align: center;
-	animation: login_area_animation 1s;
+	animation: login_area_animation 1.5s;
 }
 
 #login_title {
@@ -94,7 +94,7 @@ form {
 
 @keyframes login_area_animation {
 	from {
-		transform: translateY(500px);
+		transform: translateY(-700px);
 		opacity: 0;
 	}
 

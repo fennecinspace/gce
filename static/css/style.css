@@ -1,0 +1,504 @@
+/* #region TOP BAR*/
+#topbar {
+    z-index: 1;
+    display: flex;
+    position : fixed;
+    top: 0;
+    width: 100%;
+    height: 3em;
+    padding: 0 10%;
+    background: rgba(0,0,0,0.8);
+    line-height: 3em;
+    text-align: center;
+    animation-duration: 1.5s;
+    animation-name: top_bar_animation;
+    transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
+}
+
+#profile_pic {
+    display: inline-block;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+    margin: 0.25em 0.4em 0.25em 0;
+}
+
+#profile_pic:hover {
+    cursor: pointer;
+    filter: opacity(0.8);
+    transition: .5s;
+}
+
+#menu_search_container {
+    position: relative;
+    width: 100%;
+}
+
+/* #region MENU ENTRIES */
+#menu_entries {
+    display: inline-block;  
+    width: 100%;
+    height: 3em;
+    color: white;
+    padding-right: 2.7em; /* filler for the search button */
+}
+
+#menu_entries > div {
+    font-weight: 700;
+    display: inline-block;
+    font-size: 14px;
+    margin-right: 1em;
+    padding: 0 0.2em;
+    height: 2.5em;
+    line-height: 2.5em;
+}
+
+#menu_entries > div:last-child {
+    margin-right: 0;
+}
+
+#menu_entries > div:hover {
+    cursor: pointer;
+    color: rgb(192, 192, 192);
+    transition: .3s;
+}
+/* #endregion */
+
+/* #region SEARCH AREA */
+#search_area {
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2.6em;
+    height: 2.5em;
+    line-height: 2.5em;
+    margin: 0.25em 0;
+    margin-left: 2%;
+    text-align: right;
+    z-index: 1;
+}
+
+#search_button {
+    background: url(../images/search_icon.png) no-repeat center;
+    background-size: 100%;
+    margin: 0.5em 0.5em;
+    width: 1.6em;
+    height: 1.6em;
+    cursor: pointer;
+    display: inline-block;
+}
+
+
+#leave_search_area {
+    cursor: pointer;
+    display: none;
+    color: white;
+    position: relative;
+    margin: .9em 1.5em; 
+    line-height: 1em;
+}
+
+/* #region X mark */
+#leave_search_area > div, #leave_search_area > div:last-child {
+    position: absolute;
+    top: 0;
+    font-size: 1.5em;
+}
+
+#leave_search_area > div {
+    transform: rotateZ(-45deg) translate(-2.5px,0px);
+    transform-origin: top; 
+}
+
+#leave_search_area > div:last-child {
+    transform: rotateZ(45deg) translate(-4.25px,0px);
+    transform-origin: bottom; 
+}
+/* #endregion X mark */
+
+#search_input {
+    background: transparent;
+    flex: 1; 
+    border: none;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    font-size: 1.35em;
+    color: white;
+    margin-left: 0em;
+}
+
+#search_overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.527); 
+}
+
+#search_button:hover, #notification_button:hover, #leave_search_area:hover {
+    filter: opacity(.8);
+    transition: .3s;
+}
+
+/* #region SUGGESTIONS*/
+#search_suggestions {
+    z-index: 1000;
+    position: absolute;
+    display: none;
+    top: 2.75em;
+    left: 0em;
+    background-color: rgb(255, 255, 255);
+    margin-left: -1%; 
+    width: 96%;
+    max-height: 13.5em;
+    border-radius:  0em 0em .5em .5em;
+}
+
+.suggestion_item {
+    display: flex;
+    height: 2.2em;
+    margin: 0.4em 0.4em;
+    border-radius: 0.3em;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.suggestion_item:hover {
+    background-color: rgb(231, 231, 231); 
+    color: #0070c9;
+}
+
+
+.suggestion_item_id {
+    display: none;
+}
+
+.suggestion_item_img {
+    display: inline-block;
+    width: 1.8em;
+    height: 1.8em;
+    margin: 0.2em 0.5em 0.2em 0.3em; 
+    border-radius: 50%;
+}
+
+.suggestion_item_info {
+    display: flex;
+    width: 100%;
+    line-height: 2.3em;
+}
+
+.suggestion_item_name, .suggestion_item_filiere {
+    width: 50%;
+    font-family: Roboto-Bold;
+    font-size: 14px;
+}
+
+.suggestion_item_name {
+    text-align: left;
+    text-transform: capitalize;
+}
+
+.suggestion_item_filiere {
+    padding-right: 1em;
+    text-align: right;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+/* #endregion SUGGESTIONS*/
+/* #endregion SEARCH AREA*/
+
+/* #region NOTIFICATION and OPTIONS AREAS*/
+#notification_area {
+    height: 2.5em;
+    margin: 0.25em 0;
+    text-align: right;
+    display: flex;
+    line-height: 2.5em;
+}
+
+#notification_button {
+    background: url(../images/notification_bell_filled.png) no-repeat center;
+    background-size: 100%;
+    width: 1.6em;
+    height: 1.6em;
+    margin: 0.4em;
+    cursor: pointer;
+    display: inline-block;
+}
+
+#notification_box, #options_box {
+    z-index: 1;
+    position : absolute;
+    top: 3.1em;
+    background-color: rgb(231, 231, 231);
+    border: 1px solid rgb(88, 88, 88);
+    border-radius: 3px;
+}
+
+#options_box {
+    left: 10%;
+    transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
+}
+
+#notification_box {
+    right: 10%;
+    transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
+}
+
+#notification_box > div {
+    max-height: 21.1em;
+    overflow-y: scroll;
+}
+
+/* #region notification and options TRIANGLES */
+#options_box:after, #options_box:before, #notification_box:after, #notification_box:before {
+    bottom: 100%;
+    border: 1px solid transparent;
+    content: " ";
+    position: absolute;
+    pointer-events: none;
+}
+
+#notification_box:after, #notification_box:before {
+    right: 0.5em;
+    margin-left: -18px;
+}
+
+#options_box:after, #options_box:before {
+    left: 0.55em;
+}
+
+#notification_box:after, #options_box:after {  /* upper triangle */
+    border-bottom-color: rgb(238, 238, 238);
+    border-width: 10px;
+}
+
+#notification_box:before, #options_box:before { /* upper triangle border*/
+    border-bottom-color: rgb(88, 88, 88);
+    border-width: 12px;
+}
+
+#options_box:before {
+    margin-left: -2px;
+}
+
+#notification_box:before {
+    margin-right: -2px;
+}
+/* #endregion notification and options TRIANGLES */
+
+
+#notification_box > span {
+    padding: 0 1em;
+}
+
+#profile_options_item, #logout_options_item {
+    background-color: rgb(238, 238, 238);
+    display:block;
+    border: none;
+    height: 2.5em;
+    width: 100%;
+    line-height: 2.5em;
+    text-align: left;
+    font-size: 0.8em;
+    font-family: Roboto-Bold;
+    padding: 0 1em 0 2.5em; 
+    background-repeat: no-repeat;
+}
+
+#profile_options_item {
+    background-image: url(../images/profile_icon.png);
+    background-size: 2em;
+    background-position: 0.5em 0.3em;
+}
+
+#logout_options_item {
+    background-image: url(../images/logout_icon.png);
+    background-size: 1.7em;
+    background-position: 0.7em 0.5em;
+}
+
+#profile_options_item:hover, #logout_options_item:hover {
+    cursor: pointer;
+    background-color: rgba(206, 206, 206, 0.548);
+    transition: .2s;
+}
+
+/* #region NOTIFICATION BOX*/
+.notification_item {
+    position: relative;
+    display: flex;
+    padding: 0em 1em 0em .4em;
+    width: 25em;
+    height: 3.5em;
+    font-size: 1em;
+    text-align: left;
+    line-height: 3.5em;
+}
+
+.notification_item:hover {
+    cursor: default;
+}
+
+.notification_icon {
+    display: inline-block;
+    width: 3.5em;
+    height: 3.5em;
+    line-height: 3.5em;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.notification_icon > img {
+    width: 2em;
+    height: 2em;
+}
+
+.notification_content{
+    overflow: hidden;
+    width: 100%;
+    padding-top: 0.5em; 
+}
+
+.notification_subject {
+    height: 1.5em;
+    font-family: Roboto-Bold;
+    font-size: 0.85em; 
+    line-height: 1.2em;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space: nowrap; 
+}
+
+.notification_description {
+    height: 2em;
+    line-height: 1.2em;
+    font-size: 0.85em;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space: nowrap; 
+}
+
+/* .notification_id {
+    position: absolute;
+    top: .6em;
+    right: .6em;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: .8em;
+    color: rgba(61, 61, 61, 0.979);
+    line-height: .8em;
+    transform: scaleY(0.8);
+} */
+
+.notification_id > div:first-child {
+    display: none;
+}
+
+.remove_notification_sign {
+    cursor: pointer;
+    color: black;
+    position: relative;
+    margin: .9em 1.5em; 
+    line-height: 1em;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.5em 1.2em;
+    color: rgba(61, 61, 61, 0.979);
+}
+
+/* #region XMARK NOTIFICATION */
+.remove_notification_sign > div, .remove_notification_sign > div:last-child {
+    position: absolute;
+    top: 0;
+}
+
+.remove_notification_sign > div {
+    transform: rotateZ(-45deg) translate(-2px,0px);
+    transform-origin: top; 
+}
+
+.remove_notification_sign > div:last-child {
+    transform: rotateZ(45deg) translate(-4.25px,0px);
+    transform-origin: bottom; 
+}
+/* #endregion XMARK NOTIFICATION */
+/* #endregion NOTIFICATION BOX*/
+/* #endregion NOTIFICATION and OPTIONS AREAS*/
+/* #endregion TOP BAR*/
+
+/*#region CONTENT*/
+#content_container {
+    padding: 3em 10% 0em 10%;
+    transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
+}
+/*#endregion CONTENT*/
+
+/* #region MEDIA QUERIES */
+@media only screen and (max-width: 799px) { 
+    #topbar {
+        padding: 0 5%;
+        transition: padding .5s; 
+    }
+    
+    #content_container {
+        padding: 5%;
+        padding-top: 3em;
+        transition: padding .5s; 
+    }
+
+    #notification_box {
+        right: 5%;
+        transition: right .5s; 
+    }
+
+    #options_box {
+        left: 5%;
+        transition: left .5s; 
+    }
+
+    .suggestion_item_filiere {
+        display: none;
+    }
+}
+/* #endregion TABLET & PHONE */
+
+/* #region keyframes */
+@keyframes top_bar_animation {
+	from {
+		transform: translateY(-3.1em);;
+	}
+
+	to {
+		transform: translateY(0px);
+	}
+}
+
+@keyframes pop_animation1 {
+    0% {
+        background-size: 100%;
+    }
+    50% {
+        background-size: 95%;
+    }
+    100% {
+        background-size: 100%;
+    }
+}
+
+@keyframes pop_animation2 {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(.8);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+/* #endregion keyframes */

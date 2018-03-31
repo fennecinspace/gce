@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang='fr' class ='fill_100'>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/normalize.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/default.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/style.css' %}" />
+    <!-- Scripts -->
+    <script src="{% static 'js/libs/jquery/jquery.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/libs/bootstrap/bootstrap.min.js' %}" type="text/javascript"></script>
+</head>
+<body class="fill_100">   
+    <div id='site_container' class='fill_100'>
+        <nav id='topbar'>
+            <img id='profile_pic' src="{{ user_avatar.url }}">
+            <form id ="options_box" class='hide' method="POST">
+                <div>
+                    {% csrf_token %}
+                    {% if user_type == 'etud' %}
+                        <input name="profile" type="submit" value="Profile" id ='profile_options_item' class='options_item'>
+                    {% endif %}
+                    <input name="logout" type="submit" value="Deconnecter" id ='logout_options_item' class='options_item'>
+                </div>
+            </form> <!-- this is the options window -->
+            <div id='menu_search_container'>
+                <div id='menu_entries' class="center_element">
+                    {% if user_type == 'tech' %}
+                        <div>Acceuil</div><div>Televerser Copies</div><div>Saisir Notes</div>
+                    {% endif %}
+                    {% if user_type == 'etud' %}
+                        <div>Acceuil</div><div>Annonces</div><div>Resultats</div><div>Messenger</div>
+                    {% endif %}
+                    {% if user_type == 'ensg' %}
+                        <div>Acceuil</div><div>Annonces</div><div>Resultats</div><div>Reclamations</div><div>Consultations</div><div>Messenger</div>
+                    {% endif %}
+                    {% if user_type == 'chef' %}
+                        <div>Acceuil</div><div>Annonces</div><div>Affichage</div><div>Consultations</div><div>Utilisateurs</div><div>Messenger</div>
+                    {% endif %}
+                </div>
+                <div id="search_area" class='hide'>
+                    <input id ='search_input' name='search-input' type="text" placeholder="Rechercher des Etudiants">
+                    <div id='leave_search_area'><div>l</div><div>l</div></div>
+                    <div id="search_button"></div>
+                    <div id="search_suggestions"></div>
+                </div>
+            </div>
+            <div id="notification_area">
+                <div id="notification_button"></div>
+                <div class='arrow-up'></div>
+                <div id ="notification_box" class='hide'>
+                    {% if not notifications_list %}
+                        <span>Pas de Notification</span>
+                    {% else %}
+                        <div>
+                            {% for notification in notifications_list %}
+                                <div class='notification_item'>
+                                    <div class="notification_id"><div>{{ notification.id_notification }}</div><div class='remove_notification_sign'><div>l</div><div>l</div></div></div>
+                                    <div class="notification_icon"><img src="{{ notification.icon_notification }}" alt=""></div>
+                                    <div class="notification_content">
+                                        <div class="notification_subject">{{ notification.sujet_notification }}</div>
+                                        <div class="notification_description">{{ notification.description_notification }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div> <!-- this is the notification window -->
+            </div>
+        </nav>
+        <div id='search_overlay' class='hide'></div>
+        <div id='content_container' class="fill_100">
+            {% block base_extender %}
+            {% endblock %}
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="{% static 'js/topbar_behaviour.js' %}" type="text/javascript"></script>
+</body>
+</html>
