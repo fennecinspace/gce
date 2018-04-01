@@ -1,0 +1,12 @@
+implement:
+-compression algorihm
+-messenger
+
+-improve:
+-search algorithm
+-loading time
+-site performence
+
+workon:
+-responsive layout
+
