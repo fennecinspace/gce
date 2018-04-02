@@ -250,6 +250,7 @@ class Consultation(models.Model):
     date_consultation = models.DateField(db_column='date_Consultation', blank=True, null=True)
     heure_consultation = models.TimeField(db_column='heure_Consultation', blank=True, null=True)
     afficher_consultation = models.BooleanField(db_column='afficher_Consultation', default=False)
+    approve_consultation = models.BooleanField(db_column='approve_Consultation', default=False)
     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
 
