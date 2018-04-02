@@ -1,16 +1,19 @@
-## importing page rendering and views modules
+## page rendering and views modules
 from django.shortcuts import render
 from django.views.generic import TemplateView
-## importing authentification modules
+## authentification modules
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.contrib import messages
-## importing json for ajax
+## json modules for ajax
 from django.http.response import JsonResponse
 import json
-## importing needed models
-from gce_app.models import Utilisateur, Notification, Parcours, Specialite, Section, Groupe, Etudiant, FichierCopie, FichierCorrection
+## user search modules
+from difflib import SequenceMatcher # to get ratio of similarity between 2 strings
+from django.db.models import Q # to make complex queries
+import re # to use regex
+## needed models
+from gce_app.models import User, Utilisateur, Notification, Parcours, Specialite, Section, Groupe, Etudiant, FichierCopie, FichierCorrection
 
 ## returns the user's data
 def get_user_data(u_obj):
@@ -34,19 +37,44 @@ def get_user_notifications(u_obj):
     for notification in allNotifications:
         if notification.vue_notification == False:
             notifications += [notification]
+    return {'notifications_list': notifications,}
 
-    return {
-        'notifications_list': notifications,
-    }
-
-import random
 ## returns data for suggested users if exist
-def get_search_suggestions(search_entry):
-    x = list(Utilisateur.objects.all()[random.randint(1,20):random.randint(25,40)])
-    if len(x) >= 5:
-        return x[:5]
-    else:
-        return x
+def get_student_search_suggestions(search_entry):
+    ### processing user search entry
+    suggestions = []
+    search_entry = search_entry.lower()
+    search_entry = re.sub(r'[^a-zA-Z ]', '', search_entry) # stripping entry from non latin letters
+    search_entry = re.sub(r' +', ' ', search_entry) # turning multiple whitespaces to one
+    ## finding possible suggestions
+    # first try : trying to march based similarity ratio between the first and last names and the search entry
+    all_Students = Utilisateur.objects.filter(id_utilisateur__regex = r"etud")
+    for user in all_Students:
+        # matching first name
+        if SequenceMatcher(None, user.info_utilisateur.first_name, search_entry).ratio() > 0.9:
+            suggestions += [user]
+        # matching last name
+        if SequenceMatcher(None, user.info_utilisateur.last_name, search_entry).ratio() > 0.9:
+            suggestions += [user]
+        # matching last name + first name
+        user_full_name = user.info_utilisateur.last_name + ' ' + user.info_utilisateur.first_name
+        if SequenceMatcher(None, user_full_name, search_entry).ratio() > 0.9:
+            suggestions += [user]
+        # matching first name + last name
+        user_full_name = user.info_utilisateur.first_name + ' ' + user.info_utilisateur.last_name
+        if SequenceMatcher(None, user_full_name, search_entry).ratio() > 0.9:
+            suggestions += [user]
+    # return suggestions[:5] # allow a max of 5 suggestions
+    if len(suggestions) >= 5:
+            print('done 1')
+            return suggestions[:5] #5 suggestions found -> return them
+    # second try : trying to match charachter by character with the first and last names
+    split_search_entry = search_entry.split()
+    for search_word in split_search_entry:
+        suggestions += list(Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))) & Q(id_utilisateur__regex = r"etud")))
+        if len(suggestions) >= 5:
+            print('done 2')
+            return suggestions[:5] #5 suggestions found -> return them
 
 ## returns the template based on the signed in user's type
 def get_base_template(req):
@@ -63,6 +91,45 @@ def get_base_template(req):
         return render(req, 'gce_app/ensg/ensg_index.html', context = data)
     if user_data['user_type'] == 'chef':
         return render(req, 'gce_app/chef/chef_index.html', context = data)
+
+
+#######################################################
+###################### VIEWS ##########################
+#######################################################
+
+## AJAX NOTIFICATION HANDLER VIEW
+@login_required
+def notification_state_changer(req):
+    if req.method == 'POST':
+        if req.is_ajax():
+            notification_id = req.POST.get('notif_id')
+            Notification.objects.filter(id_notification = notification_id).delete()
+
+    return HttpResponse(req)
+
+
+## AJAX SEARCH SUGGESTIONS HANDLER VIEW
+@login_required
+def search_suggestion_feeder(req):
+    data = {'success': False}
+    if req.method == 'POST':
+        if req.is_ajax():
+            search_entry = req.POST.get('search_entry')
+            all_user_data = get_student_search_suggestions(search_entry)
+            if all_user_data:
+                data = {'success': True, 'users_data': [],}
+                for user_data in all_user_data:
+                    data['users_data'] += [{
+                        'id': user_data.id_utilisateur,
+                        'first_name': user_data.info_utilisateur.first_name,
+                        'last_name': user_data.info_utilisateur.last_name,
+                        'avatar': user_data.avatar_utilisateur.url,
+                        'level': Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = user_data)[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours.nom,
+                        'branch': Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = user_data)[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours.id_filiere.nom,
+                    }]
+    stringfied_data = json.dumps(data)
+    return JsonResponse(stringfied_data, safe = False)
+
 
 ## Main View
 class mainView(TemplateView):
@@ -87,38 +154,6 @@ class mainView(TemplateView):
             return render(req, 'gce_app/common/login.html', context = None)
         
         return get_base_template(req)
-
-## AJAX NOTIFICATION HANDLER VIEW
-@login_required
-def notification_state_changer(req):
-    if req.method == 'POST':
-        if req.is_ajax():
-            notification_id = req.POST.get('notif_id')
-            Notification.objects.filter(id_notification = notification_id).delete()
-
-    return HttpResponse(req)
-
-## AJAX SEARCH SUGGESTIONS HANDLER VIEW
-@login_required
-def search_suggestion_feeder(req):
-    data = {'success': False}
-    if req.method == 'POST':
-        if req.is_ajax():
-            search_entry = req.POST.get('search_entry')
-            all_user_data = get_search_suggestions(search_entry)
-            if all_user_data:
-                data = {'success': True, 'users_data': [],}
-                for user_data in all_user_data:
-                    data['users_data'] += [{
-                        'id': user_data.id_utilisateur,
-                        'first_name': user_data.info_utilisateur.first_name,
-                        'last_name': user_data.info_utilisateur.last_name,
-                        'avatar': user_data.avatar_utilisateur.url,
-                        'level': Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.all()[0])[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours.nom,
-                        'branch': Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.all()[0])[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours.id_filiere.nom,
-                    }]
-    stringfied_data = json.dumps(data)
-    return JsonResponse(stringfied_data, safe = False)
 
 
 
