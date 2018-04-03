@@ -15,6 +15,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
+
 //////////////// NOTIFICATION & OPTIONS TOGGLERS ////////////////
 notification_is_toggled = false;
 options_is_toggled = false;
@@ -29,6 +30,10 @@ function notification_toggler(){
             if (options_is_toggled){ // closing options if toggled
                 options_is_toggled = false;
                 $("#options_box").slideUp(slide_animation_duration);
+            }
+            if (menu_is_toggled && mobile_is_on){
+                menu_is_toggled = false;
+                $('#menu_entries').slideUp(slide_animation_duration);
             }
             if (search_is_toggled)
                 hideSearch();
@@ -50,6 +55,10 @@ function options_toggler(){
                 notification_is_toggled = false;
                 $("#notification_box").slideUp(slide_animation_duration);
             }
+            if (menu_is_toggled && mobile_is_on){
+                menu_is_toggled = false;
+                $('#menu_entries').slideUp(slide_animation_duration);
+            }
             if (search_is_toggled)
                 hideSearch();
         }
@@ -62,136 +71,251 @@ function options_toggler(){
 
 function toggled_areas_closer(){ // closes the toggled windows when clicking elsewhere
     window.addEventListener('click', function(e){
-        if (!document.getElementById('notification_box').contains(e.target)){
+        if (!document.getElementById('notification_box').contains(e.target))
             if (notification_is_toggled){
                 notification_is_toggled = false;
                 $("#notification_box").slideUp(slide_animation_duration);
             }
-        }
-        if (!document.getElementById('options_box').contains(e.target)){
+        if (!document.getElementById('options_box').contains(e.target))
             if (options_is_toggled){
                 options_is_toggled = false;
                 $("#options_box").slideUp(slide_animation_duration);
             }
-        }
+        if (!document.getElementById('menu_entries').contains(e.target))
+            if (menu_is_toggled && mobile_is_on){
+                menu_is_toggled = false;
+                $('#menu_entries').slideUp(slide_animation_duration);
+            }
         if (!document.getElementById('search_area').contains(e.target))
-            if (search_is_toggled)
-                hideSearch();
+            if(!document.getElementById('search_result').contains(e.target))
+                if (search_is_toggled){
+                    hideSearch();
+                    if (search_result_is_toggled) {
+                        search_result_is_toggled = false;
+                        $('#search_result').fadeOut(show_leave_duration);
+                        $('#search_result_list').html('')
+                    }
+                }
         // use else for clicks inside the box
     });
 }
 
 //////////////// NOTIFICATIONS STATE CHANGER ////////////////
 function mark_notification_as_read(){
-    document.querySelectorAll('.notification_id').forEach(elem => elem.addEventListener('click', function(e) {
-        $.ajax({
-            url:'/notification_state_changer_VIEW',
-            type: "POST",
-            data: {
-                'notif_id': this.querySelector('div').innerHTML,
-                'csrfmiddlewaretoken': getCookie('csrftoken'),
-            },
-            success:function(response){
-                a = elem.parentElement;
-                elem.parentElement.remove();
-                if (!(document.querySelector('#notification_box div').children).length){ //if there are no more notification items
-                    document.querySelector('#notification_box').innerHTML = '<span>Pas de Notification</span>';
-                }   
-            },
-            complete:function(){},
-            error:function (xhr, textStatus, thrownError){}
-        });
-    }))
+    l = document.querySelectorAll('.notification_id').length
+    allNotifications = document.querySelectorAll('.notification_id')
+    for (let i = 0; i < l; i++)
+        allNotifications[i].addEventListener('click', function(e) {
+            $.ajax({
+                url:'/notification_state_changer_VIEW',
+                type: "POST",
+                data: {
+                    'notif_id': allNotifications[i].querySelector('div').innerHTML,
+                    'csrfmiddlewaretoken': getCookie('csrftoken'),
+                },
+                success:function(response){
+                    a = allNotifications[i].parentElement;
+                    allNotifications[i].parentElement.remove();
+                    if (!(document.querySelector('#notification_box div').children).length){ //if there are no more notification items
+                        document.querySelector('#notification_box').innerHTML = '<span>Pas de Notification</span>';
+                    }   
+                },
+                complete:function(){},
+                error:function (xhr, textStatus, thrownError){}
+            });
+        })
 }
 
-//////////////// SEARCH BAR MANAGERS ////////////////
+//////////////// SEARCH MANAGERS ////////////////
 search_is_toggled = false;
 suggestions_is_toggled = false;
-search_animation_duration = 400;
+search_result_is_toggled = false;
+suggestions_is_allowed = true; // added to solve suggetsions and results overlapping
+search_animation_duration = 300;
 show_leave_duration = 200;
+search_input_timeout = 500;
 
 function hideSearch(){
     search_is_toggled = false;
     $('#search_input')[0].value = ''; // emptying the search bar
     if (suggestions_is_toggled){
         suggestions_is_toggled = false;
+        $('#search_suggestions').html('');
         $("#search_suggestions").hide()
     }
+    if (search_result_is_toggled) {
+        search_result_is_toggled = false;
+        $('#search_result').fadeOut(show_leave_duration);
+        $('#search_result_list').html('')
+    }
     $('#leave_search_area').fadeOut(show_leave_duration);
-    $('#search_area').animate({width:'2.6em','margin-left':'0'},search_animation_duration,'linear');
-    $('#menu_entries').animate({'opacity':'1'},1000) //show menu entries
+    $('#search_area').animate({width:'2.6em','margin-left':'0'},search_animation_duration);
+    $('#menu_entries').animate({'opacity':'1'},800) //show menu entries
+    $('#menu_button').animate({'opacity':'1'},800) //show menu button 
     $('#search_overlay').fadeOut(search_animation_duration);
 }
 
 function showSearch (){
     search_is_toggled = true;
-    $('#search_area').animate({width:'95%','margin-left':'5%'},search_animation_duration,'swing');
+    $('#search_area').animate({width:'95%','margin-left':'5%'},search_animation_duration);
     $('#leave_search_area').show(show_leave_duration);
     $('#search_input').focus();
-    $('#menu_entries').animate({'opacity':'0'},100) //hide menu entries
+    $('#menu_entries').animate({'opacity':'0'},50) //hide menu entries
+    $('#menu_button').animate({'opacity':'0'},50) //hide menu button 
     $('#search_overlay').fadeIn(search_animation_duration);
 }
 
-function search_bar_toggler() {
+function search_result_filler(returned_data){
+    var html_to_inject = ''
+    if (returned_data.success){
+        for (let i = 0; i < returned_data.users_data.length; i++){
+            user = returned_data.users_data[i]
+            full_name = user.last_name
+            html_to_inject+=`
+                <div id="search_result_list">
+                    <div class='search_result_item'>
+                        <div class='search_result_item_id'>${user.id}</div>
+                        <img class='search_result_item_img' src='${user.avatar}'>
+                        <div class='search_result_item_info'>
+                            <div class='search_result_item_name'>${user.last_name.toLowerCase()} ${user.first_name.toLowerCase()}</div>
+                            <span>
+                                <div class='search_result_item_group'>GROUPE ${user.group_num} - SECTION ${user.section_num} - ${user.speciality.toLowerCase()}</div>
+                            </span>
+                            <div class='search_result_item_filiere'>${user.level.toUpperCase()} - ${user.branch.toUpperCase()}</div>
+                        </div>
+                    </div>
+                </div>`
+        }
+        $('#search_result_list').html(html_to_inject);
+    }
+    else {
+        html_to_inject = "<span>Pas de Resultats</span>"
+        $('#search_result_list').html(html_to_inject);
+    }
+}
+
+function search_query(search_entry){
+    $.ajax({
+        url:'/search_result_VIEW',
+        type: "POST",
+        data: {
+            'search_entry': search_entry,
+            'csrfmiddlewaretoken': getCookie('csrftoken'),
+        },
+        success:function(response){
+            returned_data = JSON.parse(response)
+            search_result_filler(returned_data)
+        },
+        complete:function(){},
+        error:function (xhr, textStatus, thrownError){}
+    });
+}
+
+function start_search(e) {
+    e.stopPropagation()
+    if (search_is_toggled) { // get search result
+        suggestions_is_allowed = false;
+        console.log(suggestions_is_allowed)
+        setTimeout(() => {
+            search_result_is_toggled = true;
+            search_query(document.getElementById('search_input').value)
+            $('#search_suggestions').html('');
+            $("#search_suggestions").slideUp(slide_animation_duration);
+            $('#search_result').fadeIn(show_leave_duration);
+            if (suggestions_is_toggled) {
+                suggestions_is_toggled = false;
+                $('#search_suggestions').html('');
+                $("#search_suggestions").slideUp(slide_animation_duration)
+            }
+            suggestions_is_allowed = true;
+        },search_input_timeout + 100)
+    }
+    else {
+        showSearch();
+        if (options_is_toggled){ // closing options if toggled
+            options_is_toggled = false;
+            $("#options_box").slideUp(slide_animation_duration);
+        }
+        if (notification_is_toggled){ // closing notification if toggled
+            notification_is_toggled = false;
+            $("#notification_box").slideUp(slide_animation_duration);
+        }
+        if (menu_is_toggled && mobile_is_on){
+            menu_is_toggled = false;
+            $('#menu_entries').slideUp(slide_animation_duration);
+        }
+    }
+}
+
+function search_bar_manager() {
     // open search_area and search
     document.getElementById('search_button').addEventListener('click', e => {
-        if (search_is_toggled){
-            console.log("search this " + document.getElementById('search_input').value);
-        }
-        else
-            showSearch();
-            if (options_is_toggled){ // closing options if toggled
-                options_is_toggled = false;
-                $("#options_box").slideUp(slide_animation_duration);
-            }
-            if (notification_is_toggled){ // closing notification if toggled
-                notification_is_toggled = false;
-                $("#notification_box").slideUp(slide_animation_duration);
-            }
+        start_search(e)
+    }) // search when clicking in search button
+    document.getElementById('search_input').addEventListener('keyup', e => { // search when pressing enter
+        if (e.which == 13)
+            start_search(e)
     })
-
+    
     // close search_area
     document.getElementById('leave_search_area').addEventListener('click', e => {
         if (search_is_toggled)
             hideSearch();
     })
-    
 }
 
+function search_result_manager(){
+    document.getElementById('search_result_exit').addEventListener('click', () => {
+        search_result_is_toggled = false;
+        $('#search_result').fadeOut(show_leave_duration);
+        $('#search_result_list').html('')
+    })
+}
+
+//////////////// SUGGESTIONS MANAGERS ////////////////
 function suggestions_filler(returned_data){
     var html_to_inject = ''
     if (returned_data.success){
-        returned_data.users_data.forEach(user => {
+        for (let i = 0; i < returned_data.users_data.length; i++){
+            if (i >= 5) // allow only 5 suggestions
+                break;
+            user = returned_data.users_data[i]
             full_name = user.last_name
             html_to_inject +=`
             <div class='suggestion_item'>
                 <div class='suggestion_item_id'>${user.id}</div>
-                <img class='suggestion_item_img' src='${user.avatar}' >
+                <img class='suggestion_item_img' src='${user.avatar}'>
                 <div class='suggestion_item_info'>
                     <div class='suggestion_item_name'>${user.last_name.toLowerCase()} ${user.first_name.toLowerCase()}</div>
                     <div class='suggestion_item_filiere'>${user.level.toUpperCase()} - ${user.branch.toUpperCase()}</div>
                 </div>
             </div>`
-        })
+        }
         $('#search_suggestions').html(html_to_inject);
     }
     else {
-        console.log('FAILURE')
-        $('#search_suggestions').html("Hleoo");
+        html_to_inject = "<span>Pas de Suggestions</span>"
+        $('#search_suggestions').html(html_to_inject);
     }
 }
+
 
 function search_bar_suggestions() {
     var typingTimer;  
     document.getElementById('search_input').addEventListener('input', function(e) {
         clearTimeout(typingTimer);
         typingTimer = setTimeout(function(){
-            if (search_is_toggled && $('#search_input')[0].value != ''){
+            if (search_is_toggled && $('#search_input')[0].value != '' && suggestions_is_allowed){
+                if (search_result_is_toggled) {
+                    search_result_is_toggled = false;
+                    $('#search_result').fadeOut(show_leave_duration);
+                    $('#search_result_list').html('')
+                }
                 $.ajax({
                     url:'/search_suggestions_VIEW',
                     type: "POST",
                     data: {
-                        'search_entry': this.value,
+                        'search_entry': e.target.value,
                         'csrfmiddlewaretoken': getCookie('csrftoken'),
                     },
                     success:function(response){
@@ -206,13 +330,64 @@ function search_bar_suggestions() {
             }
             else {
                 suggestions_is_toggled = false;
+                $('#search_suggestions').html('');
                 $("#search_suggestions").slideUp(slide_animation_duration)
             }
-        }, 500);
+        }, search_input_timeout);
     })
 }
 
-$( document ).ready(() => {
+//////////////// MAIN MENU TOGGELER FOR RESPONSIVE DESIGN////////////////
+menu_is_toggled = false;
+
+// device type
+function set_device_type(){
+    if ($(window).width() <= 799 ){
+        mobile_is_on = true;
+        menu_is_toggled = false;
+        $('#menu_entries').hide();
+        $('#menu_button').show();
+    }
+    else {
+        mobile_is_on = false;
+        menu_is_toggled = true;
+        $('#menu_entries').show();
+        $('#menu_button').hide();
+    }
+}
+set_device_type(); // first load device type
+
+function menu_toggeler(){
+    window.addEventListener('resize', e => {
+        e.stopPropagation();
+        set_device_type();
+    })
+
+    document.getElementById('menu_button').addEventListener('click', e => {
+        e.stopPropagation();
+        if (!menu_is_toggled){
+            menu_is_toggled = true;
+            $('#menu_entries').slideDown(slide_animation_duration);
+            if (options_is_toggled){ // closing options if toggled
+                options_is_toggled = false;
+                $("#options_box").slideUp(slide_animation_duration);
+            }
+            if (notification_is_toggled){ // closing notification if toggled
+                notification_is_toggled = false;
+                $("#notification_box").slideUp(slide_animation_duration);
+            }
+        }
+        else {
+            menu_is_toggled = false;
+            $('#menu_entries').slideUp(slide_animation_duration);
+
+        }
+    })
+}
+
+//////////////// FUNCTIONS CALLING ////////////////
+
+$(document).ready(() => {
     /* notification and options toggling */
     notification_toggler();
     options_toggler();
@@ -220,10 +395,14 @@ $( document ).ready(() => {
     /* notification state changing */
     mark_notification_as_read();
 
-    /* search bar management */
-    search_bar_toggler();
+    /* search manager */
+    search_bar_manager();
+    search_result_manager();
     search_bar_suggestions();
 
     /* closing toggled area when clicking elsewhere */
     toggled_areas_closer();
+
+    /* Menu Handler */
+    menu_toggeler();
 })

@@ -4,18 +4,13 @@
 }
 
 @font-face {
-    font-family: Roboto-Light;
-    src: url("../fonts/Roboto-Light.ttf");
-}
-
-@font-face {
     font-family: Roboto-Regular;
     src: url("../fonts/Roboto-Regular.ttf");
 }
 
 * {
     box-sizing: border-box;
-    font-family: Roboto-Regular;
+    font-family: Roboto-Regular, 'Arial';
     font-size: 16px;
 }
 
@@ -24,6 +19,13 @@
     width: 100%;
     min-height: 100%;
 }
+
+.disable-select {
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
+  }
 
 :focus {
     outline: none;
@@ -37,12 +39,25 @@
     display : None;
 }
 
-.random_element { 
-    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
-    image-rendering: -moz-crisp-edges;          /* Firefox                        */
-    image-rendering: -o-crisp-edges;            /* Opera                          */
-    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
-    image-rendering: pixelated; /* Chrome */
-    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
-    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+/* Custom general Scroll Bar*/
+::-webkit-scrollbar {
+    width: 8px;
+    background-color:rgba(15, 15, 15, 0.144);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.397); 
+    border-radius: 5px;
+}
+
+/* notification box custom scroll bar */
+#notification_box > div::-webkit-scrollbar {
+    width: 8px;
+    background-color: rgb(231, 231, 231); 
+    margin: 5px;
+}
+
+#notification_box > div::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.397); 
+    border-radius: 5px;
 }

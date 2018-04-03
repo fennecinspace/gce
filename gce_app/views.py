@@ -40,41 +40,39 @@ def get_user_notifications(u_obj):
     return {'notifications_list': notifications,}
 
 ## returns data for suggested users if exist
-def get_student_search_suggestions(search_entry):
+def get_search_data(req, search_entry, type_of_req):
     ### processing user search entry
-    suggestions = []
+    search_data = []
     search_entry = search_entry.lower()
     search_entry = re.sub(r'[^a-zA-Z ]', '', search_entry) # stripping entry from non latin letters
     search_entry = re.sub(r' +', ' ', search_entry) # turning multiple whitespaces to one
-    ## finding possible suggestions
+
     # first try : trying to march based similarity ratio between the first and last names and the search entry
     all_Students = Utilisateur.objects.filter(id_utilisateur__regex = r"etud")
     for user in all_Students:
         # matching first name
         if SequenceMatcher(None, user.info_utilisateur.first_name, search_entry).ratio() > 0.9:
-            suggestions += [user]
+            search_data += [user]
         # matching last name
         if SequenceMatcher(None, user.info_utilisateur.last_name, search_entry).ratio() > 0.9:
-            suggestions += [user]
+            search_data += [user]
         # matching last name + first name
         user_full_name = user.info_utilisateur.last_name + ' ' + user.info_utilisateur.first_name
         if SequenceMatcher(None, user_full_name, search_entry).ratio() > 0.9:
-            suggestions += [user]
+            search_data += [user]
         # matching first name + last name
         user_full_name = user.info_utilisateur.first_name + ' ' + user.info_utilisateur.last_name
         if SequenceMatcher(None, user_full_name, search_entry).ratio() > 0.9:
-            suggestions += [user]
-    # return suggestions[:5] # allow a max of 5 suggestions
-    if len(suggestions) >= 5:
-            print('done 1')
-            return suggestions[:5] #5 suggestions found -> return them
+            search_data += [user]
+    if (type_of_req == 'suggestions' and len(search_data) >= 5):
+        return search_data[:5]
     # second try : trying to match charachter by character with the first and last names
     split_search_entry = search_entry.split()
     for search_word in split_search_entry:
-        suggestions += list(Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))) & Q(id_utilisateur__regex = r"etud")))
-        if len(suggestions) >= 5:
-            print('done 2')
-            return suggestions[:5] #5 suggestions found -> return them
+        search_data += list(Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))) & Q(id_utilisateur__regex = r"etud")))
+        if (type_of_req == 'suggestions' and len(search_data) >= 5):
+            return search_data[:5]
+    return search_data 
 
 ## returns the template based on the signed in user's type
 def get_base_template(req):
@@ -115,21 +113,47 @@ def search_suggestion_feeder(req):
     if req.method == 'POST':
         if req.is_ajax():
             search_entry = req.POST.get('search_entry')
-            all_user_data = get_student_search_suggestions(search_entry)
+            all_user_data = get_search_data(req, search_entry, 'suggestions')
             if all_user_data:
                 data = {'success': True, 'users_data': [],}
                 for user_data in all_user_data:
+                    user_parcours = Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = user_data)[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours
                     data['users_data'] += [{
                         'id': user_data.id_utilisateur,
                         'first_name': user_data.info_utilisateur.first_name,
                         'last_name': user_data.info_utilisateur.last_name,
                         'avatar': user_data.avatar_utilisateur.url,
-                        'level': Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = user_data)[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours.nom,
-                        'branch': Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = user_data)[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours.id_filiere.nom,
+                        'level': user_parcours.nom,
+                        'branch': user_parcours.id_filiere.nom,
                     }]
     stringfied_data = json.dumps(data)
     return JsonResponse(stringfied_data, safe = False)
 
+## AJAX SEARCH RESULTS HANDLER VIEW
+@login_required
+def search_result_feeder(req):
+    data = {'success': False}
+    if req.method == 'POST':
+        if req.is_ajax():
+            search_entry = req.POST.get('search_entry')
+            all_user_data = get_search_data(req, search_entry, 'search')
+            if all_user_data:
+                data = {'success': True, 'users_data': [],}
+                for user_data in all_user_data:
+                    user_group = Groupe.objects.filter(id_groupe = Etudiant.objects.filter(id_etudiant = user_data)[0].id_groupe.id_groupe)[0]
+                    data['users_data'] += [{
+                        'id': user_data.id_utilisateur,
+                        'first_name': user_data.info_utilisateur.first_name,
+                        'last_name': user_data.info_utilisateur.last_name,
+                        'avatar': user_data.avatar_utilisateur.url,
+                        'level': user_group.id_section.id_specialite.id_parcours.nom,
+                        'branch': user_group.id_section.id_specialite.id_parcours.id_filiere.nom,
+                        'group_num' : user_group.numero,
+                        'section_num' : user_group.id_section.numero,
+                        'speciality' : user_group.id_section.id_specialite.nom,
+                    }]
+    stringfied_data = json.dumps(data)
+    return JsonResponse(stringfied_data, safe = False)
 
 ## Main View
 class mainView(TemplateView):
