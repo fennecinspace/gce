@@ -37,7 +37,7 @@ form {
 .login_input { /*style input & password  */ 
 	width: 95%;
 	height: 3em;
-	border: none;
+	border: transparent;
 	font-size: 14px;
 	color: #000000;
 	padding: 0 2.6em 0 1.5em;

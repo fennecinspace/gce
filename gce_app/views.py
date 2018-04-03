@@ -165,9 +165,15 @@ class mainView(TemplateView):
             user = authenticate(username = username, password = password)
             if user:
                 login(req,user)
+                if req.is_ajax():
+                    return JsonResponse(json.dumps({'success':True}), safe = False) # else will return base template
             else:
-                return HttpResponse('Wrong Info')
-        else:
+                if req.is_ajax():
+                    return JsonResponse(json.dumps({'success':False}), safe = False)
+                else:
+                    return render(req, 'gce_app/common/login.html', context = None)
+
+        else:   
             if req.POST.get('logout'):
                 logout(req)
                 return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
@@ -176,7 +182,6 @@ class mainView(TemplateView):
     def get(self,req):
         if req.user.is_anonymous: # if user is not logged in return login page
             return render(req, 'gce_app/common/login.html', context = None)
-        
         return get_base_template(req)
 
 
