@@ -34,7 +34,7 @@ class Utilisateur(models.Model):
     info_utilisateur = models.OneToOneField(User,models.CASCADE)
     type_utilisateur = models.CharField(db_column='type_Utilisateur', max_length=255, null=True, choices = user_choices)
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100, unique=True, blank=True, editable=False)
-    avatar_utilisateur = models.FileField(db_column='Avatar', blank=True, null=True, upload_to = avatars_file_path)
+    avatar_utilisateur = models.FileField(db_column='Avatar', default = 'avatars/default_avatar.png', upload_to = avatars_file_path)
 
     def save(self,*args, **kwargs):
         self.id_utilisateur = self.type_utilisateur + str(self.info_utilisateur.id)
