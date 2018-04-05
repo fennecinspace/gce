@@ -16,7 +16,7 @@
     <!-- <script src="{% static 'js/libs/bootstrap/bootstrap.min.js' %}" type="text/javascript"></script> -->
 </head>
 <body class="fill_100">   
-    <div id='site_container' class='fill_100'>
+    <div id='site_container' class='fill_100 no_horizontal_scrolling'>
         <nav id='topbar'>
             <img id='profile_pic' src="{{ user_avatar.url }}">
             <div id='logged_in_user_id'>{{ user_id }}</div>
@@ -33,16 +33,16 @@
                 <div id="menu_button" class="disable-select center_element">MENU</div>
                 <div id='menu_entries' class="disable-select center_element">
                     {% if user_type == 'tech' %}
-                        <div>Acceuil</div><div>Televerser Copies</div><div>Saisir Notes</div>
+                        <div id='home_entry'>Acceuil</div><div id='upload_entry'>Televerser Copies</div><div id='marks_entry'>Saisir Notes</div>
                     {% endif %}
                     {% if user_type == 'etud' %}
-                        <div>Acceuil</div><div>Annonces</div><div>Resultats</div><div>Messenger</div>
+                        <div id='home_entry'>Acceuil</div><div id='news_entry'>Annonces</div><div id='results_entry'>Resultats</div><div id='messenger_entry'>Messenger</div>
                     {% endif %}
                     {% if user_type == 'ensg' %}
-                        <div>Acceuil</div><div>Annonces</div><div>Resultats</div><div>Reclamations</div><div>Consultations</div><div>Messenger</div>
+                        <div id='home_entry'>Acceuil</div><div id='news_entry'>Annonces</div><div id='results_entry'>Resultats</div><div id='error_entry'>Reclamations</div><div id='consult_entry'>Consultations</div><div id='messenger_entry'>Messenger</div>
                     {% endif %}
                     {% if user_type == 'chef' %}
-                        <div>Acceuil</div><div>Annonces</div><div>Affichage</div><div>Consultations</div><div>Utilisateurs</div><div>Messenger</div>
+                        <div id='home_entry'>Acceuil</div><div id='news_entry'>Annonces</div><div id='billboard_entry'>Affichages</div><div id='consult_entry'>Consultations</div><div id='users_entry'>Utilisateurs</div><div id='messenger_entry'>Messenger</div>
                     {% endif %}
                 </div>
                 <div id="search_area" class='hide'>
@@ -62,7 +62,7 @@
                             {% for notification in notifications_list %}
                                 <div class='notification_item'>
                                     <div class="notification_id"><div>{{ notification.id_notification }}</div><div class='remove_notification_sign'><div>l</div><div>l</div></div></div>
-                                    <div class="notification_icon"><img src="{{ notification.icon_notification }}" alt=""></div>
+                                    <div class="notification_icon"><img src="{% static ''|add:notification.icon_notification %}" alt=""></div>
                                     <div class="notification_content">
                                         <div class="notification_subject">{{ notification.sujet_notification }}</div>
                                         <div class="notification_description">{{ notification.description_notification }}</div>

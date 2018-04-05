@@ -21,20 +21,28 @@ notification_is_toggled = false;
 options_is_toggled = false;
 slide_animation_duration = 200;
 
+function options_hider(){
+    if (options_is_toggled){ // closing options if toggled
+        options_is_toggled = false;
+        $("#options_box").slideUp(slide_animation_duration);
+    }
+}
+
+function notifications_box_hider() {
+    if (notification_is_toggled){ // closing notification if toggled
+        notification_is_toggled = false;
+        $("#notification_box").slideUp(slide_animation_duration);
+    }
+}
+
 function notification_toggler(){
     document.getElementById('notification_button').addEventListener('click',e => {
         e.stopPropagation();
         if (!notification_is_toggled){
             notification_is_toggled = true;
             $("#notification_box").slideDown(slide_animation_duration);
-            if (options_is_toggled){ // closing options if toggled
-                options_is_toggled = false;
-                $("#options_box").slideUp(slide_animation_duration);
-            }
-            if (menu_is_toggled && mobile_is_on){
-                menu_is_toggled = false;
-                $('#menu_entries').slideUp(slide_animation_duration);
-            }
+            options_hider();
+            responsive_menu_hider();
             if (search_is_toggled)
                 hideSearch();
         }
@@ -51,11 +59,8 @@ function profile_option_handler() {
         profile_options_item.addEventListener('click', e => {
             e.preventDefault();
             user_id = document.getElementById('logged_in_user_id').innerHTML
-            $('#content_container').load(`users/${user_id} #content_container > *`);
-            if (options_is_toggled){ // closing options if toggled
-                options_is_toggled = false;
-                $("#options_box").slideUp(slide_animation_duration);
-            }
+            $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
+            options_hider();
         })
     }
 }
@@ -66,14 +71,8 @@ function options_toggler(){
         if (!options_is_toggled){
             options_is_toggled = true;
             $("#options_box").slideDown(slide_animation_duration);
-            if (notification_is_toggled){ // closing notification if toggled
-                notification_is_toggled = false;
-                $("#notification_box").slideUp(slide_animation_duration);
-            }
-            if (menu_is_toggled && mobile_is_on){
-                menu_is_toggled = false;
-                $('#menu_entries').slideUp(slide_animation_duration);
-            }
+            notifications_box_hider();
+            responsive_menu_hider();
             if (search_is_toggled)
                 hideSearch();
         }
@@ -87,20 +86,11 @@ function options_toggler(){
 function toggled_areas_closer(){ // closes the toggled windows when clicking elsewhere
     window.addEventListener('click', function(e){
         if (!document.getElementById('notification_box').contains(e.target))
-            if (notification_is_toggled){
-                notification_is_toggled = false;
-                $("#notification_box").slideUp(slide_animation_duration);
-            }
+            notifications_box_hider();
         if (!document.getElementById('options_box').contains(e.target))
-            if (options_is_toggled){
-                options_is_toggled = false;
-                $("#options_box").slideUp(slide_animation_duration);
-            }
+            options_hider();
         if (!document.getElementById('menu_entries').contains(e.target))
-            if (menu_is_toggled && mobile_is_on){
-                menu_is_toggled = false;
-                $('#menu_entries').slideUp(slide_animation_duration);
-            }
+            responsive_menu_hider();
         if (!document.getElementById('search_area').contains(e.target))
             if(!document.getElementById('search_result').contains(e.target))
                 if (search_is_toggled){
@@ -185,7 +175,7 @@ function search_result_click_handler(){
         all_search_results[i].addEventListener('click', e => {
             e.stopPropagation();
             user_id = all_search_results[i].querySelector('.search_result_item_id').innerHTML
-            $('#content_container').load(`users/${user_id} #content_container > *`);
+            $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
             hideSearch();
         })
     }
@@ -256,18 +246,9 @@ function start_search(e) {
     }
     else {
         showSearch();
-        if (options_is_toggled){ // closing options if toggled
-            options_is_toggled = false;
-            $("#options_box").slideUp(slide_animation_duration);
-        }
-        if (notification_is_toggled){ // closing notification if toggled
-            notification_is_toggled = false;
-            $("#notification_box").slideUp(slide_animation_duration);
-        }
-        if (menu_is_toggled && mobile_is_on){
-            menu_is_toggled = false;
-            $('#menu_entries').slideUp(slide_animation_duration);
-        }
+        options_hider();
+        notifications_box_hider();
+        responsive_menu_hider();
     }
 }
 
@@ -301,7 +282,7 @@ function suggestions_click_handler(){
         all_suggestions[i].addEventListener('click', e => {
             e.stopPropagation();
             user_id = all_suggestions[i].querySelector('.suggestion_item_id').innerHTML
-            $('#content_container').load(`users/${user_id} #content_container > *`);
+            $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
             hideSearch();
         })
     }
@@ -403,14 +384,8 @@ function menu_toggeler(){
         if (!menu_is_toggled){
             menu_is_toggled = true;
             $('#menu_entries').slideDown(slide_animation_duration);
-            if (options_is_toggled){ // closing options if toggled
-                options_is_toggled = false;
-                $("#options_box").slideUp(slide_animation_duration);
-            }
-            if (notification_is_toggled){ // closing notification if toggled
-                notification_is_toggled = false;
-                $("#notification_box").slideUp(slide_animation_duration);
-            }
+            notifications_box_hider();
+            options_hider();
         }
         else {
             menu_is_toggled = false;
@@ -419,6 +394,80 @@ function menu_toggeler(){
         }
     })
 }
+
+//////////////// PAGE CHANGING HANDLER ////////////////
+function responsive_menu_hider() {
+    if (menu_is_toggled && mobile_is_on){
+        menu_is_toggled = false;
+        $('#menu_entries').slideUp(slide_animation_duration);
+    }
+}
+
+function pages_handler() {
+    document.getElementById("home_entry").addEventListener('click', () => {
+        $('#content_container').load(`${location.origin} #content_container > *`);
+        responsive_menu_hider();
+    })
+    ///// later replace alerts with load (' view url ') for each view 
+    user_type = $("#logged_in_user_id").html().substring(0, 4);
+    
+    if (user_type == 'tech') {
+        document.getElementById("upload_entry").addEventListener('click', () => {
+            alert('upload')
+            responsive_menu_hider();
+        })
+
+        document.getElementById("marks_entry").addEventListener('click', () => {
+            alert('marks')
+            responsive_menu_hider();
+        })
+    }
+    else {
+        document.getElementById("news_entry").addEventListener('click', () => {
+            alert('news')
+            responsive_menu_hider();
+        })
+
+        document.getElementById("messenger_entry").addEventListener('click', () => {
+            alert('messenger')
+            responsive_menu_hider();
+        })
+    }
+
+    if (user_type == 'ensg' || user_type == 'etud') {
+        document.getElementById("results_entry").addEventListener('click', () => {
+            alert('results')
+            responsive_menu_hider();
+        })
+    }
+
+    if (user_type == 'ensg') {
+        document.getElementById("error_entry").addEventListener('click', () => {
+            alert('error')
+            responsive_menu_hider();
+        })
+    }
+
+    if (user_type == 'ensg' || user_type == 'chef') {
+        document.getElementById("consult_entry").addEventListener('click', () => {
+            alert('consult')
+            responsive_menu_hider();
+        })
+    }
+
+    if (user_type == 'chef') {
+        document.getElementById("users_entry").addEventListener('click', () => {
+            alert('users')
+            responsive_menu_hider();
+        })
+
+        document.getElementById("billboard_entry").addEventListener('click', () => {
+            alert('billboard')
+            responsive_menu_hider();
+        })
+    }
+}
+
 
 //////////////// FUNCTIONS CALLING ////////////////
 
@@ -439,4 +488,6 @@ $(document).ready(() => {
 
     /* Menu Handler */
     menu_toggeler();
+    pages_handler()
+
 })

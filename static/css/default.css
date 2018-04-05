@@ -39,6 +39,10 @@
     display : None;
 }
 
+.no_horizontal_scrolling {
+    overflow-x: hidden;
+}
+
 /* Custom general Scroll Bar*/
 ::-webkit-scrollbar {
     width: 8px;
@@ -62,3 +66,4 @@
     background-color: rgba(0, 0, 0, 0.397); 
     border-radius: 5px;
 }
+

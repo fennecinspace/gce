@@ -1,0 +1,30 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% load staticfiles %}
+{% block base_extender %}
+    <div id="home_container">
+        {% if user_type == 'tech' %}
+            <div id='televerser_icon' class='home_item left_home_item'>Televerser</div>
+            <div id='saisir_icon' class='home_item right_home_item'>Saisir Notes</div>
+        {% endif %}
+        {% if user_type != 'tech' %}
+            <div id='annonces_icon' class='home_item left_home_item'>Annonces</div>
+        {% endif %}
+        {% if user_type == 'etud' or user_type == 'ensg' %}
+            <div id='resultats_icon' class='home_item right_home_item'>Resultats</div>
+        {% endif %}
+        {% if user_type == 'ensg' %}
+            <div id='reclamations_icon' class='home_item left_home_item'>Reclamations</div>
+            <div id='consultations_icon' class='home_item right_home_item'>Consultations</div>
+        {% endif %}
+        {% if user_type == 'chef' %}
+            <div id='affichages_icon' class='home_item right_home_item'>Affichages</div>
+            <div id='consultations_icon' class='home_item left_home_item'>Consultations</div>
+            <div id='utilisateur_icon' class='home_item right_home_item'>Utilisateurs</div>
+        {% endif %}
+        {% if user_type != 'tech' %}
+            <div id='messenger_icon' class ='home_item left_home_item'>Messenger</div>
+        {% endif %}
+    </div>
+    <!-- SCRIPTS -->
+    <script src="{% static 'js/home.js' %}" type='text/javascript'></script>
+{% endblock %}

@@ -116,20 +116,13 @@ def get_search_data(search_entry, req, req_type):
 
 
 ## returns the template based on the signed in user's type
-def get_base_template(req):
+def get_home_template(req):
     loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [req.user])[0]
     user_data = get_user_data(loggedin_user)
     notifications = get_user_notifications(loggedin_user)
     data = user_data
     data.update(notifications) ##merging the 2 dicts in one
-    if user_data['user_type'] == 'etud':
-        return render(req, 'gce_app/etud/etud_index.html', context = data)
-    if user_data['user_type'] == 'tech':
-        return render(req, 'gce_app/tech/tech_index.html', context = data)
-    if user_data['user_type'] == 'ensg':
-        return render(req, 'gce_app/ensg/ensg_index.html', context = data)
-    if user_data['user_type'] == 'chef':
-        return render(req, 'gce_app/chef/chef_index.html', context = data)
+    return render(req, 'gce_app/common/home.html', context = data)
 
 
 #######################################################
@@ -219,12 +212,12 @@ class mainView(TemplateView):
                 logout(req)
                 return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
 
-        return get_base_template(req)
+        return get_home_template(req)
 
     def get(self,req):
         if req.user.is_anonymous: # if user is not logged in return login page
             return render(req, 'gce_app/common/login.html', context = None)
-        return get_base_template(req)
+        return get_home_template(req)
 
 
 #### STUDENT PROFILE VIEW
@@ -237,6 +230,7 @@ class profileView(DetailView):
         context = super(profileView, self).get_context_data(**kwargs)
         loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [self.request.user])[0]
         context.update(get_user_data(loggedin_user))
+        context.update(get_user_notifications(loggedin_user))
         return context
 
     def post(self, req, *args, **kwargs):
