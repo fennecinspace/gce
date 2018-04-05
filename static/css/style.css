@@ -23,6 +23,10 @@
     margin: 0.25em 0.4em 0.25em 0;
 }
 
+#logged_in_user_id {
+    display: none;
+}
+
 #profile_pic:hover {
     cursor: pointer;
     filter: opacity(0.8);
@@ -234,8 +238,12 @@
     border-radius: 5px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     transition: width 1s height 1s;
-    overflow-y: scroll;
     user-select: none;
+}
+
+#search_result_list {
+    height: calc(100% - 4em);
+    overflow-y: auto;
 }
 
 #search_result_list > span {
@@ -609,8 +617,7 @@
     }
 
     #content_container {
-        padding: 5%;
-        padding-top: 3em;
+        padding: 3em 5% 0em 5%;
         transition: padding .5s; 
     }
 }

@@ -45,6 +45,21 @@ function notification_toggler(){
     })
 }
 
+function profile_option_handler() {
+    var profile_options_item = document.getElementById('profile_options_item')
+    if (profile_options_item ){
+        profile_options_item.addEventListener('click', e => {
+            e.preventDefault();
+            user_id = document.getElementById('logged_in_user_id').innerHTML
+            $('#content_container').load(`users/${user_id} #content_container > *`);
+            if (options_is_toggled){ // closing options if toggled
+                options_is_toggled = false;
+                $("#options_box").slideUp(slide_animation_duration);
+            }
+        })
+    }
+}
+
 function options_toggler(){
     document.getElementById('profile_pic').addEventListener('click',e => {
         e.stopPropagation();
@@ -102,9 +117,8 @@ function toggled_areas_closer(){ // closes the toggled windows when clicking els
 
 //////////////// NOTIFICATIONS STATE CHANGER ////////////////
 function mark_notification_as_read(){
-    l = document.querySelectorAll('.notification_id').length
     allNotifications = document.querySelectorAll('.notification_id')
-    for (let i = 0; i < l; i++)
+    for (let i = 0; i < allNotifications.length; i++)
         allNotifications[i].addEventListener('click', function(e) {
             $.ajax({
                 url:'/notification_state_changer_VIEW',
@@ -165,6 +179,18 @@ function showSearch (){
     $('#search_overlay').fadeIn(search_animation_duration);
 }
 
+function search_result_click_handler(){
+    all_search_results = document.getElementsByClassName('search_result_item')
+    for (let i = 0; i < all_search_results.length; i++) {
+        all_search_results[i].addEventListener('click', e => {
+            e.stopPropagation();
+            user_id = all_search_results[i].querySelector('.search_result_item_id').innerHTML
+            $('#content_container').load(`users/${user_id} #content_container > *`);
+            hideSearch();
+        })
+    }
+}
+
 function search_result_filler(returned_data){
     var html_to_inject = ''
     if (returned_data.success){
@@ -172,21 +198,20 @@ function search_result_filler(returned_data){
             user = returned_data.users_data[i]
             full_name = user.last_name
             html_to_inject+=`
-                <div id="search_result_list">
-                    <div class='search_result_item'>
-                        <div class='search_result_item_id'>${user.id}</div>
-                        <img class='search_result_item_img' src='${user.avatar}'>
-                        <div class='search_result_item_info'>
-                            <div class='search_result_item_name'>${user.last_name.toLowerCase()} ${user.first_name.toLowerCase()}</div>
-                            <span>
-                                <div class='search_result_item_group'>GROUPE ${user.group_num} - SECTION ${user.section_num} - ${user.speciality.toLowerCase()}</div>
-                            </span>
-                            <div class='search_result_item_filiere'>${user.level.toUpperCase()} - ${user.branch.toUpperCase()}</div>
-                        </div>
+                <div class='search_result_item'>
+                    <div class='search_result_item_id'>${user.id}</div>
+                    <img class='search_result_item_img' src='${user.avatar}'>
+                    <div class='search_result_item_info'>
+                        <div class='search_result_item_name'>${user.last_name.toLowerCase()} ${user.first_name.toLowerCase()}</div>
+                        <span>
+                            <div class='search_result_item_group'>GROUPE ${user.group_num} - SECTION ${user.section_num} - ${user.speciality.toLowerCase()}</div>
+                        </span>
+                        <div class='search_result_item_filiere'>${user.level.toUpperCase()} - ${user.branch.toUpperCase()}</div>
                     </div>
                 </div>`
         }
         $('#search_result_list').html(html_to_inject);
+        search_result_click_handler();
     }
     else {
         html_to_inject = "<span>Pas de Resultats</span>"
@@ -215,7 +240,6 @@ function start_search(e) {
     e.stopPropagation()
     if (search_is_toggled) { // get search result
         suggestions_is_allowed = false;
-        console.log(suggestions_is_allowed)
         setTimeout(() => {
             search_result_is_toggled = true;
             search_query(document.getElementById('search_input').value)
@@ -250,11 +274,11 @@ function start_search(e) {
 function search_bar_manager() {
     // open search_area and search
     document.getElementById('search_button').addEventListener('click', e => {
-        start_search(e)
+        start_search(e);
     }) // search when clicking in search button
     document.getElementById('search_input').addEventListener('keyup', e => { // search when pressing enter
         if (e.which == 13)
-            start_search(e)
+            start_search(e);
     })
     
     // close search_area
@@ -266,21 +290,31 @@ function search_bar_manager() {
 
 function search_result_manager(){
     document.getElementById('search_result_exit').addEventListener('click', () => {
-        search_result_is_toggled = false;
-        $('#search_result').fadeOut(show_leave_duration);
-        $('#search_result_list').html('')
+        hideSearch();
     })
 }
 
 //////////////// SUGGESTIONS MANAGERS ////////////////
+function suggestions_click_handler(){
+    all_suggestions = document.getElementsByClassName('suggestion_item')
+    for (let i = 0; i < all_suggestions.length; i++) {
+        all_suggestions[i].addEventListener('click', e => {
+            e.stopPropagation();
+            user_id = all_suggestions[i].querySelector('.suggestion_item_id').innerHTML
+            $('#content_container').load(`users/${user_id} #content_container > *`);
+            hideSearch();
+        })
+    }
+}
+
 function suggestions_filler(returned_data){
     var html_to_inject = ''
     if (returned_data.success){
         for (let i = 0; i < returned_data.users_data.length; i++){
             if (i >= 5) // allow only 5 suggestions
                 break;
-            user = returned_data.users_data[i]
-            full_name = user.last_name
+            user = returned_data.users_data[i];
+            full_name = user.last_name;
             html_to_inject +=`
             <div class='suggestion_item'>
                 <div class='suggestion_item_id'>${user.id}</div>
@@ -289,16 +323,17 @@ function suggestions_filler(returned_data){
                     <div class='suggestion_item_name'>${user.last_name.toLowerCase()} ${user.first_name.toLowerCase()}</div>
                     <div class='suggestion_item_filiere'>${user.level.toUpperCase()} - ${user.branch.toUpperCase()}</div>
                 </div>
-            </div>`
+            </div>`;
         }
         $('#search_suggestions').html(html_to_inject);
+        suggestions_click_handler();
+        
     }
     else {
-        html_to_inject = "<span>Pas de Suggestions</span>"
+        html_to_inject = "<span>Pas de Suggestions</span>";
         $('#search_suggestions').html(html_to_inject);
     }
 }
-
 
 function search_bar_suggestions() {
     var typingTimer;  
@@ -326,12 +361,12 @@ function search_bar_suggestions() {
                     error:function (xhr, textStatus, thrownError){}
                 });
                 suggestions_is_toggled = true;
-                $("#search_suggestions").slideDown(slide_animation_duration)
+                $("#search_suggestions").slideDown(slide_animation_duration);
             }
             else {
                 suggestions_is_toggled = false;
                 $('#search_suggestions').html('');
-                $("#search_suggestions").slideUp(slide_animation_duration)
+                $("#search_suggestions").slideUp(slide_animation_duration);
             }
         }, search_input_timeout);
     })
@@ -388,12 +423,11 @@ function menu_toggeler(){
 //////////////// FUNCTIONS CALLING ////////////////
 
 $(document).ready(() => {
-    /* notification and options toggling */
+    /* notification and options */
     notification_toggler();
     options_toggler();
-
-    /* notification state changing */
     mark_notification_as_read();
+    profile_option_handler();
 
     /* search manager */
     search_bar_manager();

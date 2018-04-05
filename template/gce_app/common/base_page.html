@@ -19,6 +19,7 @@
     <div id='site_container' class='fill_100'>
         <nav id='topbar'>
             <img id='profile_pic' src="{{ user_avatar.url }}">
+            <div id='logged_in_user_id'>{{ user_id }}</div>
             <form id ="options_box" class='hide' method="POST">
                 <div>
                     {% csrf_token %}

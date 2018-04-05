@@ -43,6 +43,7 @@
 ::-webkit-scrollbar {
     width: 8px;
     background-color:rgba(15, 15, 15, 0.144);
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
