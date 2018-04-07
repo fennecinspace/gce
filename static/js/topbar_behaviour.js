@@ -1,21 +1,3 @@
-//get cookie using cookie name
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-
 //////////////// NOTIFICATION & OPTIONS TOGGLERS ////////////////
 notification_is_toggled = false;
 options_is_toggled = false;
@@ -58,7 +40,7 @@ function profile_option_handler() {
     if (profile_options_item ){
         profile_options_item.addEventListener('click', e => {
             e.preventDefault();
-            user_id = document.getElementById('logged_in_user_id').innerHTML
+            var user_id = document.getElementById('logged_in_user_id').innerHTML
             $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
             options_hider();
         })
@@ -111,11 +93,10 @@ function mark_notification_as_read(){
     for (let i = 0; i < allNotifications.length; i++)
         allNotifications[i].addEventListener('click', function(e) {
             $.ajax({
-                url:'/notification_state_changer_VIEW',
+                url:`${location.origin}/notification_state_changer_VIEW/`,
                 type: "POST",
                 data: {
                     'notif_id': allNotifications[i].querySelector('div').innerHTML,
-                    'csrfmiddlewaretoken': getCookie('csrftoken'),
                 },
                 success:function(response){
                     a = allNotifications[i].parentElement;
@@ -174,7 +155,7 @@ function search_result_click_handler(){
     for (let i = 0; i < all_search_results.length; i++) {
         all_search_results[i].addEventListener('click', e => {
             e.stopPropagation();
-            user_id = all_search_results[i].querySelector('.search_result_item_id').innerHTML
+            var user_id = all_search_results[i].querySelector('.search_result_item_id').innerHTML
             $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
             hideSearch();
         })
@@ -211,11 +192,10 @@ function search_result_filler(returned_data){
 
 function search_query(search_entry){
     $.ajax({
-        url:'/search_result_VIEW',
+        url:`${location.origin}/search_result_VIEW/`,
         type: "POST",
         data: {
             'search_entry': search_entry,
-            'csrfmiddlewaretoken': getCookie('csrftoken'),
         },
         success:function(response){
             returned_data = JSON.parse(response)
@@ -281,7 +261,7 @@ function suggestions_click_handler(){
     for (let i = 0; i < all_suggestions.length; i++) {
         all_suggestions[i].addEventListener('click', e => {
             e.stopPropagation();
-            user_id = all_suggestions[i].querySelector('.suggestion_item_id').innerHTML
+            var user_id = all_suggestions[i].querySelector('.suggestion_item_id').innerHTML
             $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
             hideSearch();
         })
@@ -328,11 +308,10 @@ function search_bar_suggestions() {
                     $('#search_result_list').html('')
                 }
                 $.ajax({
-                    url:'/search_suggestions_VIEW',
+                    url:`${location.origin}/search_suggestions_VIEW/`,
                     type: "POST",
                     data: {
                         'search_entry': e.target.value,
-                        'csrfmiddlewaretoken': getCookie('csrftoken'),
                     },
                     success:function(response){
                         returned_data = JSON.parse(response)
@@ -467,7 +446,6 @@ function pages_handler() {
         })
     }
 }
-
 
 //////////////// FUNCTIONS CALLING ////////////////
 

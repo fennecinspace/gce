@@ -37,10 +37,10 @@ class Utilisateur(models.Model):
     avatar_utilisateur = models.FileField(db_column='Avatar', default = 'avatars/default_avatar.png', upload_to = avatars_file_path)
 
     def save(self,*args, **kwargs):
-        self.id_utilisateur = self.type_utilisateur + str(self.info_utilisateur.id)
+        if self.id_utilisateur == '':
+            self.id_utilisateur = self.type_utilisateur + str(self.info_utilisateur.id)
         super().save(*args, **kwargs)
     
-
     class Meta:
         db_table = 'Utilisateur'
 
@@ -54,6 +54,7 @@ class Notification(models.Model):
     heure_notification = models.TimeField(db_column='heure_Notification', blank=True, null=True)
     icon_notification = models.CharField(db_column='IconPath', blank=True, null=True,max_length=1000)
     id_utilisateur = models.ForeignKey('Utilisateur', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
+    
     class Meta:
         db_table = 'Notification'
 
@@ -198,7 +199,7 @@ class Copie(models.Model):
 class VersionCopie(models.Model):
     id_version = models.CharField(db_column='id_Version', primary_key=True, max_length=100)
     numero_version = models.IntegerField(db_column='numero_Version', blank=True, null=True)
-    note_copie = models.FloatField(db_column='note_Copie', blank=True, null=True)
+    note_version = models.FloatField(db_column='note_Version', blank=True, null=True)
     id_copie = models.ForeignKey('Copie', models.CASCADE, db_column='id_Copie', blank=True, null=True)
 
     class Meta:

@@ -15,6 +15,11 @@ from django.db.models import Q # to make complex queries
 import re # to use regex
 ## models
 from gce_app.models import *
+## forms
+from gce_app.forms import avatar_upload_form
+## extra 
+from django.conf import settings
+import os
 
 ## returns the user's data
 def get_user_data(u_obj):
@@ -42,6 +47,34 @@ def get_user_notifications(u_obj):
             notifications += [notification]
     return {'notifications_list': notifications,}
 
+## returns student data
+def get_student_copies(student):
+    all_copies = Copie.objects.filter(id_etudiant = student)
+    all_versions = [list(VersionCopie.objects.filter(id_copie = copie)) for copie in all_copies]
+    final_versions = []
+    for version in all_versions:
+        version.sort(key=lambda x : x.id_version , reverse=False) # sorting the copie version from oldest to newest
+        final_versions += [version[len(version)-1]] # grabing the latest version
+    return final_versions
+
+def get_student_notes(student):
+    final_versions = get_student_copies(student)
+    notes = {}
+    [notes.update({version.id_copie.annee_copie:[]}) for version in final_versions]
+    for version in final_versions:
+        notes[version.id_copie.annee_copie] += [version]
+    return notes
+
+def get_student_data(student):
+    modules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
+    teachers = Enseignant.objects.filter(modules__in = modules)
+    notes = get_student_notes(student) # gettings final versions of copies categorized by school year
+    marks = {k: notes[k] for k in sorted(notes,reverse=True)} # sorting from newest school year to oldest
+    return {
+        'modules': modules,
+        'teachers': teachers,
+        'marks': marks,
+    }
 def get_permitted_search_group(req, user_type):
     search_group = []
     if user_type == 'etud': # students of same parcours
@@ -230,13 +263,38 @@ class profileView(DetailView):
         context = super(profileView, self).get_context_data(**kwargs)
         loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [self.request.user])[0]
         context.update(get_user_data(loggedin_user))
+        context.update(get_student_data(kwargs['object']))
         context.update(get_user_notifications(loggedin_user))
+        context.update({'form': avatar_upload_form })
         return context
 
     def post(self, req, *args, **kwargs):
+        form = avatar_upload_form(req.POST, req.FILES)
         if self.request.POST.get('logout'):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if form.is_valid(): ## changing user avatar
+            try:
+                user_acct = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
+                if user_acct.avatar_utilisateur.url[-18:] != 'default_avatar.png':
+                    user_acct.avatar_utilisateur.delete(False)
+                obj = form.save(commit=False)
+                obj.info_utilisateur = req.user
+                obj.type_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur
+                obj.id_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].id_utilisateur
+                obj.save()
+                data = {'success': True, 'new_avatar':obj.avatar_utilisateur.url}
+            except:
+                data = {'success': False}
+            serialized_data = json.dumps(data)
+            return JsonResponse(serialized_data, safe = False)
+        return HttpResponse(req)
+
+
+    def get (self,request,*args,**kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
 
 #### INITIAL TEST PAGE

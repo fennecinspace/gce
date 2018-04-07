@@ -70,7 +70,8 @@ def CreateUtilisateur(user_type, counter, gen_avatar):
     else: #user_type == "chef departement"
         #gen_id = GenerateId(IDS[3],counter)
         gen_type = IDS[3] 
-    return Utilisateur(info_utilisateur = obj, type_utilisateur = gen_type, avatar_utilisateur = gen_avatar)
+    return Utilisateur(info_utilisateur = obj, type_utilisateur = gen_type)
+    # , avatar_utilisateur = gen_avatar)
 
 ########################
 ## defining Populators
@@ -112,7 +113,7 @@ def PopulateNotification():
             gen_description = fake.text(120)
             gen_date = dt.strptime(fake.date(),'%Y-%M-%d').date()
             gen_time = dt.strptime(fake.time(),'%H:%M:%S').time()
-            gen_icon = os.path.join('images',random.choice(['email_notification.png','save_notification.png']))
+            gen_icon = os.path.join('images/notifications',random.choice(['email_notification.png','save_notification.png']))
             obj = Notification(id_notification = gen_id, sujet_notification = gen_sujet, description_notification = gen_description, vue_notification = False, date_notification = gen_date, heure_notification = gen_time, icon_notification = gen_icon, id_utilisateur = user)
             obj.save()
             nbOfEntries += 1 
@@ -344,7 +345,7 @@ def PopulateModule(nbMod = 20):
     for speciality in allSpecialties:
         for _ in range (0,nbMod//len(allSpecialties)):
             gen_id = IDS[12] + str(nbOfEntries)
-            gen_titre = "module no " + str(nbOfEntries)
+            gen_titre = random.choice(['Math','Chemie','Physics','Algorithms','AI','Medecine']) + " " + random.choice(['initiation','advanced','amateur']) + " " + str(nbOfEntries)
             obj = Module(id_module = gen_id, titre_module = gen_titre, finsaisie_module = False, id_specialite = speciality)
             obj.save()
             nbOfEntries += 1
@@ -444,9 +445,8 @@ def PopulateVersionCopie():
         for i in range (0,x):
             gen_id = IDS[23] + str(nbOfEntries)
             gen_numero_version = i + 1
-            gen_note_copie = str(random.randint(0,20))
-            #gen_emplacement_copie = "/media/copies/" + gen_id
-            obj = VersionCopie(id_version = gen_id, numero_version = gen_numero_version, note_copie = gen_note_copie, id_copie = copy)
+            gen_note_version = str(random.randint(0,20))
+            obj = VersionCopie(id_version = gen_id, numero_version = gen_numero_version, note_version = gen_note_version, id_copie = copy)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[20/{}]VersionCopie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))

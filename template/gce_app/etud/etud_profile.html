@@ -1,13 +1,79 @@
 {% extends 'gce_app/common/base_page.html' %}
+{% load custom_filters %}
+{% load staticfiles %}
 {% block base_extender %}
     <div id="profile_container">
-        <div id='left_profile_section'></div>
-        <div id='right_profile_section'></div>
-
-        {{ student.pk}}
-
-        {% if user.username == student.id_etudiant.info_utilisateur.username %}
-            <div style="display:none"></div>
-        {% endif %}
+        <div id='left_profile_section'>
+            <div id='profile_avatar'>
+                {% if user == student.id_etudiant.info_utilisateur %}
+                <form id ='avatar_form' method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}{% for field in form %}{{ field }}{% endfor %}
+                </form>
+                {% endif %}
+                <img {% if user == student.id_etudiant.info_utilisateur %} onclick='avatar_selector(event)' class="change_avatar"{% endif %} src="{{ student.id_etudiant.avatar_utilisateur.url}}">
+                <div><div class="change_avatar_child"><div></div>Changer Avatar</div></div>
+            </div>
+            <span>
+                <div id="profile_name">{{ student.id_etudiant.info_utilisateur.first_name|lower }} {{ student.id_etudiant.info_utilisateur.last_name|lower }}
+                    <div id="profile_email">{{ student.id_etudiant.info_utilisateur.email }}</div>
+                </div>
+                <div id="profile_career">
+                    <div id="profile_groupe"><strong>Groupe :</strong> {{ student.id_groupe.numero }}</div>
+                    <div id="profile_section"><strong>Section :</strong> {{ student.id_groupe.id_section.numero }}</div>
+                    <div id="profile_specialty"><strong>Specialité :</strong> {{ student.id_groupe.id_section.id_specialite.nom }}</div>
+                    <div id="profile_level"><strong>Parcours :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.nom }}</div>
+                    <div id="profile_branch"><strong>Filiere :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.nom }}</div>
+                    <div id="profile_domain"><strong>Domaine :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.nom }}</div>
+                    <div id="profile_faculty"><strong>Faculté :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.id_faculte.nom }}</div>
+                    <div id="profile_university"><strong>Université :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.id_faculte.id_universite.nom }}</div>
+                </div>
+            </span>
+        </div>
+        <div id='right_profile_section'>
+            {% if modules %}
+                <div class="profile_area">
+                    <div id='profile_modules' class="profile_area_title">Modules</div>
+                    <div class="profile_area_content">
+                        {% for module in modules %}
+                            <div>{{ module.titre_module|lower }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if marks %}
+                <div class="profile_area">
+                    <div id='profile_notes' class="profile_area_title">Notes</div>
+                    <div class="profile_area_content">
+                        {% for year,notes in marks.items %}
+                            <div class="profile_area_result">
+                                <div class='profile_school_year'>{{ year }} :</div>
+                                <span>
+                                    <div class='profile_notes_modules'>
+                                        {% for note in notes %}
+                                                <div>{{ note.id_copie.id_module.titre_module|lower }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class='profile_notes_notes'>
+                                        {% for note in notes %}
+                                            <div>{{ note.note_version|floatformat:"0"|second_zero_adder }}/20</div>
+                                        {% endfor %}
+                                    </div>
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if teachers %}
+                <div class="profile_area">
+                    <div id='profile_ensgs' class="profile_area_title">Enseignants</div>
+                    <div class="profile_area_content">
+                        {% for teacher in teachers %}
+                            <div>{{ teacher.id_enseignant.info_utilisateur.last_name|lower }} {{ teacher.id_enseignant.info_utilisateur.first_name|lower }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
