@@ -30,28 +30,29 @@ function avatar_selector() {
 }
 
 function avatar_uploader(e) {
-    var formData = new FormData($('#avatar_form')[0]);
-    $.ajax({
-        url: `${location.origin}/users/${document.getElementById('logged_in_user_id').innerHTML}/`,
-        type: 'POST',
-        data: formData,
-        async: false,
-        success: function (response) {
-            data = JSON.parse(response)
-            if (data['success']){
-                document.querySelector('#profile_pic').src = data['new_avatar'];
-                document.querySelector('.change_avatar').src = data['new_avatar'];
-            }
-            else
-                alert('Erreur !')
-        },
-        complete: function (){
-        },
-        error: function (xhr, textStatus, thrownError){
-        },
-        cache: false,
-        contentType: false,
-        processData: false
-    });
-    console('Hello')
+    if (document.getElementById('avatar_upload').value != ''){
+        var formData = new FormData(document.getElementById('avatar_form'));
+        $.ajax({
+            url: `${location.origin}/users/${document.getElementById('logged_in_user_id').innerHTML}/`,
+            type: 'POST',
+            data: formData,
+            async: false,
+            success: function (response) {
+                data = JSON.parse(response)
+                if (data['success']){
+                    document.querySelector('#profile_pic').src = data['new_avatar'];
+                    document.querySelector('.change_avatar').src = data['new_avatar'];
+                }
+                else
+                    alert('Erreur !')
+            },
+            complete: function (){
+            },
+            error: function (xhr, textStatus, thrownError){
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    }
 }
