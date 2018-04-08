@@ -38,6 +38,7 @@ def get_user_data(u_obj):
         'user_type' : user_type,
     }
 
+
 ## returns the user's querylist of notifications in a dictionary
 def get_user_notifications(u_obj):
     notifications = []
@@ -46,6 +47,7 @@ def get_user_notifications(u_obj):
         if notification.vue_notification == False:
             notifications += [notification]
     return {'notifications_list': notifications,}
+
 
 ## returns student data
 def get_student_copies(student):
@@ -57,6 +59,7 @@ def get_student_copies(student):
         final_versions += [version[len(version)-1]] # grabing the latest version
     return final_versions
 
+
 def get_student_notes(student):
     final_versions = get_student_copies(student)
     notes = {}
@@ -64,6 +67,7 @@ def get_student_notes(student):
     for version in final_versions:
         notes[version.id_copie.annee_copie] += [version]
     return notes
+
 
 def get_student_data(student):
     modules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
@@ -75,6 +79,8 @@ def get_student_data(student):
         'teachers': teachers,
         'marks': marks,
     }
+
+
 def get_permitted_search_group(req, user_type):
     search_group = []
     if user_type == 'etud': # students of same parcours
@@ -95,6 +101,7 @@ def get_permitted_search_group(req, user_type):
         search_group += [student.id_etudiant]
     return search_group
 
+
 ## returns data for suggested users if exist
 def get_search_data(search_entry, req, req_type):
     ### processing user search entry
@@ -103,6 +110,7 @@ def get_search_data(search_entry, req, req_type):
     search_entry = re.sub(r'[^a-zA-Z ]', '', search_entry) # stripping entry from non latin letters
     search_entry = re.sub(r' +', ' ', search_entry) # turning multiple whitespaces to one
     user_type = Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur
+
     # first try : trying to march based similarity ratio between the first and last names and the search entry
     all_Students = get_permitted_search_group(req, user_type)
     for user in all_Students:
@@ -145,7 +153,6 @@ def get_search_data(search_entry, req, req_type):
         if (req_type == 'suggestions' and len(search_data) >= 5):
             return search_data[:5]
     return search_data 
-
 
 
 ## returns the template based on the signed in user's type
@@ -260,7 +267,7 @@ class profileView(DetailView):
     context_object_name = 'student'
     
     def get_context_data(self, **kwargs):
-        context = super(profileView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [self.request.user])[0]
         context.update(get_user_data(loggedin_user))
         context.update(get_student_data(kwargs['object']))
@@ -291,10 +298,16 @@ class profileView(DetailView):
         return HttpResponse(req)
 
 
-    def get (self,request,*args,**kwargs):
+    def get (self,req,*args,**kwargs):
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+        profile_to_access = context['student'].id_etudiant
+        logged_in_user_type = context['user_id'][:4]
+        allowed_profiles = get_permitted_search_group(req, logged_in_user_type)
+        if profile_to_access in allowed_profiles:
+            return self.render_to_response(context)
+        else:
+            return HttpResponse("<h1>Not Allowed</h1>")
 
 
 #### INITIAL TEST PAGE
