@@ -24,9 +24,9 @@
                 <div>
                     {% csrf_token %}
                     {% if user_type == 'etud' %}
-                        <input name="profile" type="submit" value="Profile" id ='profile_options_item' class='options_item'>
+                        <input name="profile" type="submit" value="Profile" id ='profile_options_item'>
                     {% endif %}
-                    <input name="logout" type="submit" value="Deconnecter" id ='logout_options_item' class='options_item'>
+                    <input name="logout" type="submit" value="Deconnecter" id ='logout_options_item'>
                 </div>
             </form> <!-- this is the options window -->
             <div id='menu_search_container'>
@@ -47,7 +47,7 @@
                 </div>
                 <div id="search_area" class='hide'>
                     <input id ='search_input' name='search-input' type="text" placeholder="Rechercher des Etudiants" spellcheck="false">
-                    <div id='leave_search_area'><div>l</div><div>l</div></div>
+                    <div id='leave_search_area'><div></div><div></div></div>
                     <div id="search_button"></div>
                     <div id="search_suggestions"></div>
                 </div>
@@ -56,20 +56,20 @@
                 <div id="notification_button"></div>
                 <div id ="notification_box" class='hide'>
                     {% if not notifications_list %}
-                        <span>Pas de Notification</span>
+                        <span id='no_notification'>Pas de Notification</span>
                     {% else %}
-                        <div>
-                            {% for notification in notifications_list %}
+                        {% for notification in notifications_list %}
+                            <div>
                                 <div class='notification_item'>
-                                    <div class="notification_id"><div>{{ notification.id_notification }}</div><div class='remove_notification_sign'><div>l</div><div>l</div></div></div>
+                                    <div class="notification_id"><div>{{ notification.id_notification }}</div><div class='remove_notification_sign'><div></div><div></div></div></div>
                                     <div class="notification_icon"><img src="{% static ''|add:notification.icon_notification %}" alt=""></div>
                                     <div class="notification_content">
                                         <div class="notification_subject">{{ notification.sujet_notification }}</div>
                                         <div class="notification_description">{{ notification.description_notification }}</div>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </div>
+                        {% endfor %}
                     {% endif %}
                 </div> <!-- this is the notification window -->
             </div>
@@ -78,7 +78,7 @@
             <div id="search_result">
                 <div id="search_result_head">
                     <div id="search_result_title">Resultat</div>
-                    <div id="search_result_exit"><div>l</div><div>l</div></div>
+                    <div id="search_result_exit"><div></div><div></div></div>
                 </div>
                 <div id="search_result_list"></div>
             </div>

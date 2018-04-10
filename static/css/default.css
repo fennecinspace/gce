@@ -56,13 +56,13 @@
 }
 
 /* notification box custom scroll bar */
-#notification_box > div::-webkit-scrollbar {
+#notification_box::-webkit-scrollbar {
     width: 8px;
     background-color: rgb(231, 231, 231); 
     margin: 5px;
 }
 
-#notification_box > div::-webkit-scrollbar-thumb {
+#notification_box::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.397); 
     border-radius: 5px;
 }
