@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/normalize.css' %}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/default.css' %}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/datalist.css' %}" />
     <!-- Scripts -->
     <script src="{% static 'js/libs/jquery/jquery.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/additional.js' %}" type="text/javascript"></script>
@@ -58,18 +59,18 @@
                     {% if not notifications_list %}
                         <span id='no_notification'>Pas de Notification</span>
                     {% else %}
+                        <div>
                         {% for notification in notifications_list %}
-                            <div>
-                                <div class='notification_item'>
-                                    <div class="notification_id"><div>{{ notification.id_notification }}</div><div class='remove_notification_sign'><div></div><div></div></div></div>
-                                    <div class="notification_icon"><img src="{% static ''|add:notification.icon_notification %}" alt=""></div>
-                                    <div class="notification_content">
-                                        <div class="notification_subject">{{ notification.sujet_notification }}</div>
-                                        <div class="notification_description">{{ notification.description_notification }}</div>
-                                    </div>
+                            <div class='notification_item'>
+                                <div class="notification_id"><div>{{ notification.id_notification }}</div><div class='remove_notification_sign'><div></div><div></div></div></div>
+                                <div class="notification_icon"><img src="{% static ''|add:notification.icon_notification %}" alt=""></div>
+                                <div class="notification_content">
+                                    <div class="notification_subject">{{ notification.sujet_notification }}</div>
+                                    <div class="notification_description">{{ notification.description_notification }}</div>
                                 </div>
                             </div>
                         {% endfor %}
+                        </div>
                     {% endif %}
                 </div> <!-- this is the notification window -->
             </div>
@@ -90,5 +91,6 @@
     </div>
     <!-- Scripts -->
     <script src="{% static 'js/topbar_behaviour.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/datalist.js' %}" type="text/javascript"></script>
 </body>
 </html>

@@ -445,7 +445,7 @@ def PopulateVersionCopie():
         for i in range (0,x):
             gen_id = IDS[23] + str(nbOfEntries)
             gen_numero_version = i + 1
-            gen_note_version = str(random.randint(0,20))
+            gen_note_version = str(random.randint(0,20))+ '.' + random.choice(['00','25','50','75'])
             obj = VersionCopie(id_version = gen_id, numero_version = gen_numero_version, note_version = gen_note_version, id_copie = copy)
             obj.save()
             nbOfEntries += 1

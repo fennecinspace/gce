@@ -378,8 +378,6 @@
 #notification_box {
     right: 10%;
     transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
-    overflow: hidden;
-    overflow-y: auto;
 }
 
 /* #region notification and options TRIANGLES */
@@ -454,6 +452,12 @@
 /* #region NOTIFICATION BOX*/
 #no_notification {
     padding: 0 1em;
+}
+
+#notification_box > div {
+    max-height: 21.1em;
+    overflow: hidden;
+    overflow-y: auto;
 }
 
 .notification_item {
@@ -775,7 +779,7 @@
 }
 
 .profile_notes_notes {
-    width: 3em;
+    width: 3.1em;
 }
 
 .profile_notes_modules > div, .profile_notes_notes > div {
@@ -1009,6 +1013,6 @@
 
 /* #region MOZILLA COMPATIBILITY */
 @-moz-document url-prefix() {
-    #notification_box {overflow-y: scroll;}
+    #notification_box > div {overflow-y: scroll;}
 }
 /* #endregion MOZILLA COMPATIBILITY */

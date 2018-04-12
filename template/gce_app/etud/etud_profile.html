@@ -55,7 +55,7 @@
                                     </div>
                                     <div class='profile_notes_notes'>
                                         {% for note in notes %}
-                                            <div>{{ note.note_version|floatformat:"0"|second_zero_adder }}/20</div>
+                                            <div>{{ note.note_version|second_zero_adder }}</div>
                                         {% endfor %}
                                     </div>
                                 </span>

@@ -1,7 +1,9 @@
 import os, uuid
+from io import BytesIO
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.core.files.base import ContentFile
+from gce_app.functions import image_center_crop
 ########################################################################
 #######  Modifications : 
 ##   1 - added OneToOneFields
@@ -37,8 +39,18 @@ class Utilisateur(models.Model):
     avatar_utilisateur = models.FileField(db_column='Avatar', default = 'avatars/default_avatar.png', upload_to = avatars_file_path)
 
     def save(self,*args, **kwargs):
+        # creating user id
         if self.id_utilisateur == '':
             self.id_utilisateur = self.type_utilisateur + str(self.info_utilisateur.id)
+        # cropping avatar to a square
+        if self.avatar_utilisateur != 'avatars/default_avatar.png': # checking that this is not a user creation
+            cropped_user_img = image_center_crop(self.avatar_utilisateur)
+            cropped_user_img_io = BytesIO()
+            cropped_user_img.save(cropped_user_img_io, format='JPEG')
+            cropped_user_img_name = self.avatar_utilisateur.name
+            self.avatar_utilisateur.delete(save=False)
+            self.avatar_utilisateur.save(cropped_user_img_name,content=ContentFile(cropped_user_img_io.getvalue()),save=False)
+
         super().save(*args, **kwargs)
     
     class Meta:

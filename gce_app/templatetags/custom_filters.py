@@ -6,6 +6,14 @@ register = template.Library()
 @register.filter(name='second_zero_adder')
 @stringfilter
 def second_zero_adder(value):
-    if len(value) == 1:
-        value = '0' + value 
+    values = value.split('.')
+
+    if len(values[0]) == 1:
+        values[0] = '0' + values[0] 
+
+    if len(values[1]) == 1:
+            values[1] = values[1] + '0'
+
+
+    value = '.'.join(values)
     return value
