@@ -44,31 +44,20 @@ def CreateUtilisateur(user_type, counter, gen_avatar):
     allUsers = Utilisateur.objects.all()
     gen_lastName = random.choice(NOMS)
     gen_firstName = random.choice(PRENOMS)
-    found = True
-    while found:
-        gen_email = gen_firstName + gen_lastName + "@" + random.choice(MAILS) + "." + random.choice(SITEDOMAINS)
-        found = False
-        for ussr in allUsers:
-            if ussr.info_utilisateur.email == gen_email:
-                found = True
-                break          
-    gen_userId = "username" + str(counter)
+    gen_email = user_type + str(counter) + "@" + random.choice(MAILS) + "." + random.choice(SITEDOMAINS)       
+    gen_userId = user_type + str(counter)
     gen_userPassword = "password" + str(10) #str(random.randint(0,500))
     # Saving User Objects
     obj = User(username = gen_userId,last_name = gen_lastName, first_name = gen_firstName, email = gen_email)
     obj.set_password(gen_userPassword)
     obj.save()
     if user_type == "etudiant":
-        #gen_id = GenerateId(IDS[0],counter)
         gen_type = IDS[0]
     elif user_type == "enseignant":
-        #gen_id = GenerateId(IDS[1],counter)
         gen_type = IDS[1]
     elif user_type == "technicien":
-        #gen_id = GenerateId(IDS[2],counter)
         gen_type = IDS[2]
     else: #user_type == "chef departement"
-        #gen_id = GenerateId(IDS[3],counter)
         gen_type = IDS[3] 
     return Utilisateur(info_utilisateur = obj, type_utilisateur = gen_type)
     # , avatar_utilisateur = gen_avatar)
@@ -81,22 +70,22 @@ def PopulateUtilisateur(nbEtud = 200, nbEnsen = 10, nbTech = 5, nbChef = 6): # i
     nbOfUsers = 0
     sys.stdout.write('[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbEtud):
-        obj = CreateUtilisateur("etudiant",nbOfUsers,default_avatar)
+        obj = CreateUtilisateur("etudiant",counter,default_avatar)
         obj.save()
         nbOfUsers += 1
         sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbEnsen):
-        obj = CreateUtilisateur("enseignant",nbOfUsers,default_avatar)
+        obj = CreateUtilisateur("enseignant",counter,default_avatar)
         obj.save()
         nbOfUsers += 1
         sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbTech):
-        obj = CreateUtilisateur("technicien",nbOfUsers,default_avatar)
+        obj = CreateUtilisateur("technicien",counter,default_avatar)
         obj.save()
         nbOfUsers += 1
         sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
     for counter in range (0, nbChef):
-        obj = CreateUtilisateur("chef departement",nbOfUsers,default_avatar)
+        obj = CreateUtilisateur("chef_departement",counter,default_avatar)
         obj.save()
         nbOfUsers += 1
         sys.stdout.write('\r[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
@@ -330,12 +319,12 @@ def PopulateEtudiant(nbEtud = 200):
     nbOfEntries = 0
     sys.stdout.write('\n[14/{}]Etudiant : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for group in allGroups:
-        for student in allStudents[i:i+25]:
+        for student in allStudents[i:i+(len(allStudents)//8)]:
             obj = Etudiant(id_etudiant = student, id_groupe = group)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[14/{}]Etudiant : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-        i = i +25
+        i = i + len(allStudents)//8
 
 def PopulateModule(nbMod = 20):
     allSpecialties = Specialite.objects.all()
@@ -404,18 +393,9 @@ def PopulateCopie():
     allStudents = Etudiant.objects.all()
     nbOfEntries = 0
     x = 0
-    nbOfEntriesToCreate = 0
-    for student in allStudents:
-        allModules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
-        for module in allModules:
-            if x == 0: ### 80% entries creation
-                x += 1
-                continue
-            elif x < 4:
-                x += 1
-            else:
-                x = 0
-            nbOfEntriesToCreate += 1
+    allModules = Module.objects.all()
+    allSpecialties = Specialite.objects.all()
+    nbOfEntriesToCreate = len(allStudents) * len(allModules) // len(allSpecialties) * 4 // 5 #0
     sys.stdout.write('\n[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for student in allStudents:
         allModules = Module.objects.filter(id_specialite = Specialite.objects.filter(id_specialite = (Section.objects.filter(id_section = Groupe.objects.filter(id_groupe = student.id_groupe.id_groupe)[0].id_section.id_section)[0].id_specialite.id_specialite))[0])
@@ -474,17 +454,8 @@ def PopulateCorrection():
     teacher_module_relations = Enseignant.modules.through.objects.all()
     nbOfEntries = 0
     x = 0
-    nbOfEntriesToCreate = 0
+    nbOfEntriesToCreate = len(teacher_module_relations) * 4 // 5
     sys.stdout.write('\n[22/{}]Correction : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for relation in teacher_module_relations:
-        if x == 0:
-            x += 1
-            continue
-        elif x < 4:
-            x += 1
-        else:
-            x = 0
-        nbOfEntriesToCreate += 1
     for relation in teacher_module_relations:
         if x == 0: 
             x += 1
@@ -542,15 +513,8 @@ def PopulateConsultation():
     teacher_module_relations = Enseignant.modules.through.objects.all()
     nbOfEntries = 0
     x = 0
-    nbOfEntriesToCreate = 0
+    nbOfEntriesToCreate = len (teacher_module_relations) // 4
     sys.stdout.write('\n[25/{}]Consultation : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for relation in teacher_module_relations:
-        if x == 0 or x <3: ### 25% entries creation
-            x += 1
-            continue
-        else:
-            x = 0
-        nbOfEntriesToCreate += 1
     for relation in teacher_module_relations:
         if x == 0 or x <3: ### 25% entries creation
             x += 1
@@ -646,7 +610,9 @@ def PopulateMessagesReclamation(nbMess = 10):
 
 
 def Populate():
-    PopulateUtilisateur()
+    nbetud = input('nombre d\'étudiants : ')
+    nbetud = int(nbetud)
+    PopulateUtilisateur(nbEtud = nbetud)
     PopulateNotification()
     PopulateChefDepartement()
     PopulateUniversite()
@@ -659,7 +625,7 @@ def Populate():
     PopulateGroupe()
     PopulateTechnicien()
     PopulateEnseignant()
-    PopulateEtudiant()
+    PopulateEtudiant(nbEtud = nbetud)
     PopulateModule()
     PopulateAnnonce()
     RelationEnseignantFiliere()
@@ -734,38 +700,6 @@ def RelationEtudiantModule():
                 nbOfEntries += 1
                 sys.stdout.write('\r[20/{}]Relation ETUDIANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
-def PopulateCopie3():
-    student_module_relations = Etudiant.modules.through.objects.all()
-    nbOfEntries = 0
-    x = 0
-    nbOfEntriesToCreate = 0
-    sys.stdout.write('\n[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
-    for relation in student_module_relations:
-        if x == 0: ### 80% entries creation
-            x += 1
-            continue
-        elif x < 4:
-            x += 1
-        else:
-            x = 0
-        nbOfEntriesToCreate += 1
-    for relation in student_module_relations:
-        if x == 0:
-            x += 1
-            continue
-        elif x < 4:
-            x += 1
-        else:
-            x = 0
-        gen_id = IDS[15] + str(nbOfEntries)
-        note_copie = str(random.randint(0,20))
-        gen_emplacement_copie = "/media/copies/" + gen_id
-        gen_id_module = relation.module
-        gen_id_etudiant = relation.etudiant
-        obj = Copie(id_copie = gen_id, note_copie = note_copie, emplacement_copie = gen_emplacement_copie, id_module = gen_id_module, id_etudiant = gen_id_etudiant)
-        obj.save()
-        nbOfEntries += 1
-        sys.stdout.write('\r[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateCopie2():
     allStudents = Etudiant.objects.all()

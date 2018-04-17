@@ -11,7 +11,6 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/normalize.css' %}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/default.css' %}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/style.css' %}" />
-    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/datalist.css' %}" />
     <!-- Scripts -->
     <script src="{% static 'js/libs/jquery/jquery.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/additional.js' %}" type="text/javascript"></script>
@@ -43,7 +42,7 @@
                         <div id='home_entry'>Acceuil</div><div id='news_entry'>Annonces</div><div id='results_entry'>Notes</div><div id='error_entry'>Reclamations</div><div id='consult_entry'>Consultations</div><div id='messenger_entry'>Messenger</div>
                     {% endif %}
                     {% if user_type == 'chef' %}
-                        <div id='home_entry'>Acceuil</div><div id='news_entry'>Annonces</div><div id='billboard_entry'>Affichages</div><div id='consult_entry'>Consultations</div><div id='users_entry'>Utilisateurs</div><div id='messenger_entry'>Messenger</div>
+                        <div id='home_entry'>Acceuil</div><div id='news_entry'>Annonces</div><div id='billboard_entry'>Affichages</div><div id='consult_entry'>Consultations</div><div id='users_entry'>Personnels</div><div id='messenger_entry'>Messenger</div>
                     {% endif %}
                 </div>
                 <div id="search_area" class='hide'>
@@ -76,6 +75,9 @@
             </div>
         </nav>
         <div id='search_overlay' class='fill_100 hide'>
+            <div class='loader_container'>
+                <div id='search_results_loader' class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
             <div id="search_result">
                 <div id="search_result_head">
                     <div id="search_result_title">Resultat</div>
@@ -91,6 +93,5 @@
     </div>
     <!-- Scripts -->
     <script src="{% static 'js/topbar_behaviour.js' %}" type="text/javascript"></script>
-    <script src="{% static 'js/datalist.js' %}" type="text/javascript"></script>
 </body>
 </html>

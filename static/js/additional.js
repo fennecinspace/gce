@@ -15,7 +15,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-csrftoken = getCookie('csrftoken')
+csrftoken = getCookie('csrftoken');
 
 $.ajaxSetup({
     beforeSend: function(xhr, settings) {
@@ -38,13 +38,13 @@ function avatar_uploader(e) {
             data: formData,
             async: false,
             success: function (response) {
-                data = JSON.parse(response)
-                if (data['success']){
-                    document.querySelector('#profile_pic').src = data['new_avatar'];
-                    document.querySelector('.change_avatar').src = data['new_avatar'];
+                data = JSON.parse(response);
+                if (data.success){
+                    document.querySelector('#profile_pic').src = data.new_avatar;
+                    document.querySelector('.change_avatar').src = data.new_avatar;
                 }
                 else
-                    alert('Erreur !')
+                    alert('Erreur !');
             },
             complete: function (){
             },
@@ -52,7 +52,7 @@ function avatar_uploader(e) {
             },
             cache: false,
             contentType: false,
-            processData: false
+            processData: false,
         });
     }
 }

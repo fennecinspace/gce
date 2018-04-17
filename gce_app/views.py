@@ -42,7 +42,7 @@ def get_user_data(u_obj):
 ## returns the user's querylist of notifications in a dictionary
 def get_user_notifications(u_obj):
     notifications = []
-    allNotifications = Notification.objects.filter(id_utilisateur__in = [u_obj])
+    allNotifications = Notification.objects.filter(Q(id_utilisateur__in = [u_obj]) & Q(vue_notification = False))
     for notification in allNotifications:
         if notification.vue_notification == False:
             notifications += [notification]
@@ -85,21 +85,18 @@ def get_permitted_search_group(req, user_type):
     search_group = []
     if user_type == 'etud': # students of same parcours
         parcours_etud = Groupe.objects.filter(id_groupe = Etudiant.objects.filter (id_etudiant__in = Utilisateur.objects.filter(info_utilisateur = req.user))[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours
-        all_Students = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_parcours = parcours_etud.id_parcours)))))
+        all_Students = Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_parcours = parcours_etud.id_parcours))))))
     elif user_type == 'ensg':
         specialite_ensg = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].modules.values_list('id_specialite',flat = True)
-        all_Students = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_specialite__in = specialite_ensg))))
+        all_Students = Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_specialite__in = specialite_ensg)))))
     elif user_type == 'chef':
         filiere_chef = Filiere.objects.filter(id_chef_departement = ChefDepartement(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0]))[0]
-        all_Students = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = filiere_chef)))))
+        all_Students = Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = filiere_chef))))))
     elif user_type == 'tech':
         faculte_tech = Technicien.objects.filter(id_technicien = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_faculte
-        all_Students = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = faculte_tech)))))))
+        all_Students = Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = faculte_tech))))))))
 
-    ## converting Etudiant to Utilisateur
-    for student in all_Students:
-        search_group += [student.id_etudiant]
-    return search_group
+    return all_Students
 
 
 ## returns data for suggested users if exist
@@ -128,30 +125,26 @@ def get_search_data(search_entry, req, req_type):
         user_full_name = user.info_utilisateur.first_name + ' ' + user.info_utilisateur.last_name
         if SequenceMatcher(None, user_full_name, search_entry).ratio() > 0.9:
             search_data += [user]
-    if (req_type == 'suggestions' and len(search_data) >= 5):
-        return search_data[:5]
-    
+        if (req_type == 'suggestions' and len(search_data) >= 5):
+            return search_data[:5]
+        if len(search_data) > 50:
+            return search_data
+
     # second try : trying to match character by character with the first and last names
     split_search_entry = search_entry.split()
-    student_data = []
     for search_word in split_search_entry:
         if user_type == 'etud':
             parcours_etud = Groupe.objects.filter(id_groupe = Etudiant.objects.filter (id_etudiant__in = Utilisateur.objects.filter(info_utilisateur = req.user))[0].id_groupe.id_groupe)[0].id_section.id_specialite.id_parcours
-            student_data += list(Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_parcours = parcours_etud.id_parcours))))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) ))
+            search_data += list(Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_parcours = parcours_etud.id_parcours))))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) ) ) )
         elif user_type == 'ensg':
             specialite_ensg = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].modules.values_list('id_specialite',flat = True)
-            student_data += list(Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_specialite__in = specialite_ensg)))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) ))
+            search_data += list(Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_specialite__in = specialite_ensg)))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) )))
         elif user_type == 'chef':
             filiere_chef = Filiere.objects.filter(id_chef_departement = ChefDepartement(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0]))[0]
-            student_data += list(Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = filiere_chef))))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) ))
+            search_data += list(Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = filiere_chef))))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) )))
         elif user_type == 'tech':
             faculte_tech = Technicien.objects.filter(id_technicien = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_faculte
-            student_data += list(Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = faculte_tech))))))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) ))
-    
-    for student in student_data:
-        search_data += [student.id_etudiant]
-        if (req_type == 'suggestions' and len(search_data) >= 5):
-            return search_data[:5]
+            search_data += list(Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter( Q(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = faculte_tech))))))) & Q(id_etudiant__in = Utilisateur.objects.filter(Q(info_utilisateur__in = User.objects.filter(Q(first_name__regex = search_word) | Q(last_name__regex = search_word))))) )))
     return search_data 
 
 
@@ -175,7 +168,9 @@ def notification_state_changer(req):
     if req.method == 'POST':
         if req.is_ajax():
             notification_id = req.POST.get('notif_id')
-            Notification.objects.filter(id_notification = notification_id).delete()
+            notification_obj = Notification.objects.filter(id_notification = notification_id)[0]
+            notification_obj.vue_notification = True
+            notification_obj.save()
 
     return HttpResponse(req)
 

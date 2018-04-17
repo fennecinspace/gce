@@ -942,8 +942,23 @@
     #profile_name {
         text-align: center;
     }
-
 }
+
+
+/* #region loaders */
+.loader_container {
+    position: absolute;
+    top: 45%;
+    width: 100%;
+}
+#search_results_loader {
+    display: none;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+}
+/* #endregion TABLET & PHONE */
+
 
 @media only screen and (max-width: 499px) { 
     .home_item {
@@ -952,6 +967,7 @@
     }
 }
 /* #endregion TABLET & PHONE */
+
 
 /* #region keyframes */
 @keyframes top_bar_animation {
