@@ -119,9 +119,14 @@ var search_animation_duration = 300;
 var show_leave_duration = 200;
 var search_input_timeout = 500;
 var search_ajax_request;
+var search_in_progress = false;
 
 function hideSearch(){
-    search_ajax_request.abort();    // aborting ajax request in case leaving before it's done
+    if (search_in_progress){
+        search_ajax_request.abort();    // aborting ajax request in case leaving before it's done
+        search_in_progress = false;
+    }
+        
     search_is_toggled = false;
     $('#search_input')[0].value = ''; // emptying the search bar
     if (suggestions_is_toggled){
@@ -184,17 +189,17 @@ function search_result_filler(returned_data){
                 </div>`;
         }
         $('#search_result_list').html(html_to_inject);
-        console.log('Hello')
         search_result_click_handler();
-        $('#search_results_loader').fadeOut(show_leave_duration);
-        $('#search_result').fadeIn(show_leave_duration);
-        search_result_is_toggled = true; // toggle search results
-        suggestions_is_allowed = true;
     }
     else {
         html_to_inject = "<span>Pas de Resultats</span>";
         $('#search_result_list').html(html_to_inject);
     }
+    $('#search_results_loader').fadeOut(show_leave_duration);
+    $('#search_result').fadeIn(show_leave_duration);
+    search_result_is_toggled = true; // toggle search results
+    suggestions_is_allowed = true;
+    search_in_progress = false;
 }
 
 function search_query(search_entry){
@@ -216,21 +221,24 @@ function search_query(search_entry){
 function start_search(e) {
     e.stopPropagation();
     if (search_is_toggled) { // get search result
-        suggestions_is_allowed = false;
-        setTimeout(function () {
-            if (search_result_is_toggled) { // in case new search started
-                search_result_is_toggled = false;
-                $('#search_result').fadeOut(show_leave_duration);
-                $('#search_result_list').html('');
-            } 
-            if (suggestions_is_toggled) {
-                suggestions_is_toggled = false;
-                $('#search_suggestions').html('');
-                $("#search_suggestions").slideUp(slide_animation_duration);
-            }
-            $('#search_results_loader').fadeIn(show_leave_duration); // show loading
-            search_query(document.getElementById('search_input').value);
-        },search_input_timeout + 100);
+        if (!search_in_progress) {
+            suggestions_is_allowed = false;
+            search_in_progress = true;
+            setTimeout(function () {
+                if (search_result_is_toggled) { // in case new search started
+                    search_result_is_toggled = false;
+                    $('#search_result').fadeOut(show_leave_duration);
+                    $('#search_result_list').html('');
+                } 
+                if (suggestions_is_toggled) {
+                    suggestions_is_toggled = false;
+                    $('#search_suggestions').html('');
+                    $("#search_suggestions").slideUp(slide_animation_duration);
+                }
+                $('#search_results_loader').fadeIn(show_leave_duration); // show loading
+                search_query(document.getElementById('search_input').value);
+            },search_input_timeout + 100);
+        }
     }
     else {
         showSearch();
@@ -246,7 +254,7 @@ function search_bar_manager() {
         start_search(e);
     }); // search when clicking in search button
     document.getElementById('search_input').addEventListener('keyup', function(e) { // search when pressing enter
-        if (e.which == 13)
+        if (e.which == 13 && !search_in_progress)
             start_search(e);
     });
     
@@ -404,13 +412,13 @@ function pages_handler() {
         });
 
         document.getElementById("marks_entry").addEventListener('click', function () {
-            alert('marks');
+            $('#content_container').load(`${location.origin}/saisir #content_container > *`);
             responsive_menu_hider();
         });
     }
     else {
         document.getElementById("news_entry").addEventListener('click', function () {
-            alert('news');
+            $('#content_container').load(`${location.origin}/annonces #content_container > *`);
             responsive_menu_hider();
         });
 

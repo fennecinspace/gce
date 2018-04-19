@@ -3,7 +3,7 @@
 {% load staticfiles %}
 {% block base_extender %}
     <div id="profile_container">
-        <div id='left_profile_section'>
+        <div id='left_profile_section' class='left_item'>
             <div id='profile_avatar'>
                 {% if user == student.id_etudiant.info_utilisateur %}
                 <form id ='avatar_form' method="POST" enctype="multipart/form-data">
@@ -29,7 +29,7 @@
                 </div>
             </span>
         </div>
-        <div id='right_profile_section'>
+        <div id='right_profile_section' class='right_item'>
             {% if modules %}
                 <div class="profile_area">
                     <div id='profile_modules' class="profile_area_title">Modules</div>

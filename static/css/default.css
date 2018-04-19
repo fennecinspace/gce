@@ -25,7 +25,11 @@
     -moz-user-select: none;    
     -ms-user-select: none;      
     user-select: none;
-  }
+}
+
+textarea {
+    resize: none;
+}
 
 :focus {
     outline: none;
@@ -41,6 +45,16 @@
 
 .no_horizontal_scrolling {
     overflow-x: hidden;
+}
+
+.left_item {
+    animation-name: slide_animation_RtoL;
+    animation-duration: 1.5s;
+}
+
+.right_item {
+    animation-name: slide_animation_LtoR;
+    animation-duration: 1.5s;
 }
 
 /* Custom general Scroll Bar*/
@@ -66,8 +80,6 @@
     background-color: rgba(0, 0, 0, 0.397); 
     border-radius: 5px;
 }
-
-
 
 /** LOADER **/
 .lds-spinner {
@@ -143,4 +155,9 @@
     100% {
         opacity: 0;
     }
+}
+
+.wobble_animation {
+    animation-name: wobble-horizontal;
+    animation-duration: 1.5s;
 }

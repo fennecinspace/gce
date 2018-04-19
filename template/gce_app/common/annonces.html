@@ -1,0 +1,46 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% block base_extender %}
+    <div id="annonce_container">
+        {% if user_type == 'chef' and modules %}
+            <div id='annonce_create'>
+                <label class="annonce_create_label" for="annonce_module">Module :</label>
+                <select name='annonce_module' id='annonce_create_module'>
+                    {% for module in modules%}
+                        <option value="{{ module.titre_module}}">{{ module.titre_module}}</option>
+                    {% endfor %}
+                </select>
+                <label class="annonce_create_label" for="annonce_title">Sujet :</label>
+                <input type="text" name="annonce_title" id="annonce_create_title" maxlength="500">
+                <label class="annonce_create_label" for="annonce_content">Contenu :</label>
+                <textarea name="annonce_content" id="annonce_create_content" maxlength="10000" rows="4"></textarea>
+                <div id="annonce_create_exit" onclick="leaveCreateAnnonce(event)"><div></div><div></div></div>
+                <div id='annonce_create_item_show' onclick="createAnnonceShow(this,event);"><div></div></div>
+                <div id='annonce_create_item_save' onclick="createAnnonce(event);"><div></div><div></div></div>
+            </div>
+            <div id='annonce_add_button' class='wobble_animation'>
+                <div onclick="toggleCreateAnnonce(event);">Créer Une Annonce</div>
+            </div>
+        {% endif %}
+        <div id='annonce_items_container'>
+            {% if annonces %}
+                {% for annonce in annonces %}
+                    <div class='annonce_item {% if forloop.counter0|divisibleby:2 %}left_item{% else%}right_item{% endif %}' {% if forloop.counter0 == 0%} id ='first_annonce_item' {% endif %}>
+                        <div class='annonce_item_info'>
+                            <div class='annonce_item_id'>{{ annonce.id }}</div>
+                            <div class='annonce_item_subject'>{{ annonce.sujet_annonce }}</div>
+                            <div class='annonce_item_datetime'>{{ annonce.date_annonce }} {{ annonce.heure_annonce }}</div>
+                            <div class='annonce_item_content'>{{ annonce.description_annonce }}</div>
+                            <div class='annonce_item_module'>{{ annonce.id_module.titre_module }}</div>
+                        </div>
+                        {% if user_type == 'chef' %}
+                            <div class='annonce_item_show' onclick="annonceVisibility(this,event);"><div class='{% if annonce.afficher_annonce == True %}hide{% endif %}'></div></div>
+                            <div class='annonce_item_delete' onclick="deleteAnnonce(this,event);"><div></div><div></div></div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <span id='no_annonce'>Pas de nouvelles annonces </span>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

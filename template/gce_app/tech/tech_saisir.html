@@ -1,0 +1,28 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% block base_extender %}
+    <div id="saisir_container">
+        {% if modules %}
+            <div id='copies_notes_area' class="hide">
+                <div id="retour" class="saisir_item_small" onclick="leave_upload_area(event);"><div><div></div><div></div></div></div>
+                <div id="upload_area" onclick="trigger_upload(event);">
+                    <div>Glisser-Déposer ou Sélectionner un Fichier</div>
+                </div>
+                <input id="upload_copies_input" class="hide" type="file" name="upload_copies" onchange="upload_copies(this,event);">
+                <div id="saisir_area"></div>
+            </div>
+            <div id="saisir_chose_module">
+                <div class="saisir_item_small" id="saisir_search_module">
+                    <input type="text" name="search_module" placeholder="Trouver un module" oninput="filter_modules(event);" autocomplete="off" >
+                </div>
+                {% for module in modules %}
+                    <div class="saisir_item_small saisir_module_item" onclick="choose_module(this,event);">
+                        <span class="saisir_module_level">{{ module.id_specialite.id_parcours.nom }} : </span>
+                        <span class="saisir_module_title">{{ module.titre_module }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h1>Fin de Saisie</h1>
+        {% endif %}
+    </div>
+{% endblock %}

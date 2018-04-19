@@ -177,7 +177,7 @@ class Etudiant(models.Model):
 
 class Module(models.Model):
     # id_module = models.CharField(db_column='id_Module', primary_key=True, max_length=100)
-    titre_module = models.CharField(db_column='titre_Module', max_length=1000, blank=True, null=True)
+    titre_module = models.CharField(db_column='titre_Module', max_length=1000, blank=True, null=True, unique=True)
     finsaisie_module = models.BooleanField(db_column='FinSaisie_Module', blank=True, default=False)
     id_specialite = models.ForeignKey('Specialite', models.CASCADE , blank = True, null = True, unique = False)
 
@@ -201,7 +201,8 @@ class Annonce(models.Model):
 class Copie(models.Model):
     # id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)
     annee_copie = models.CharField(db_column='annee_Copie', max_length=500, null=True)
-    # afficher_copie = models.BooleanField(db_column='afficher_Copie', default=False)
+    afficher_copie = models.BooleanField(db_column='afficher_Copie', default=False)
+    modifiable = models.BooleanField(db_column='Modifiable', default=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
 
