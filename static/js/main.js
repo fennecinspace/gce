@@ -217,7 +217,12 @@ function createAnnonce(e) {
 
 
 /////////////////// SAISIR PAGE /////////////////////
+var upload_in_progress = false;
 var module_to_upload_to = null;
+var droppedFiles = null;
+var upload_file_req = null;
+var mouse_is_down = false;
+var offset = [0,0];
 
 function filter_modules(e) {
     e.stopPropagation();
@@ -238,60 +243,187 @@ function filter_modules(e) {
 function choose_module(element,e) {
     e.stopPropagation();
     module_to_upload_to = element.querySelector('.saisir_module_title').innerHTML;
-    $(element.parentElement).slideUp();
-    $('#copies_notes_area').slideDown();
+    $(element.parentElement).slideUp(500);
+    $('#copies_notes_area').slideDown(500);
 
     $.ajax({
-        url: `${location.origin}/get_unsaved_entries/`,
+        url: `${location.origin}/saisir/`,
         type: 'POST',
         data: {
             'module_name' : module_to_upload_to,
         },
         async: false,
         success: function (response) {
-            $('#saisir_area').html(response);
+            data = JSON.parse(response);
+            if (data.success)
+                $('#saisir_area').html(data.html);
+            else
+                alert('Echec !')
         },
         complete: function (){},
         error: function (xhr, textStatus, thrownError){},
-    });    
+    });  
+
+    document.querySelector('#retour > div:last-child').innerHTML = module_to_upload_to;
+   
+    /// used for file dragging upload
+    $('#upload_area').on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    $('#upload_area').on('dragover dragenter', function(e) {
+        if(!upload_in_progress)
+            $('#upload_area').addClass('upload_active_drag');
+    });
+    $('#upload_area').on('dragleave dragend drop', function(e) {
+        if(!upload_in_progress)
+            $('#upload_area').removeClass('upload_active_drag');
+    });
+
+    $('#upload_area').on('drop', function(e) {
+        if(!upload_in_progress) {
+            droppedFiles = e.originalEvent.dataTransfer.files;
+            start_copies_upload()
+        }
+    });
 }
 
 function leave_upload_area(e) {
     e.stopPropagation();
     module_to_upload_to = null;
-    $('#copies_notes_area').slideUp();
-    $('#saisir_chose_module').slideDown();
+    $('#copies_notes_area').slideUp(500);
+    $('#saisir_chose_module').slideDown(500);
+    if (upload_file_req) {
+        upload_file_req.abort();
+        upload_file_req = null;
+    }
 }
 
 function trigger_upload(e){
-    e.stopPropagation();
-    $('#upload_copies_input').trigger('click');
+    if(!upload_in_progress)
+        $('#upload_copies_input').trigger('click');
 }
 
 function upload_copies(element,e){
-    e.stopPropagation();
+    if (document.getElementById('upload_copies_input').value != '')
+        start_copies_upload();
 }
 
-// function drag_n_drop(e) {
-//     e.stopPropagation();
-//     e.preventDefault();
-//     var files = e.dataTransfer.files; // Array of all files
+function start_copies_upload(){
+    if (!upload_file_req) {
+        ajax_data = new FormData(document.getElementById('upload_form'));
+        ajax_data.append("type",'upload');
+        ajax_data.append("module_name",module_to_upload_to);
+        if (droppedFiles)
+            for (var i = 0; i < droppedFiles.length; i++)
+                ajax_data.append( 'emplacement_fichier', droppedFiles[i] );
+    
+        upload_file_req = $.ajax({
+            url: `${location.origin}/saisir/`,
+            type: 'POST',
+            data: ajax_data,
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                data = JSON.parse(response);
+                if (data.success){
+                    console.log(data.html);
+                    $('#saisir_area').html(data.html);
+                }
+                else
+                    alert('Echec !');
+                droppedFiles = null;
+                upload_file_req = null;
+            },
+            complete: function (){
+                document.getElementById('progress_percent').className = "hide";
+                document.getElementById('progress_bar').className = "hide";
+                document.getElementById('glisser-fichier').className = "";
+                document.getElementById('selectioner-fichier').className = "";
+                document.getElementById('upload_area').className = "upload_unactive_drag upload_is_allowed";
+                document.getElementById('progress_percent').innerHTML = "0%";
+                document.getElementById('progress_bar_status').style.width = '0%';
+                upload_in_progress = false;
+            },
+            error: function (xhr, textStatus, thrownError){},
+            xhr: function () {
+                var jqXHR = new window.XMLHttpRequest();
+                jqXHR.upload.addEventListener( "progress", function ( e ) {
+                    if (e.lengthComputable) {
+                        var percentComplete = Math.round( (e.loaded * 100) / e.total );
+                        document.getElementById('progress_percent').innerHTML = percentComplete + "%";
+                        document.getElementById('progress_bar_status').style.width = percentComplete + '%';
+                    }
+                });
+                return jqXHR;
+            },
+            beforeSend: function() {
+                document.getElementById('progress_percent').className = "";
+                document.getElementById('progress_bar').className = "";
+                document.getElementById('glisser-fichier').className = "hide";
+                document.getElementById('selectioner-fichier').className = "hide";
+                document.getElementById('upload_area').className = "upload_unactive_drag";
+                upload_in_progress = true;
+            }
+        });
+    }
+    else {
+        alert('un autre upload est en cours');
+    }
+}
 
-//     for (var i=0, file; file=files[i]; i++) {
-//         if (file.type.match(/image.*/)) {
-//             var reader = new FileReader();
+function copie_click(elem, e) {
+    mouse_is_down = true;
+    offset = [elem.offsetLeft - e.clientX, elem.offsetTop - e.clientY];
+}
 
-//             reader.onload = function(e2) {
-//                 // finished reading file data.
-//                 var img = document.createElement('img');
-//                 img.src= e2.target.result;
-//                 document.body.appendChild(img);
-//             }
+function copie_unclick(elem, e) {
+    mouse_is_down = false;
+}
 
-//             reader.readAsDataURL(file); // start reading the file data.
-//         }
-//     }
-// }
+function copie_move(elem, e) {
+    e.preventDefault(); // if this is removed mouse will unclick on move
+    if (mouse_is_down) {
+        elem.style.left = (e.clientX + offset[0]) + 'px';
+        elem.style.top  = (e.clientY + offset[1]) + 'px';
+    }
+}
+
+function get_current_image(elem) {
+    var all_images = elem.parentElement.querySelectorAll('img');
+    for (var i = 0; i < all_images.length; i++)
+        if (all_images[i].className == "")
+            current_img = all_images[i];
+    return current_img;
+}
+
+function next_image(elem, e){
+    e.stopPropagation();
+    var current_img = get_current_image(elem);
+    var list_length = elem.parentElement.dataset.listLength;
+    var current_index = current_img.dataset.indexNumber;
+
+    if (current_index == list_length-1)
+        elem.parentElement.querySelector('[data-index-number="0"]').className = "";
+    else 
+        elem.parentElement.querySelector(`[data-index-number="${ parseInt(current_index)+1 }"]`).className = "";
+    current_img.className = "hide";
+}
+
+function previous_image(elem, e){
+    e.stopPropagation();
+    var current_img = get_current_image(elem);
+    var list_length = elem.parentElement.dataset.listLength;
+    var current_index = current_img.dataset.indexNumber;
+
+    if (current_index == 0)
+        elem.parentElement.querySelector(`[data-index-number="${ list_length-1 }"]`).className = "";
+    else 
+        elem.parentElement.querySelector(`[data-index-number="${ parseInt(current_index)-1 }"]`).className = "";
+    current_img.className = "hide";
+}
 
 /////////////////// SHAKE EFFECT /////////////////////
 function shake(obj_to_shake) {

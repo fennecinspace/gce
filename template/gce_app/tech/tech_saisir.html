@@ -3,11 +3,17 @@
     <div id="saisir_container">
         {% if modules %}
             <div id='copies_notes_area' class="hide">
-                <div id="retour" class="saisir_item_small" onclick="leave_upload_area(event);"><div><div></div><div></div></div></div>
-                <div id="upload_area" onclick="trigger_upload(event);">
-                    <div>Glisser-Déposer ou Sélectionner un Fichier</div>
+                <div id="retour" class="saisir_item_small" onclick="leave_upload_area(event);"><div><div></div><div></div></div><div></div></div>
+                <div id="upload_area" onclick="trigger_upload(event);" class="upload_unactive_drag upload_is_allowed">
+                    <div id='glisser-fichier'>Glisser-Déposer</div>
+                    <div id="progress_percent" class="hide">0%</div>
+                    <div id="progress_bar" class="hide"><div id="progress_bar_status"></div></div>
+                    <div id='selectioner-fichier'>Clicker pour Sélectionner un Fichier</div>
                 </div>
-                <input id="upload_copies_input" class="hide" type="file" name="upload_copies" onchange="upload_copies(this,event);">
+                <form id='upload_form' class='hide' enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ upload_form }}
+                </form>
                 <div id="saisir_area"></div>
             </div>
             <div id="saisir_chose_module">

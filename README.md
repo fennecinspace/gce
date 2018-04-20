@@ -4,10 +4,10 @@ peupler la base :
     python populator.py
 
 identifier a l'aide du mot de pass `password10` des comptes suivants:
-- username120 pour etudiant
-- username200 pour enseignant
-- username210 pour technicien
-- username216 pour chef departement
+- etudiant1 pour etudiant
+- enseignant1 pour enseignant
+- technicien1 pour technicien
+- chef_departement1 pour chef departement
 
 
 # Pour utiliser livereload (browser-sync alternative)

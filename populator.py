@@ -461,7 +461,7 @@ def PopulateFichierCopie():
             gen_id_fichier = IDS[24] + str(nbOfEntries)
             gen_emplacement_fichier = os.path.join(media_directory,'00' + str(i)) + ".jpg"
             # obj = FichierCopie(id_fichier = gen_id_fichier, emplacement_fichier = gen_emplacement_fichier, id_version = copyVersion)
-            obj = FichierCopie(emplacement_fichier = gen_emplacement_fichier, id_version = copyVersion)
+            obj = FichierCopie(emplacement_fichier = gen_emplacement_fichier, id_version = copyVersion, id_module = copyVersion.id_copie.id_module)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[21/{}]FichierCopie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))

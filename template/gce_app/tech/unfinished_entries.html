@@ -1,5 +1,21 @@
-{% if entries %}
-    {% for entry in entries %}
-        <div>{{ entry.2 }} {{ entry.3 }}</div>
-    {% endfor %}
-{% endif %}
+{% load staticfiles %}
+<div id="uncompleted_entries">
+</div>
+<div id="completed_entries">
+    {% if entries %}
+        {% for entry in entries %}
+            <div class="mark_item_large">
+                <div class="mark_version_id">{{ entry.0.id_version.id }}</div>
+                <div class = "mark_item_image" data-list-length="{{ entry|length }}">
+                    {% for elem in entry %}
+                        <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onmousedown="copie_click(this, event)" onmouseup="copie_unclick(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
+                    {% endfor %}  
+                    {% if entry|length > 1 %}
+                        <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
+                        <div class="previous_image" onclick="previous_image(this, event);"><div></div><div></div></div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>

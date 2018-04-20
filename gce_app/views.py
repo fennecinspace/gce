@@ -17,7 +17,7 @@ import re # to use regex
 ## models
 from gce_app.models import *
 ## forms
-from gce_app.forms import avatar_upload_form
+from gce_app.forms import avatar_upload_form, copies_file_upload_form
 ## extra 
 from django.conf import settings
 from datetime import datetime
@@ -193,9 +193,19 @@ def get_saisir_entries(module_title):
     final_versions = get_final_versions(all_copies)
     entries = []
     for version in final_versions:
-        entries += [FichierCopie.objects.filter(id_version = version)]
+        entries = [list(FichierCopie.objects.filter(id_version = version).order_by('id'))] + entries 
     return {'entries': entries}
     
+## creating copie entries
+def create_new_copie_files(req): ## gets all uploaded files and saves them one by
+    files = req.FILES.getlist('emplacement_fichier')
+    for file_to_save in files:
+        req.FILES['emplacement_fichier'] = file_to_save
+        form = copies_file_upload_form(req.POST, req.FILES)
+        if form.is_valid():
+            obj = form.save()
+        
+
 
 #######################################################
 ###################### VIEWS ##########################
@@ -423,6 +433,7 @@ class saisirView(TemplateView):
         context.update(get_user_data(logged_in_user))
         context.update(get_user_notifications(logged_in_user))
         context['modules'] = Module.objects.filter(Q(id_specialite__in = Specialite.objects.filter(id__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = Technicien.objects.filter(Q(id_technicien = logged_in_user))[0].id_faculte)))))) & Q(finsaisie_module = False))
+        context['upload_form'] = copies_file_upload_form
         return context
 
     def post(self, req, *args, **kwargs):
@@ -430,7 +441,18 @@ class saisirView(TemplateView):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
         if req.is_ajax():
-            pass; 
+            try :
+                module_name = req.POST.get('module_name')
+                context = get_saisir_entries(module_name)
+                html = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
+                if req.POST.get('type') == 'upload':
+                    create_new_copie_files(req)
+                data = {'success': True, 'html': html}
+            except:
+                data = {'success': False}
+            serialized_data = json.dumps(data)
+            return JsonResponse(serialized_data, safe = False)
+                    
         return HttpResponse(req)
 
     def get(self, req, *args, **kwargs):
@@ -440,12 +462,3 @@ class saisirView(TemplateView):
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")
-
-## ajax copies entries
-def get_unfinished_saisir_entries(req):
-    if req.method == 'POST':
-        if req.is_ajax():
-            module_name = req.POST.get('module_name')
-            context = get_saisir_entries(module_name)
-            data = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
-            return HttpResponse(data)
