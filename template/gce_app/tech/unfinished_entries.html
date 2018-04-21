@@ -1,21 +1,68 @@
 {% load staticfiles %}
 <div id="uncompleted_entries">
+    {% if new_files %}
+        <div id="uncompleted_entries_title">Nouveaux Fichiers</div>
+        {% for file in new_files %}
+            <div class="mark_item_large">
+                <div class="mark_version_id">{{ file.id }}</div>
+                <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_unclick(this, event);">
+                    <img src="{{ file.emplacement_fichier.url }}"  alt="file preview" onmousedown="copie_click(this, event)" onmouseup="copie_unclick(this, event);" onmouseout="copie_unclick(this, event);" onmousemove="copie_move(this, event);">
+                </div>
+                <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
+                <div class="student_infos" >
+                    <input list="unassigned_students_names" class="saisir_student_name" placeholder="Nom et Prenom">
+                </div>
+            </div>
+        {% endfor %}
+        <datalist id="unassigned_students_names">
+            {% for student in unassigned_students %}
+                <option value="{{ student.id_etudiant.info_utilisateur.last_name|lower|title }} {{ student.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ student.id_groupe.numero }} - {{ student.id_etudiant.id_utilisateur|title }}" data-user-id="{{ student.id_etudiant.id_utilisateur }}">
+            {% endfor %}
+        </datalist>
+    {% endif %}
 </div>
 <div id="completed_entries">
     {% if entries %}
+        <div id="completed_entries_title">Copies</div>
         {% for entry in entries %}
             <div class="mark_item_large">
                 <div class="mark_version_id">{{ entry.0.id_version.id }}</div>
-                <div class = "mark_item_image" data-list-length="{{ entry|length }}">
+                <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_unclick(this, event);">
                     {% for elem in entry %}
-                        <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onmousedown="copie_click(this, event)" onmouseup="copie_unclick(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
+                        <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onmousedown="copie_click(this, event)" onmouseup="copie_unclick(this, event);" onmouseout="copie_unclick(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
                     {% endfor %}  
                     {% if entry|length > 1 %}
                         <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
                         <div class="previous_image" onclick="previous_image(this, event);"><div></div><div></div></div>
                     {% endif %}
                 </div>
+                <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
+                <div class="student_infos" >
+                    <input list="students_names" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower }}">
+                    <input class="saisir_student_mark" placeholder="Note" value="{{  entry.0.id_version.note_version }}">
+                </div>
             </div>
         {% endfor %}
+        <datalist id="students_names">
+            {% for student in students %}
+                <option value="{{ student.id_etudiant.info_utilisateur.last_name|lower }} {{ student.id_etudiant.info_utilisateur.first_name|lower }} G{{ student.id_groupe.numero }}" data-user-id="{{ student.id_etudiant.id_utilisateur }}">
+            {% endfor %}
+        </datalist>
     {% endif %}
 </div>
+<div id="move_controls">
+    <div class="move_controls_item" id="go_to_top" onclick="go_to_top(event)"><div></div><div></div></div>
+    {% if new_files %}
+        <div class="move_controls_item" id="go_to_files" onclick="go_to_files(event)">F</div>
+    {% endif %}
+    {% if entries %}
+        <div class="move_controls_item" id="go_to_copies" onclick="go_to_copies(event)">C</div>
+    {% endif %}
+    <div class="move_controls_item" id="go_to_bottom" onclick="go_to_bottom(event)"><div></div><div></div></div>
+</div>
+{% if entries or new_files %}
+    <div id="save_and_submut" class="saisir_item_small">
+        <div class="default_button" id="data_save" onclick="send_copies_data(this, event, false);">Sauvgarder</div>
+        <div class="default_button" id="data_submit" onclick="send_copies_data(this, event, true);">Envoyer</div>
+    </div>
+{% endif %}

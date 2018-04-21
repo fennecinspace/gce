@@ -49,6 +49,7 @@ function avatar_uploader(e) {
             complete: function (){
             },
             error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
             },
             cache: false,
             contentType: false,
@@ -114,7 +115,9 @@ function annonceVisibility(element,e) {
             }
         },
         complete: function (){},
-        error: function (xhr, textStatus, thrownError){},
+        error: function (xhr, textStatus, thrownError){
+            alert('Echec !');
+        },
     });
 }
 
@@ -140,7 +143,9 @@ function deleteAnnonce(element,e) {
             }
         },
         complete: function (){},
-        error: function (xhr, textStatus, thrownError){},
+        error: function (xhr, textStatus, thrownError){
+            alert('Echec !');
+        },
     });
 }
 
@@ -205,7 +210,9 @@ function createAnnonce(e) {
                 }
             },
             complete: function (){},
-            error: function (xhr, textStatus, thrownError){},
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
         });
     }
     else {
@@ -242,27 +249,36 @@ function filter_modules(e) {
 
 function choose_module(element,e) {
     e.stopPropagation();
+    e.preventDefault();
     module_to_upload_to = element.querySelector('.saisir_module_title').innerHTML;
-    $(element.parentElement).slideUp(500);
-    $('#copies_notes_area').slideDown(500);
-
-    $.ajax({
-        url: `${location.origin}/saisir/`,
-        type: 'POST',
-        data: {
-            'module_name' : module_to_upload_to,
-        },
-        async: false,
-        success: function (response) {
-            data = JSON.parse(response);
-            if (data.success)
-                $('#saisir_area').html(data.html);
-            else
-                alert('Echec !')
-        },
-        complete: function (){},
-        error: function (xhr, textStatus, thrownError){},
-    });  
+    element.querySelector('.saisir_module_item_loader').style.display = "block";
+    setTimeout(function() {
+        $.ajax({
+            url: `${location.origin}/saisir/`,
+            type: 'POST',
+            data: {
+                'module_name' : module_to_upload_to,
+            },
+            async: false,
+            success: function (response) {
+                data = JSON.parse(response);
+                if (data.success){
+                    $('#saisir_area').html(data.html);
+                    $(element.parentElement).slideUp(500);
+                    $('#copies_notes_area').slideDown(500);
+                }
+                else
+                    alert('Echec !');
+            },
+            complete: function (){
+                element.querySelector('.saisir_module_item_loader').style.display = "none";
+            },
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
+        }); 
+    },100);
+ 
 
     document.querySelector('#retour > div:last-child').innerHTML = module_to_upload_to;
    
@@ -283,7 +299,7 @@ function choose_module(element,e) {
     $('#upload_area').on('drop', function(e) {
         if(!upload_in_progress) {
             droppedFiles = e.originalEvent.dataTransfer.files;
-            start_copies_upload()
+            start_copies_upload();
         }
     });
 }
@@ -329,7 +345,6 @@ function start_copies_upload(){
             success: function (response) {
                 data = JSON.parse(response);
                 if (data.success){
-                    console.log(data.html);
                     $('#saisir_area').html(data.html);
                 }
                 else
@@ -347,7 +362,9 @@ function start_copies_upload(){
                 document.getElementById('progress_bar_status').style.width = '0%';
                 upload_in_progress = false;
             },
-            error: function (xhr, textStatus, thrownError){},
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
             xhr: function () {
                 var jqXHR = new window.XMLHttpRequest();
                 jqXHR.upload.addEventListener( "progress", function ( e ) {
@@ -375,19 +392,23 @@ function start_copies_upload(){
 }
 
 function copie_click(elem, e) {
+    e.preventDefault();
     mouse_is_down = true;
     offset = [elem.offsetLeft - e.clientX, elem.offsetTop - e.clientY];
 }
 
 function copie_unclick(elem, e) {
+    e.preventDefault();
     mouse_is_down = false;
 }
 
 function copie_move(elem, e) {
     e.preventDefault(); // if this is removed mouse will unclick on move
     if (mouse_is_down) {
-        elem.style.left = (e.clientX + offset[0]) + 'px';
-        elem.style.top  = (e.clientY + offset[1]) + 'px';
+        if ((e.movementX > 0 && e.target.offsetLeft < 0 ) || (e.movementX < 0 && -e.target.offsetLeft < (e.target.offsetWidth - e.target.parentElement.offsetWidth)))
+            elem.style.left = (e.clientX + offset[0]) + 'px';
+        if ((e.movementY > 0 && e.target.offsetTop < 0 )|| (e.movementY < 0 && e.target.offsetTop > -(e.target.offsetHeight - e.target.parentElement.offsetHeight) ) )
+            elem.style.top  = (e.clientY + offset[1]) + 'px';
     }
 }
 
@@ -425,7 +446,154 @@ function previous_image(elem, e){
     current_img.className = "hide";
 }
 
-/////////////////// SHAKE EFFECT /////////////////////
+function change_zoom(elem, e) {
+    var current_img =  get_current_image(elem);
+    var zoom_level = elem.innerHTML;
+    switch (zoom_level) {
+        case 'x1':  elem.innerHTML = "x2";
+                    current_img.style.width = "200%";
+                    break;
+        case 'x2':  elem.innerHTML = "x3";
+                    current_img.style.width = "300%";
+                    break;
+        case 'x3':  elem.innerHTML = "x1";
+                    current_img.style.width = "100%";
+                    break;
+    }
+    current_img.style.top = "0";
+    current_img.style.left = current_img.parentElement.clientWidth - current_img.clientWidth + "px";
+}
+
+function go_to_top(e) {
+    $('#site_container').animate({ scrollTop: 0 }, 500);
+}
+
+function go_to_bottom(e) {
+    $('#site_container').animate({ scrollTop: $('#saisir_area').height() }, 500);
+}
+
+function go_to_copies(e) {
+    $('#site_container').animate({ scrollTop: document.getElementById('completed_entries_title').offsetTop - 50 }, 500);
+}
+
+function go_to_files(e) {
+    $('#site_container').animate({ scrollTop: document.getElementById('uncompleted_entries_title').offsetTop - 50 }, 500);
+}
+
+
+function get_all_entries(parentTag) {
+    var elements = document.getElementById(parentTag).querySelectorAll('.mark_item_large');
+    if (elements.length == 0)
+        return null;
+    return elements;
+}
+
+function check_valid_entries(elements, type){ //  returns only valid entries (no empty / no false info)
+    var allowed_options = document.getElementById(elements[0].querySelector('.saisir_student_name').getAttribute('list')).options;
+    var valid_elements = [];
+
+    for (var i = 0; i < elements.length; i++){
+        var std_name = ltrim(elements[i].querySelector(".saisir_student_name").value);
+        std_name = rtrim(std_name);
+        // if (std_name == ""){ // accept empty entries
+        //     valid_elements.push(elements[i]) ;
+        //     continue;
+        // }
+        for (var j = 0; j < allowed_options.length; j++)
+            if (std_name == allowed_options[j].value){
+                valid_elements.push(elements[i]) ;
+                break;
+            }
+    }
+    return valid_elements;
+}
+
+function getStudentId(elem) {
+    var allowed_options = document.getElementById(elem.querySelector('.saisir_student_name').getAttribute('list')).options;
+    var std_name = elem.querySelector('.saisir_student_name').value;
+    for (var j = 0; j < allowed_options.length; j++)
+        if (std_name == allowed_options[j].value){
+            return allowed_options[j].dataset.userId;
+        }
+    throw "Erreur: Entrée Invalid";
+}
+
+function format_data_to_send(data, type) {
+    var data_to_send = { 'type': type, 'module_name': module_to_upload_to };
+    var cmp = [];
+    var uncmp = [];
+
+    if (data.uncompleted) 
+        for(var i = 0; i < data.uncompleted.length; i++) {
+            uncmp = [
+                ...uncmp, 
+                {
+                    'file_id': data.uncompleted[i].querySelector('.mark_version_id').innerHTML,
+                    'student_id': getStudentId(data.uncompleted[i]),
+                }
+            ];
+        }
+
+    if (data.completed) 
+        for(var i = 0; i < data.completed.length; i++) {
+            cmp = [
+                ...cmp, 
+                {
+                    'file_id': data.completed[i].querySelector('.mark_version_id').innerHTML,
+                    'student_id': getStudentId(data.completed[i]),
+                }
+            ];
+        }
+    data_to_send.data = JSON.stringify({
+        'uncompleted': uncmp,
+        'completed': cmp,
+    });
+
+    return data_to_send;
+}
+
+
+function send_copies_data(elem, e, final) {
+    e.stopPropagation();
+    var cmp = get_all_entries('completed_entries');
+    var uncmp = get_all_entries('uncompleted_entries');
+    var data = {'completed':[], 'uncompleted':[]};
+
+    if (cmp) 
+        data.completed = [...check_valid_entries(cmp)];
+    if (uncmp) 
+        data.uncompleted = [...check_valid_entries(uncmp)];
+
+    if (final)
+        data = format_data_to_send(data, "submit");
+    else
+        data = format_data_to_send(data, "save");
+
+    console.log(data);
+    $.ajax({
+        url: `${location.origin}/saisir/`,
+        type: 'POST',
+        data: data,
+        async: false,
+        success: function (response) {
+            data = JSON.parse(response);
+            if (data.success){
+                $('#saisir_area').html(data.html);
+                console.log('Success');
+            }
+            else
+                alert('Echec !');
+        },
+        complete: function (){
+        },
+        error: function (xhr, textStatus, thrownError){
+            alert('Echec !');
+        },
+    });
+}
+
+
+/////////////////// OTHER /////////////////////
 function shake(obj_to_shake) {
     var interval = 100;
     var distance = 10;
@@ -440,3 +608,13 @@ function shake(obj_to_shake) {
     }                                                                                                          
     obj_to_shake.animate({ left: 0 }, interval);
 }
+
+function ltrim(str) {
+    if(str == null) return str;
+    return str.replace(/^\s+/g, '');
+}
+
+function rtrim(str) {
+    if(str == null) return str;
+    return str.replace(/\s+$/g, '');
+  }

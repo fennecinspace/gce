@@ -346,7 +346,8 @@ def PopulateModule(nbMod = 20):
             gen_id = IDS[12] + str(nbOfEntries)
             gen_titre = random.choice(['Math','Chemie','Physics','Algorithms','AI','Medecine']) + " " + random.choice(['initiation','advanced','amateur']) + " " + str(nbOfEntries)
             # obj = Module(id_module = gen_id, titre_module = gen_titre, finsaisie_module = False, id_specialite = speciality)
-            obj = Module(titre_module = gen_titre, finsaisie_module = False, id_specialite = speciality)
+            
+            obj = Module(titre_module = gen_titre, finsaisie_module = random.choice([True,False]), id_specialite = speciality)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[15/{}]Module : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate)) 
@@ -422,9 +423,14 @@ def PopulateCopie():
             gen_id = IDS[15] + str(nbOfEntries)
             gen_id_module = module
             gen_id_etudiant = student
-            gen_afficher_copie = random.choice([False,True])
+            if gen_id_module.finsaisie_module == False:
+                gen_modifiable = True
+                gen_afficher_copie = False
+            else:
+                gen_modifiable = False
+                gen_afficher_copie = random.choice([False,True])
             # obj = Copie(id_copie = gen_id, annee_copie = '2017-2018', id_module = gen_id_module, id_etudiant = gen_id_etudiant)
-            obj = Copie(annee_copie = '2017-2018', id_module = gen_id_module, id_etudiant = gen_id_etudiant, afficher_copie = gen_afficher_copie)
+            obj = Copie(annee_copie = '2017-2018', id_module = gen_id_module, id_etudiant = gen_id_etudiant, afficher_copie = gen_afficher_copie, modifiable = gen_modifiable)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[19/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))

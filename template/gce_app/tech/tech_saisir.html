@@ -21,9 +21,10 @@
                     <input type="text" name="search_module" placeholder="Trouver un module" oninput="filter_modules(event);" autocomplete="off" >
                 </div>
                 {% for module in modules %}
-                    <div class="saisir_item_small saisir_module_item" onclick="choose_module(this,event);">
+                    <div class="saisir_item_small saisir_module_item {% if forloop.counter0|divisibleby:2 %}left_item{% else%}right_item{% endif %}" onclick="choose_module(this,event);">
                         <span class="saisir_module_level">{{ module.id_specialite.id_parcours.nom }} : </span>
                         <span class="saisir_module_title">{{ module.titre_module }}</span>
+                        <div class="lds-spinner saisir_module_item_loader"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
                     </div>
                 {% endfor %}
             </div>

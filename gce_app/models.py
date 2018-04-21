@@ -214,7 +214,7 @@ class VersionCopie(models.Model):
     # id_version = models.CharField(db_column='id_Version', primary_key=True, max_length=100)
     numero_version = models.IntegerField(db_column='numero_Version', blank=True, null=True)
     note_version = models.FloatField(db_column='note_Version', blank=True, null=True)
-    id_copie = models.ForeignKey('Copie', models.CASCADE, db_column='id_Copie', blank=True, null=True)
+    id_copie = models.ForeignKey('Copie', models.CASCADE , db_column='id_Copie', blank=True, null=True)
 
     class Meta:
         db_table = 'VersionCopie'
@@ -223,7 +223,7 @@ class VersionCopie(models.Model):
 class FichierCopie(models.Model):
     # id_fichier = models.CharField(db_column='id_Fichier', primary_key=True, max_length=100)
     emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to = copies_file_path)
-    id_version = models.ForeignKey('VersionCopie', models.CASCADE, db_column='id_Version', blank=True, null=True)
+    id_version = models.ForeignKey('VersionCopie', models.SET_NULL, db_column='id_Version', blank=True, null=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
 
     class Meta:

@@ -14,7 +14,7 @@ class avatar_upload_form(forms.ModelForm):
 class copies_file_upload_form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['emplacement_fichier'].widget.attrs.update({'onchange': 'upload_copies(this,event);', 'id': 'upload_copies_input', 'multiple': 'true'})
+        self.fields['emplacement_fichier'].widget.attrs.update({'onchange': 'upload_copies(this,event);', 'id': 'upload_copies_input', 'multiple': 'true', 'directory': 'true'})
     
     class Meta():
         model = FichierCopie

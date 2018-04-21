@@ -212,7 +212,7 @@
     line-height: 2.3em;
 }
 
-.suggestion_item_info, .suggestion_item_name, .suggestion_item_filiere {
+.suggestion_item_info, .suggestion_item_name, .suggestion_item_filiere, #completed_entries_title, #uncompleted_entries_title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1013,6 +1013,7 @@
 
 /* #region SAISIR */
 .saisir_item_small {
+    position: relative;
     margin: 0 auto;
     width: 80%;
     padding: 1em;
@@ -1030,6 +1031,7 @@
 #saisir_search_module {
     background-color: rgba(0, 0, 0, .8);
     margin-bottom: 1.5em;
+    animation: go_down 1.5s;
 }
 
 #saisir_search_module > input {
@@ -1044,6 +1046,7 @@
 
 .saisir_module_title {
     overflow-wrap: break-word;
+    text-transform: capitalize;
 }
 
 #retour {
@@ -1165,7 +1168,21 @@
     transition: 0.5s;
 }
 
+#completed_entries_title, #uncompleted_entries_title {
+    position: relative;
+    width: 80%;
+    margin: 0 auto;
+    padding: 8px;
+    font-size: 1.5em;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    background-color: rgba(0, 0, 0, .8);
+    color: rgba(255, 255, 255, 1)
+}
+
 .mark_item_large {
+    position: relative;
     width: 80%;
     height: 20em;
     margin: 0 auto;
@@ -1179,8 +1196,9 @@
 .mark_item_image {
     width: 100%;
     position: relative;
-    height: 100%;
+    height: 98%;
     overflow: hidden;
+    border-radius: 5px;
 }
 
 .mark_item_image > img {
@@ -1189,6 +1207,7 @@
     top: 0;
     width: 200%;
     transition: width 1s height 1s;
+    border-radius: 5px;
 }
 
 .next_image, .previous_image {
@@ -1243,6 +1262,89 @@
 
 .mark_item_image:hover > .next_image, .mark_item_image:hover > .previous_image {
     display: block;
+}
+
+.zoomlevel {
+    background: rgb(0, 0, 0, 0.8);
+    color: rgba(255, 255, 255, 1);
+    display: inline-block;
+    position: absolute;
+    bottom: 0.3em;
+    right: 0.5em;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.zoomlevel:hover {
+    cursor: pointer;
+}
+
+.student_infos {
+    position: absolute;
+    left: 0.5em;
+    bottom: 0.3em;
+    width: calc(100% - 3.3em);
+}
+
+.saisir_student_name, .saisir_student_mark {
+    position: absolute;
+    bottom: 0;
+    border-radius: 5px;
+    padding: 5px;
+    border: transparent;
+    background: rgb(0, 0, 0, 0.8);
+    color: rgba(255, 255, 255, 1);
+}
+
+.saisir_student_name {
+    text-transform: capitalize;
+    left: 0;
+    width: 68%;
+}
+
+.saisir_student_mark {
+    right: 0;
+    width: 31%;
+}
+
+#students_names > option, #students_names {
+    text-transform: capitalize;
+}
+
+.saisir_student_name::-webkit-calendar-picker-indicator {
+    background-color: inherit;
+}
+
+#save_and_submut {
+    background: transparent;
+    padding: 0;
+    height: 4em;
+}
+
+.default_button {
+    position: absolute;
+    top: 0;
+    display: inline-block;
+    background-color: rgba(0, 0, 0, .8);
+    color: rgba(255, 255, 255, 1);
+    padding: 10px;
+    font-size: 22px;
+    border-radius: 10px; 
+    margin-bottom: 1em; 
+}
+
+.default_button:hover {
+    background-color: rgba(0, 0, 0, 1);
+    cursor: pointer;
+    animation: wobble-horizontal 1s;
+}
+
+#data_save{
+    right: 0;
+}
+#data_submir {
+    left: 0;
 }
 
 /* #endregion SAISIR */
@@ -1395,7 +1497,7 @@
         text-align: center;
     }
 
-    .annonce_item, #annonce_add_button, #no_annonce, #annonce_create {
+    .annonce_item, #annonce_add_button, #no_annonce, #annonce_create, .mark_item_large, #completed_entries_title, #uncompleted_entries_title {
         width: 100%;
     }
 
@@ -1421,8 +1523,23 @@
         margin-top: 2em;
     }
 
+    .saisir_student_name {
+        width: 58%;
+    }
+    
+    .saisir_student_mark {
+        width: 38%;
+    }
+
 }
 
+@media only screen and (max-width: 499px) { 
+    .home_item {
+        font-size: 6vw;
+        background-size: 15vw;
+    }
+}
+/* #endregion MEDIA QUERIES */
 
 /* #region loaders */
 .loader_container {
@@ -1436,16 +1553,89 @@
     height: 64px;
     margin: 0 auto;
 }
-/* #endregion TABLET & PHONE */
 
-
-@media only screen and (max-width: 499px) { 
-    .home_item {
-        font-size: 6vw;
-        background-size: 15vw;
-    }
+.saisir_module_item_loader {
+    display: none;
+    position: absolute;
+    top: -6px;
+    right: 3em;
+    width: 10px;
+    height: 10px;
 }
-/* #endregion TABLET & PHONE */
+
+.saisir_module_item_loader > div::after {
+    background: rgba(0, 0, 0, .8);
+    top: 18px;
+    left: 29px;
+    width: 4px;
+    height: 7px;
+}
+/* #endregion loaders */
+
+
+/* #region move_controls */
+#move_controls {
+    position: fixed;
+    bottom: 0.5em;
+    right: 1em;
+    display: flex;
+    flex-direction: column;
+}
+
+.move_controls_item {
+    width: 32px;
+    height: 32px;
+    background-color: rgba(0, 0, 0, .8);
+    color: rgba(255, 255, 255, 1);
+    margin-bottom: 0.3em;
+    border-radius: 5px; 
+    text-align: center;
+    line-height: 1.7em;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.move_controls_item:hover {
+    cursor: pointer;
+}
+
+#go_to_bottom {
+    padding-top: 8px;
+}
+
+#go_to_top {
+    padding-top: 7px;
+}
+
+#go_to_bottom > div:first-child, #go_to_bottom > div:last-child, #go_to_top > div:first-child, #go_to_top > div:last-child {
+    position: absolute;
+    background: rgb(255, 255, 255, 1);
+    width: 4px;
+    height: 15px;
+    border-radius: 5px;
+}
+
+#go_to_bottom > div:first-child {
+    transform: rotateZ(45deg);
+    right: 10px;
+}
+
+#go_to_bottom > div:last-child {
+    transform: rotateZ(-45deg);
+    left: 10px;
+}
+
+
+#go_to_top > div:first-child {
+    transform: rotateZ(-45deg);
+    right: 10px;
+}
+
+#go_to_top > div:last-child {
+    transform: rotateZ(45deg);
+    left: 10px;
+}
+/* #endregion move_controls */
 
 
 /* #region keyframes */

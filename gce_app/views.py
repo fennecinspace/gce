@@ -110,11 +110,18 @@ def get_search_data(search_entry, req, req_type):
     ### processing user search entry
     search_data = [] ## will store results
     search_entry = search_entry.lower()
-    search_entry = re.sub(r'[^a-zA-Z ]', '', search_entry) # stripping entry from non latin letters
+    search_entry = re.sub(r'[^a-zA-Z0-9 ]', '', search_entry) # stripping entry from non latin letters
     search_entry = re.sub(r' +', ' ', search_entry) # turning multiple whitespaces to one
     user_type = Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur
-    # first try : trying to march based similarity ratio between the first and last names and the search entry
     all_Students = get_permitted_search_group(req, user_type)
+
+    ## searching by id
+    if re.match('etud[0-9]+$',search_entry) is not None:
+        for user in all_Students:
+            if user.id_utilisateur == search_entry:
+                return [user]
+
+    # first try : trying to march based similarity ratio between the first and last names and the search entry
     for user in all_Students:
         # matching first name
         if SequenceMatcher(None, user.info_utilisateur.first_name, search_entry).ratio() > 0.9:
@@ -197,15 +204,29 @@ def get_saisir_entries(module_title):
     return {'entries': entries}
     
 ## creating copie entries
-def create_new_copie_files(req): ## gets all uploaded files and saves them one by
+def create_new_copie_files(req,module_name): ## gets all uploaded files and saves them one by
     files = req.FILES.getlist('emplacement_fichier')
     for file_to_save in files:
         req.FILES['emplacement_fichier'] = file_to_save
         form = copies_file_upload_form(req.POST, req.FILES)
         if form.is_valid():
-            obj = form.save()
+            obj = form.save(commit= False)
+            obj.id_module = Module.objects.filter(titre_module = module_name)[0]
+            obj.save()
         
+def get_saisir_students(module_name, have_copies = True):
+    all_students_assisting = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite = Module.objects.filter(titre_module = module_name)[0].id_specialite)))
+    if have_copies:
+        students = all_students_assisting
+        return {'students' : students}
+    else:
+        students_have_copies = Copie.objects.filter(id_module = Module.objects.filter(titre_module = module_name)[0]).values_list('id_etudiant',flat = True)
+        students = Etudiant.objects.filter(~Q(id_etudiant__in = Utilisateur.objects.filter(id_utilisateur__in = students_have_copies)) & Q(id_etudiant__in = all_students_assisting ) )
+        return {'unassigned_students' : students}
 
+def get_saisir_new_files(module_name):
+    new_files = FichierCopie.objects.filter(Q(id_version = None) & Q(id_module = Module.objects.filter(titre_module = module_name)[0]))
+    return {'new_files' : new_files}
 
 #######################################################
 ###################### VIEWS ##########################
@@ -423,7 +444,6 @@ class annonceView(TemplateView):
         else:
             return HttpResponse("<h2>404</h2>")        
 
-
 class saisirView(TemplateView):
     template_name = 'gce_app/tech/tech_saisir.html'
 
@@ -441,12 +461,19 @@ class saisirView(TemplateView):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
         if req.is_ajax():
-            try :
+            try:
                 module_name = req.POST.get('module_name')
-                context = get_saisir_entries(module_name)
-                html = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
+                if req.POST.get('type') == 'submit':
+                    pass
+                if req.POST.get('type') == 'save':
+                    save_saisir_data(req, module_name)
                 if req.POST.get('type') == 'upload':
-                    create_new_copie_files(req)
+                    create_new_copie_files(req, module_name)
+                context = get_saisir_entries(module_name)
+                context.update(get_saisir_students(module_name, True))
+                context.update(get_saisir_students(module_name, False))
+                context.update(get_saisir_new_files(module_name))
+                html = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
                 data = {'success': True, 'html': html}
             except:
                 data = {'success': False}
@@ -462,3 +489,43 @@ class saisirView(TemplateView):
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")
+
+
+def save_saisir_data(req, module_name):
+    data = json.loads(req.POST.get('data'))
+    completed = data['completed']
+    uncompleted = data['uncompleted']
+    if uncompleted:
+        ## ucompleted entries management
+        # grouping -> ex : {'etud43': ['23', '22'], 'etud45': ['21'], 'etud48': ['12']}
+        entries = {}
+        for entry in uncompleted:
+            if entry['student_id'] in entries:
+                entries[entry['student_id']] += [ entry['file_id']]
+            else:
+                entries.update({ entry['student_id'] : [entry['file_id']]})
+        if entries:
+            for student_id, files_ids in entries.items():
+                try:
+                    #create Copie
+                    if datetime.now().month > 3 and datetime.now().month < 8: ## previous year
+                        gen_annee = str(datetime.now().year - 1) + '-' + str(datetime.now().year)
+                    else:
+                        gen_annee = str(datetime.now().year) + '-' + str(datetime.now().year + 1)
+                    gen_module = Module.objects.filter(titre_module = module_name)[0]
+                    gen_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = student_id)[0])[0]
+                    copie = Copie(annee_copie = gen_annee, id_module = gen_module, id_etudiant = gen_etudiant)
+                    copie.save()
+
+                    #create first version     
+                    version = VersionCopie(numero_version = 1, note_version = 0 ,id_copie = copie)
+                    version.save()
+
+                    #asigning files
+                    for file_id in files_ids:
+                        file_to_asign = FichierCopie.objects.filter(id = file_id)[0]
+                        file_to_asign.id_version = version
+                        file_to_asign.save()
+                except:
+                    copie.delete()
+                
