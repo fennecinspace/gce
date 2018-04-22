@@ -1276,7 +1276,7 @@
     font-size: 16px;
 }
 
-.zoomlevel:hover {
+.zoomlevel:hover, .delete_entry:hover, .check_item_checkbox:hover, .select_all:hover  {
     cursor: pointer;
 }
 
@@ -1343,10 +1343,104 @@
 #data_save{
     right: 0;
 }
-#data_submir {
+
+#data_submit {
     left: 0;
 }
 
+.delete_entry {
+    display: none;
+    width: 1.1em;
+    height: 1.1em;
+    position: absolute;
+    right: 0.8em;
+    top:0.5em;
+    padding-left: 0.7em;
+}
+
+.mark_item_image:hover > .delete_entry {
+    display: block;
+}
+
+.delete_entry > div:first-child, .delete_entry >  div:last-child {
+    position: absolute;
+    background: rgb(0, 0, 0, 0.9);
+    width: 5px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.delete_entry  div:first-child {
+    transform: rotateZ(-45deg);
+    left: 5px;
+}
+
+.delete_entry> div:last-child {
+    transform: rotateZ(45deg);
+    left: 5px;
+}
+
+.delete_entry:hover > div:last-child, .delete_entry:hover > div:first-child, .check_item_checkbox:hover + .check_item_control  {
+    background: rgb(0, 0, 0, 1);
+}
+
+#delete_multiple_entries {
+    position: fixed;
+    bottom: 0.5em;
+    left: 0.5em;
+}
+
+
+.check_item_checkbox {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    top: 0.5em;
+    left: 0.55em;
+    width: 1.3em;
+    height: 1.3em;
+    z-index: 1;
+}
+
+.check_item_control {
+    display: none;
+    position: absolute;
+    top: 0.5em;
+    left: 0.5em;
+    width: 1.2em;
+    height: 1.2em;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 6px;
+    z-index: 0;
+    text-align: center;
+    line-height: 1.5em;
+}
+
+.mark_item_image:hover .check_item_control, .mark_item_image:hover .check_item_checkbox, .check_item_checkbox:checked + .check_item_control  {
+    display: block;
+}
+
+.check_item_checkbox:checked + .check_item_control:after {
+    content: "\2714";
+    color: rgb(255, 255, 255, 0.9);
+    font-size: 20px;
+    line-height: 0.95em; 
+}
+
+.select_all {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    height: 80%;
+    width: 35px;
+    border: 3px dashed rgba(0,0,0,.5);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 1);
+    font-size: 26px;
+    padding: 1px 3px;
+    /* line-height: 30px;
+    text-align: center; */
+}
 /* #endregion SAISIR */
 /* #endregion CONTENT */
 

@@ -203,6 +203,7 @@ def get_saisir_entries(module_title):
         entries = [list(FichierCopie.objects.filter(id_version = version).order_by('id'))] + entries 
     return {'entries': entries}
     
+
 ## creating copie entries
 def create_new_copie_files(req,module_name): ## gets all uploaded files and saves them one by
     files = req.FILES.getlist('emplacement_fichier')
@@ -213,20 +214,149 @@ def create_new_copie_files(req,module_name): ## gets all uploaded files and save
             obj = form.save(commit= False)
             obj.id_module = Module.objects.filter(titre_module = module_name)[0]
             obj.save()
-        
+
+## return students for saisir datalist
 def get_saisir_students(module_name, have_copies = True):
     all_students_assisting = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite = Module.objects.filter(titre_module = module_name)[0].id_specialite)))
-    if have_copies:
-        students = all_students_assisting
-        return {'students' : students}
-    else:
-        students_have_copies = Copie.objects.filter(id_module = Module.objects.filter(titre_module = module_name)[0]).values_list('id_etudiant',flat = True)
-        students = Etudiant.objects.filter(~Q(id_etudiant__in = Utilisateur.objects.filter(id_utilisateur__in = students_have_copies)) & Q(id_etudiant__in = all_students_assisting ) )
-        return {'unassigned_students' : students}
+    # if have_copies:
+    #     students = all_students_assisting
+    #     return {'students' : students}
+    # else:
+    #     # students_have_copies = Copie.objects.filter(id_module = Module.objects.filter(titre_module = module_name)[0]).values_list('id_etudiant',flat = True)
+    #     # students = Etudiant.objects.filter(~Q(id_etudiant__in = Utilisateur.objects.filter(id_utilisateur__in = students_have_copies)) & Q(id_etudiant__in = all_students_assisting ) )
+    #     students = all_students_assisting
+    #     return {'unassigned_students' : students}
+    return {'students' : all_students_assisting}
 
+
+## return uploaded but not yet assigned entries
 def get_saisir_new_files(module_name):
     new_files = FichierCopie.objects.filter(Q(id_version = None) & Q(id_module = Module.objects.filter(titre_module = module_name)[0]))
     return {'new_files' : new_files}
+
+## deletes entries
+def delete_saisir_entry(req):
+    data_to_delete = json.loads(req.POST.get('data_to_delete'))
+    if req.POST.get('delete_type') == 'copy':
+        for id_to_delete in data_to_delete:
+            VersionCopie.objects.filter(id = id_to_delete)[0].id_copie.delete()
+    if req.POST.get('delete_type') == 'file':
+        for id_to_delete in data_to_delete:
+            file_to_delete = FichierCopie.objects.filter(id = id_to_delete)[0]
+            file_to_delete.emplacement_fichier.delete()
+            file_to_delete.delete()
+    if req.POST.get('delete_type') == 'both':
+        data_to_delete = json.loads(data_to_delete)
+        if 'copies' in data_to_delete:
+            for id_to_delete in data_to_delete['copies']:
+                VersionCopie.objects.filter(id = id_to_delete)[0].id_copie.delete()
+        if 'files' in data_to_delete:
+            for id_to_delete in data_to_delete['files']:
+                file_to_delete = FichierCopie.objects.filter(id = id_to_delete)[0]
+                file_to_delete.emplacement_fichier.delete()
+                file_to_delete.delete()
+
+## create new copie entry
+def create_new_copie_entry(module_name, student_id, files_ids):
+    try:
+        #create Copie
+        if datetime.now().month > 3 and datetime.now().month < 8: ## previous year
+            gen_annee = str(datetime.now().year - 1) + '-' + str(datetime.now().year)
+        else:
+            gen_annee = str(datetime.now().year) + '-' + str(datetime.now().year + 1)
+        gen_module = Module.objects.filter(titre_module = module_name)[0]
+        gen_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = student_id)[0])[0]
+        copie = Copie(annee_copie = gen_annee, id_module = gen_module, id_etudiant = gen_etudiant)
+        copie.save()
+
+        #create first version     
+        version = VersionCopie(numero_version = 1, note_version = 0 ,id_copie = copie)
+        version.save()
+
+        #asigning files
+        for file_id in files_ids:
+            file_to_asign = FichierCopie.objects.filter(id = file_id)[0]
+            file_to_asign.id_version = version
+            file_to_asign.save()
+    except:
+        copie.delete()
+
+### save button backend
+def save_saisir_data(req, module_name):
+    data = json.loads(req.POST.get('data'))
+    completed = data['completed']
+    uncompleted = data['uncompleted']
+
+    if completed:
+        ######## grouping copies with same name ########
+        similar_elems = {}
+        for i in range(len(completed)):
+            tmp = completed[:i] + completed[i+1:]
+            for tmp_entry in tmp:
+                if completed[i]['student_id'] == tmp_entry['student_id']:
+                    if completed[i]['student_id'] in similar_elems:
+                        similar_elems[completed[i]['student_id']] += [completed[i]['version_id']]
+                    else:
+                        similar_elems[completed[i]['student_id']] = [completed[i]['version_id']]
+
+        # leaving only normal copies in completed (removing entries about to be grouped)
+        new_completed = []
+        for i in range(len(completed)): 
+            if completed[i]['student_id'] not in similar_elems:
+                new_completed += [completed[i]]
+
+        # creating new grouped copies and deleting seperate copies
+        for student_id, versions in similar_elems.items():
+            versions_objs = VersionCopie.objects.filter(id__in = versions)
+            files_to_group = list(FichierCopie.objects.filter(id_version__in = versions_objs).values_list('id',flat = True)) # getting files of the copies to groupe
+            Copie.objects.filter(id__in = versions_objs.values_list("id_copie", flat = True)).delete() #deleting copies to be grouped
+            create_new_copie_entry(module_name, student_id, files_to_group)
+        
+        ######## changing info from normal copies ########
+        for entry in new_completed:
+            try:
+                # modifying student note
+                version_to_modify = VersionCopie.objects.filter(id= entry['version_id'])[0]
+                old_note = version_to_modify.note_version
+                version_to_modify.note_version = float(entry['version_note'])
+                version_to_modify.save()
+                # modifying student name
+                copy_to_modify = version_to_modify.id_copie
+                old_student = copy_to_modify.id_etudiant
+                copy_to_modify.id_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = entry['student_id'])[0])[0]
+                copy_to_modify.save()
+            except:
+                # restoring data
+                version_to_modify.note_version = old_note
+                version_to_modify.save()
+                copy_to_modify.id_etudiant = old_student
+                copy_to_modify.save()
+
+
+    if uncompleted:
+        ######## grouping normal files by student id ########
+        entries = {}
+        for entry in uncompleted:
+            if entry['student_id'] in entries:
+                entries[entry['student_id']] += [ entry['file_id']]
+            else:
+                entries.update({ entry['student_id'] : [entry['file_id']]})
+
+        print(entries)
+        if completed:
+            ######## mergin files with copies of student ids who already have one ########
+            for entry in completed:
+                if entry['student_id'] in entries:
+                    for file_id in entries[entry['student_id']]:
+                        file_to_asign = FichierCopie.objects.filter(id = file_id)[0]
+                        file_to_asign.id_version = VersionCopie.objects.filter(id = entry['version_id'])[0]
+                        file_to_asign.save()
+                    del entries[entry['student_id']]
+        print(entries)
+
+        ######## creating a copy per student id ########
+        for student_id, files_ids in entries.items():
+            create_new_copie_entry(module_name, student_id, files_ids)
 
 #######################################################
 ###################### VIEWS ##########################
@@ -294,7 +424,7 @@ def search_result_feeder(req):
     stringfied_data = json.dumps(data)
     return JsonResponse(stringfied_data, safe = False)
 
-## Main View
+#### Main View
 class mainView(TemplateView):
     def post(self,req):
         if req.user.is_anonymous:
@@ -374,6 +504,8 @@ class profileView(DetailView):
         else:
             return HttpResponse("<h2>404</h2>")
 
+
+
 #### ANNONCE VIEW 
 class annonceView(TemplateView):
     template_name = 'gce_app/common/annonces.html'
@@ -444,6 +576,8 @@ class annonceView(TemplateView):
         else:
             return HttpResponse("<h2>404</h2>")        
 
+
+### SAISIR VIEW
 class saisirView(TemplateView):
     template_name = 'gce_app/tech/tech_saisir.html'
 
@@ -469,17 +603,22 @@ class saisirView(TemplateView):
                     save_saisir_data(req, module_name)
                 if req.POST.get('type') == 'upload':
                     create_new_copie_files(req, module_name)
+                if req.POST.get('type') == 'delete':
+                    delete_saisir_entry(req)
+
                 context = get_saisir_entries(module_name)
                 context.update(get_saisir_students(module_name, True))
-                context.update(get_saisir_students(module_name, False))
+                # context.update(get_saisir_students(module_name, False))
                 context.update(get_saisir_new_files(module_name))
+
                 html = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
                 data = {'success': True, 'html': html}
+            
             except:
                 data = {'success': False}
+            
             serialized_data = json.dumps(data)
-            return JsonResponse(serialized_data, safe = False)
-                    
+            return JsonResponse(serialized_data, safe = False)     
         return HttpResponse(req)
 
     def get(self, req, *args, **kwargs):
@@ -489,43 +628,3 @@ class saisirView(TemplateView):
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")
-
-
-def save_saisir_data(req, module_name):
-    data = json.loads(req.POST.get('data'))
-    completed = data['completed']
-    uncompleted = data['uncompleted']
-    if uncompleted:
-        ## ucompleted entries management
-        # grouping -> ex : {'etud43': ['23', '22'], 'etud45': ['21'], 'etud48': ['12']}
-        entries = {}
-        for entry in uncompleted:
-            if entry['student_id'] in entries:
-                entries[entry['student_id']] += [ entry['file_id']]
-            else:
-                entries.update({ entry['student_id'] : [entry['file_id']]})
-        if entries:
-            for student_id, files_ids in entries.items():
-                try:
-                    #create Copie
-                    if datetime.now().month > 3 and datetime.now().month < 8: ## previous year
-                        gen_annee = str(datetime.now().year - 1) + '-' + str(datetime.now().year)
-                    else:
-                        gen_annee = str(datetime.now().year) + '-' + str(datetime.now().year + 1)
-                    gen_module = Module.objects.filter(titre_module = module_name)[0]
-                    gen_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = student_id)[0])[0]
-                    copie = Copie(annee_copie = gen_annee, id_module = gen_module, id_etudiant = gen_etudiant)
-                    copie.save()
-
-                    #create first version     
-                    version = VersionCopie(numero_version = 1, note_version = 0 ,id_copie = copie)
-                    version.save()
-
-                    #asigning files
-                    for file_id in files_ids:
-                        file_to_asign = FichierCopie.objects.filter(id = file_id)[0]
-                        file_to_asign.id_version = version
-                        file_to_asign.save()
-                except:
-                    copie.delete()
-                
