@@ -3,10 +3,26 @@
     <div id="annonce_container">
         {% if user_type == 'chef' and modules %}
             <div id='annonce_create'>
+                <!-- par filiere -->
+                <label class="annonce_create_label" for="annonce_filiere">FILIERE :</label>
+                <select name='annonce_filiere' id='annonce_create_filiere' onchange="trigger_select(this,event);" data-filler-text=" -- Selectionner une Filiere -- ">
+                    <option selected value =""> -- Selectionner une Filiere -- </option>
+                    <option value="{{ filiere.id }}">{{ filiere.nom }}</option>
+                </select>
+                <!-- par parcours -->
+                <label class="annonce_create_label" for="annonce_parcours">Parcours :</label>
+                <select name='annonce_parcours' id='annonce_create_parcours' onchange="trigger_select(this,event);" data-filler-text=" -- Selectionner un Parcours -- ">
+                    <option selected value=""> -- Selectionner un Parcours -- </option>
+                    {% for parc in parcours %}
+                        <option value="{{ parc.id }}">{{ parc.nom }}</option>
+                    {% endfor %}
+                </select>
+                <!-- par module -->
                 <label class="annonce_create_label" for="annonce_module">Module :</label>
-                <select name='annonce_module' id='annonce_create_module'>
-                    {% for module in modules%}
-                        <option value="{{ module.titre_module}}">{{ module.titre_module}}</option>
+                <select name='annonce_module' id='annonce_create_module' onchange="trigger_select(this,event);" data-filler-text=" -- Selectionner un Module -- ">
+                    <option selected value=""> -- Selectionner un Module -- </option>
+                    {% for module in modules %}
+                        <option value="{{ module.id }}">{{ module.titre_module}}</option>
                     {% endfor %}
                 </select>
                 <label class="annonce_create_label" for="annonce_title">Sujet :</label>
@@ -22,15 +38,24 @@
             </div>
         {% endif %}
         <div id='annonce_items_container'>
+
             {% if annonces %}
                 {% for annonce in annonces %}
-                    <div class='annonce_item {% if forloop.counter0|divisibleby:2 %}left_item{% else%}right_item{% endif %}' {% if forloop.counter0 == 0%} id ='first_annonce_item' {% endif %}>
+                    <div class='annonce_item {% if forloop.counter0|divisibleby:2 %}left_item{% else%}right_item{% endif %}' {% if forloop.counter0 == 0 %} id ='first_annonce_item' {% endif %}>
                         <div class='annonce_item_info'>
                             <div class='annonce_item_id'>{{ annonce.id }}</div>
                             <div class='annonce_item_subject'>{{ annonce.sujet_annonce }}</div>
-                            <div class='annonce_item_datetime'>{{ annonce.date_annonce }} {{ annonce.heure_annonce }}</div>
+                            <div class='annonce_item_datetime'>{{ annonce.date_annonce|date:"d/m/Y" }} - {{ annonce.heure_annonce }}</div>
                             <div class='annonce_item_content'>{{ annonce.description_annonce }}</div>
-                            <div class='annonce_item_module'>{{ annonce.id_module.titre_module }}</div>
+                            {% if annonce.id_filiere %}
+                                <div class='annonce_item_module'>{{ annonce.id_filiere.nom  }}</div>
+                            {% endif %}
+                            {% if annonce.id_parcours %}
+                                <div class='annonce_item_module'>{{ annonce.id_parcours.nom }}</div>
+                            {% endif %}
+                            {% if annonce.id_module %}
+                                <div class='annonce_item_module'>{{ annonce.id_module.titre_module }}</div>
+                            {% endif %}
                         </div>
                         {% if user_type == 'chef' %}
                             <div class='annonce_item_show' onclick="annonceVisibility(this,event);"><div class='{% if annonce.afficher_annonce == True %}hide{% endif %}'></div></div>

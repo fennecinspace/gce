@@ -1,85 +1,157 @@
+{% load custom_filters %}
 {% load staticfiles %}
+<!-- FILES SECTION -->
 <div id="uncompleted_entries">
     {% if new_files %}
         <div id="uncompleted_entries_title">
             Fichiers
-            <div class='select_all' onclick="select_all_entries(this,event);"></div>
-        </div>
-        {% for file in new_files %}
-            <div class="mark_item_large">
-                <div class="mark_version_id">{{ file.id }}</div>
-                <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_unclick(this, event);">
-                    <img src="{{ file.emplacement_fichier.url }}"  alt="file preview" onmousedown="copie_click(this, event)" onmouseup="copie_unclick(this, event);" onmouseout="copie_unclick(this, event);" onmousemove="copie_move(this, event);">
-                    <div class="delete_entry" onclick="delete_entry(this, event, 'file');"><div></div><div></div></div>
-                    <div class="check_item">
-                        <input class ="check_item_checkbox" type="checkbox">
-                        <div class="check_item_control"></div>
-                    </div>
-                </div>
-                <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
-                <div class="student_infos" >
-                    <input list="unassigned_students_names" class="saisir_student_name" placeholder="Nom et Prenom">
-                </div>
+            <div class='select_all' onclick="select_all_entries(this,event);">
+                <span></span>
+                <div>Selectionner Tous</div>
             </div>
-        {% endfor %}
-        <datalist id="unassigned_students_names">
-            {% for student in students %}
-                <option value="{{ student.id_etudiant.info_utilisateur.last_name|lower|title }} {{ student.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ student.id_groupe.numero }} - {{ student.id_etudiant.id_utilisateur|title }}" data-user-id="{{ student.id_etudiant.id_utilisateur }}">
-            {% endfor %}
-        </datalist>
-    {% endif %}
-</div>
-<div id="completed_entries">
-    {% if entries %}
-        <div id="completed_entries_title">
-            Copies
-            <div class='select_all' onclick="select_all_entries(this,event);"></div>
         </div>
-        {% for entry in entries %}
-            <div class="mark_item_large">
-                <div class="mark_version_id">{{ entry.0.id_version.id }}</div>
-                <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_unclick(this, event);">
-                    {% for elem in entry %}
-                        <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onmousedown="copie_click(this, event)" onmouseup="copie_unclick(this, event);" onmouseout="copie_unclick(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
-                    {% endfor %} 
+        <div id="uncompleted_entries_items">
+            {% for file in new_files|slice:":8" %}
+                <div class="mark_item_large">
+                    <div class="mark_version_id">{{ file.id }}</div>
+                    <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_mouse_up(this, event);">
+                        <img src="{{ file.emplacement_fichier.url }}"  alt="file preview" onclick="copie_click(this,event);" onmousewheel="change_zoom_scroll(this,event);" onmousedown="copie_mouse_down(this, event)" onmouseup="copie_mouse_up(this, event);" onmouseout="copie_mouse_up(this, event);" onmousemove="copie_move(this, event);">
+                        <div class="delete_entry" onclick="delete_entry(this, event, 'file');"><div></div><div></div></div>
+                        <div class="delete_entry_text">Supprimer</div>
                         <div class="check_item">
                             <input class ="check_item_checkbox" type="checkbox">
                             <div class="check_item_control"></div>
                         </div>
-                        <div class="delete_entry" onclick="delete_entry(this, event, 'copy');"><div></div><div></div></div>  
-                    {% if entry|length > 1 %}
-                        <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
-                        <div class="previous_image" onclick="previous_image(this, event);"><div></div><div></div></div>
-                    {% endif %}
+                    </div>
+                    <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
+                    <div class="student_infos" >
+                        <input list="assigned_students" class="saisir_student_name" placeholder="Nom et Prenom">
+                    </div>
                 </div>
-                <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
-                <div class="student_infos" >
-                    <input list="students_names" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
-                    <input class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version }}">
-                </div>
-            </div>
-        {% endfor %}
-        <datalist id="students_names">
-            {% for student in students %}
-                <option value="{{ student.id_etudiant.info_utilisateur.last_name|lower|title }} {{ student.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ student.id_groupe.numero }} - {{ student.id_etudiant.id_utilisateur|title }}" data-user-id="{{ student.id_etudiant.id_utilisateur }}">
             {% endfor %}
-        </datalist>
+            {% for file in new_files|slice:"8:" %}
+                <div class="mark_item_large hide">
+                    <div class="mark_version_id">{{ file.id }}</div>
+                    <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_mouse_up(this, event);">
+                        <img src="{{ file.emplacement_fichier.url }}"  alt="file preview" onclick="copie_click(this,event);" onmousewheel="change_zoom_scroll(this,event);" onmousedown="copie_mouse_down(this, event)" onmouseup="copie_mouse_up(this, event);" onmouseout="copie_mouse_up(this, event);" onmousemove="copie_move(this, event);">
+                        <div class="delete_entry" onclick="delete_entry(this, event, 'file');"><div></div><div></div></div>
+                        <div class="delete_entry_text">Supprimer</div>
+                        <div class="check_item">
+                            <input class ="check_item_checkbox" type="checkbox">
+                            <div class="check_item_control"></div>
+                        </div>
+                    </div>
+                    <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
+                    <div class="student_infos" >
+                        <input list="assigned_students" class="saisir_student_name" placeholder="Nom et Prenom">
+                    </div>
+                </div>
+            {% endfor %}
+            {% if new_files|length > 8 %}
+                <div class="saisir_item_small saisir_view_more" onclick="show_more(this, event)">Afficher plus...</div>
+            {% endif %}
+            <datalist id="assigned_students">
+                {% for student in assigned_students %}
+                    <option value="{{ student.id_etudiant.info_utilisateur.last_name|lower|title }} {{ student.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ student.id_groupe.numero }} - {{ student.id_etudiant.id_utilisateur|title }}" data-user-id="{{ student.id_etudiant.id_utilisateur }}">
+                {% endfor %}
+            </datalist>
+        </div>
     {% endif %}
 </div>
+<!-- COPIES SECTION -->
+<div id="completed_entries">
+    {% if entries %}
+        <div id="completed_entries_title">
+            Copies
+            <div class='select_all' onclick="select_all_entries(this,event);">
+                <span></span>
+                <div>Selectionner Tous</div>
+            </div>
+        </div>
+        <div id="completed_entries_items">
+            {% for entry in entries|slice:":8" %}
+                <div class="mark_item_large">
+                    <div class="mark_version_id">{{ entry.0.id_version.id }}</div>
+                    <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_mouse_up(this, event);">
+                        {% for elem in entry %}
+                            <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onclick="copie_click(this,event);" onmousewheel="change_zoom_scroll(this,event);" onmousedown="copie_mouse_down(this, event)" onmouseup="copie_mouse_up(this, event);" onmouseout="copie_mouse_up(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
+                        {% endfor %} 
+                            <div class="check_item">
+                                <input class ="check_item_checkbox" type="checkbox">
+                                <div class="check_item_control"></div>
+                            </div>
+                            <div class="delete_entry" onclick="delete_entry(this, event, 'copy');"><div></div><div></div></div>  
+                            <div class="delete_entry_text">Dégrouper</div>
+                        {% if entry|length > 1 %}
+                            <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
+                            <div class="previous_image" onclick="previous_image(this, event);"><div></div><div></div></div>
+                        {% endif %}
+                    </div>
+                    <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
+                    <div class="student_infos" >
+                        <input list="unassigned_students" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
+                        <input class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version|none_to_empty }}">
+                    </div>
+                </div>
+            {% endfor %}
+            {% for entry in entries|slice:"8:" %}
+                <div class="mark_item_large hide">
+                    <div class="mark_version_id">{{ entry.0.id_version.id }}</div>
+                    <div class = "mark_item_image" data-list-length="{{ entry|length }}" onmouseout="copie_mouse_up(this, event);">
+                        {% for elem in entry %}
+                            <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onclick="copie_click(this,event);" onmousewheel="change_zoom_scroll(this,event);" onmousedown="copie_mouse_down(this, event)" onmouseup="copie_mouse_up(this, event);" onmouseout="copie_mouse_up(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
+                        {% endfor %} 
+                            <div class="check_item">
+                                <input class ="check_item_checkbox" type="checkbox">
+                                <div class="check_item_control"></div>
+                            </div>
+                            <div class="delete_entry" onclick="delete_entry(this, event, 'copy');"><div></div><div></div></div>  
+                            <div class="delete_entry_text">Dégrouper</div>
+                        {% if entry|length > 1 %}
+                            <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
+                            <div class="previous_image" onclick="previous_image(this, event);"><div></div><div></div></div>
+                        {% endif %}
+                    </div>
+                    <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
+                    <div class="student_infos" >
+                        <input list="unassigned_students" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
+                        <input class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version|none_to_empty }}">
+                    </div>
+                </div>
+            {% endfor %}
+            {% if entries|length > 8 %}
+                <div class="saisir_item_small saisir_view_more" onclick="show_more(this, event)">Afficher plus...</div>
+            {% endif %}
+            <datalist id="unassigned_students">
+                {% for student in unassigned_students %}
+                    <option value="{{ student.id_etudiant.info_utilisateur.last_name|lower|title }} {{ student.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ student.id_groupe.numero }} - {{ student.id_etudiant.id_utilisateur|title }}" data-user-id="{{ student.id_etudiant.id_utilisateur }}">
+                {% endfor %}
+            </datalist>
+        </div>
+    {% endif %}
+</div>
+<!-- SIDE CONTROLS -->
 {% if entries or new_files %}
-    <div id="move_controls">
+    <div id="right_move_controls" class="clearfix">
         <div class="move_controls_item" id="go_to_top" onclick="go_to_top(event)"><div></div><div></div></div>
         {% if new_files %}
-            <div class="move_controls_item" id="go_to_files" onclick="go_to_files(event)">F</div>
+            <div class="move_controls_item" id="go_to_files" onclick="go_to_files(event)"></div>
         {% endif %}
         {% if entries %}
-            <div class="move_controls_item" id="go_to_copies" onclick="go_to_copies(event)">C</div>
+            <div class="move_controls_item" id="go_to_copies" onclick="go_to_copies(event)"></div>
         {% endif %}
         <div class="move_controls_item" id="go_to_bottom" onclick="go_to_bottom(event)"><div></div><div></div></div>
     </div>
-    <div id="save_and_submut" class="saisir_item_small">
-        <div class="default_button" id="data_save" onclick="send_copies_data(this, event, false);">Sauvgarder</div>
-        <div class="default_button" id="data_submit" onclick="send_copies_data(this, event, true);">Envoyer</div>
+    <div id="left_move_controls">
+        <div class="move_controls_item" id="data_save" onclick="send_copies_data(this, event, false);"><span>Sauvgarder</span></div>
+        <div class="move_controls_item" id="data_submit" onclick="send_copies_data(this, event, true);"><span>Envoyer</span></div>
+        <div class="move_controls_item" id="delete_multiple_entries" onclick="delete_multiple_entry(event);">&#10006;<span>Supprimer Selection</span></div>
+        <div class="move_controls_item" id="saisir_stats">
+            <span>Stats</span>
+            {% for key, value in stats.items %}
+                <div>{{ key }}: {{ value }}</div>
+            {% endfor %}
+        </div>
     </div>
-    <div class="move_controls_item" id="delete_multiple_entries" onclick="delete_multiple_entry(event);">&#10006;</div>
 {% endif %}
+

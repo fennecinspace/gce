@@ -41,7 +41,7 @@ function profile_option_handler() {
         profile_options_item.addEventListener('click', function(e) {
             e.preventDefault();
             var user_id = document.getElementById('logged_in_user_id').innerHTML;
-            $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
+            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
             options_hider();
         });
     }
@@ -163,7 +163,7 @@ function search_result_click_handler(){
         all_search_results[i].addEventListener('click', function(e) {
             e.stopPropagation();
             user_id = this.querySelector('.search_result_item_id').innerHTML;
-            $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
+            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
             hideSearch();
         });
     }
@@ -278,7 +278,7 @@ function suggestions_click_handler(){
         all_suggestions[i].addEventListener('click', function(e) {
             e.stopPropagation();
             var user_id = this.querySelector('.suggestion_item_id').innerHTML;
-            $('#content_container').load(`${location.origin}/users/${user_id} #content_container > *`);
+            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
             hideSearch();
         });
     }
@@ -402,7 +402,6 @@ function pages_handler() {
         $('#content_container').load(`${location.origin} #content_container > *`);
         responsive_menu_hider();
     });
-    ///// later replace alerts with load (' view url ') for each view 
     user_type = $("#logged_in_user_id").html().substring(0, 4);
     
     if (user_type == 'tech') {
@@ -430,7 +429,7 @@ function pages_handler() {
 
     if (user_type == 'ensg' || user_type == 'etud') {
         document.getElementById("results_entry").addEventListener('click', function () {
-            alert('results');
+            $('#content_container').load(`${location.origin}/notes #content_container > *`);
             responsive_menu_hider();
         });
     }

@@ -17,3 +17,12 @@ def second_zero_adder(value):
 
     value = '.'.join(values)
     return value
+
+
+@register.filter(name='none_to_empty')
+def none_to_empty(value):
+    if value == None:
+        return ""
+    return value
+
+    

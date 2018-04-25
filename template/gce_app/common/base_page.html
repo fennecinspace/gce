@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>GCE</title>
     <!-- CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/bootstrap/bootstrap.min.css' %}"> -->
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/normalize.css' %}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/default.css' %}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/style.css' %}" />
@@ -23,9 +22,7 @@
             <form id ="options_box" class='hide' method="POST">
                 <div>
                     {% csrf_token %}
-                    {% if user_type == 'etud' %}
-                        <input name="profile" type="submit" value="Profile" id ='profile_options_item'>
-                    {% endif %}
+                    <input name="profile" type="submit" value="Profile" id ='profile_options_item' data-user-type = '{{ user_type }}'>
                     <input name="logout" type="submit" value="Deconnecter" id ='logout_options_item'>
                 </div>
             </form> <!-- this is the options window -->
@@ -89,6 +86,13 @@
         <div id='content_container' class="fill_100">
             {% block base_extender %}
             {% endblock %}
+        </div>
+    </div>
+    <div id="main_loader_overlay" class="fill_100">
+        <div class='loader_container'>
+            <div id="small_loading_overlay">
+                <div id='small_loader' class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
         </div>
     </div>
     <!-- Scripts -->

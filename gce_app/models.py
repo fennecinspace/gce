@@ -17,7 +17,12 @@ from gce_app.functions import image_center_crop
 def copies_file_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join('copies', filename)
+    current_annee = AnneeScolaire.objects.all().order_by('-id')[0].annee_scolaire
+    path = os.path.join('copies', current_annee)
+    path = os.path.join(path, instance.id_module.id_specialite.id_parcours.id_filiere.id_domaine.nom)
+    path = os.path.join(path, instance.id_module.id_specialite.id_parcours.nom)
+    path = os.path.join(path, instance.id_module.titre_module)
+    return os.path.join(path, filename)
 
 def corrections_file_path(instance, filename):
     ext = filename.split('.')[-1]
@@ -193,6 +198,9 @@ class Annonce(models.Model):
     heure_annonce = models.TimeField(db_column='heure_Annonce', blank=True, null=True)
     afficher_annonce = models.BooleanField(db_column='afficher_Annonce', default=False)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
+    id_parcours = models.ForeignKey('Parcours', models.CASCADE, db_column='id_Parcours', blank=True, null=True)
+    id_filiere = models.ForeignKey('Filiere', models.CASCADE, db_column='id_Filiere', blank=True, null=True)
+    
 
     class Meta:
         db_table = 'Annonce'
@@ -200,7 +208,7 @@ class Annonce(models.Model):
 
 class Copie(models.Model):
     # id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)
-    annee_copie = models.CharField(db_column='annee_Copie', max_length=500, null=True)
+    annee_copie = models.ForeignKey('AnneeScolaire', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
     afficher_copie = models.BooleanField(db_column='afficher_Copie', default=False)
     modifiable = models.BooleanField(db_column='Modifiable', default=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
@@ -316,3 +324,10 @@ class MessagesReclamation(models.Model):
 
     class Meta:
         db_table = 'Messages_Reclamation'
+
+
+class AnneeScolaire(models.Model):
+    annee_scolaire = models.CharField(db_column='annee_Scolaire', max_length=500, null=True)
+
+    class Meta:
+        db_table = 'anneeScolaire'

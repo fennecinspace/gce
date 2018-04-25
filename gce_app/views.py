@@ -54,7 +54,7 @@ def get_user_notifications(u_obj):
 
 ## returns student data
 def get_final_versions(all_copies):
-    all_versions = [list(VersionCopie.objects.filter(id_copie = copie)) for copie in all_copies]
+    all_versions = [list(VersionCopie.objects.filter(id_copie = copie).order_by('-id')) for copie in all_copies]
     final_versions = []
     for version in all_versions:
         version.sort(key=lambda x : x.id , reverse=False) # sorting the copie version from oldest to newest
@@ -162,25 +162,43 @@ def get_search_data(search_entry, req, req_type):
 ### annonce
 def get_user_annonce(req, user_type):
     if user_type == 'etud':
-        annonces = Annonce.objects.filter(Q(id_module__in = Module.objects.filter(id_specialite = Specialite.objects.filter(id = (Section.objects.filter(id = Groupe.objects.filter(id = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id)[0].id_section.id)[0].id_specialite.id))[0])) & Q(afficher_annonce = True)).order_by('-id')
+        etud_models = Module.objects.filter(id_specialite = Specialite.objects.filter(id = (Section.objects.filter(id = Groupe.objects.filter(id = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id)[0].id_section.id)[0].id_specialite.id))[0])
+        etud_parcours = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id_section.id_specialite.id_parcours
+        etud_filiere = etud_parcours.id_filiere
+        annonces = Annonce.objects.filter(Q(Q(id_module__in = etud_models) | Q(id_parcours = etud_parcours) | Q(id_filiere = etud_filiere)) & Q(afficher_annonce = True)).order_by('-id')
     elif user_type == 'ensg':
-        annonces = Annonce.objects.filter(Q(id_module__in = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].modules.all()) & Q(afficher_annonce = True)).order_by('-id')
+        ensg_filieres = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].filieres.all()
+        ensg_parcours = Parcours.objects.filter(id_filiere__in = ensg_filieres)
+        ensg_modules = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].modules.all()
+        annonces = Annonce.objects.filter(Q(Q(id_module__in = ensg_modules ) | Q(id_parcours__in = ensg_parcours ) | Q(id_filiere__in = ensg_filieres )) & Q(afficher_annonce = True)).order_by('-id')
     elif user_type == 'chef':
-        annonces = Annonce.objects.filter(id_module__in = Module.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0])[0])))).order_by('-id')
+        chef_filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0])[0]
+        chef_parcours = Parcours.objects.filter(id_filiere = chef_filiere)
+        chef_modules = Module.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0])[0])))
+        annonces = Annonce.objects.filter(Q(id_module__in = chef_modules) | Q(id_parcours__in = chef_parcours) | Q(id_filiere = chef_filiere)).order_by('-id')
     return annonces
 
 def create_new_annonce(req):
     title_annonce = req.POST.get('title')
     content_annonce = req.POST.get('content')
-    module_annonce = req.POST.get('module')
     date_annonce = datetime.now().date()
     time_annonce = datetime.now().time()
-    if req.POST.get('show') == 'false':
-        show_annonce = False
-    else:
-        show_annonce = True
-    annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_module = Module.objects.filter(titre_module = module_annonce)[0])
-    annonce.save()
+    show_annonce = json.loads(req.POST.get('show'))
+    data = json.loads(req.POST.get('create_group'))
+    data_type = data['type']
+    data_list = data['data']
+    if data_type == 'filiere':
+        for elem in data_list:
+            annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_filiere = Filiere.objects.filter(id = elem)[0])
+            annonce.save()
+    if data_type == 'parcours':
+        for elem in data_list:
+            annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_parcours = Parcours.objects.filter(id = elem)[0])
+            annonce.save()
+    if data_type == 'module':
+        for elem in data_list:
+            annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_module = Module.objects.filter(id = elem)[0])
+            annonce.save()
     return annonce
 
 
@@ -195,8 +213,8 @@ def get_home_template(req):
 
 
 ## returns entries not yet subbmited
-def get_saisir_entries(module_title):
-    all_copies = Copie.objects.filter(Q(id_module = Module.objects.filter(titre_module = module_title)[0]) & Q(modifiable = True))
+def get_copy_entries(module_title):
+    all_copies = Copie.objects.filter(id_module__in = Module.objects.filter(Q(titre_module = module_title) & Q(finsaisie_module = False))).order_by('id')
     final_versions = get_final_versions(all_copies)
     entries = []
     for version in final_versions:
@@ -204,35 +222,21 @@ def get_saisir_entries(module_title):
     return {'entries': entries}
     
 
-## creating copie entries
-def create_new_copie_files(req,module_name): ## gets all uploaded files and saves them one by
-    files = req.FILES.getlist('emplacement_fichier')
-    for file_to_save in files:
-        req.FILES['emplacement_fichier'] = file_to_save
-        form = copies_file_upload_form(req.POST, req.FILES)
-        if form.is_valid():
-            obj = form.save(commit= False)
-            obj.id_module = Module.objects.filter(titre_module = module_name)[0]
-            obj.save()
-
 ## return students for saisir datalist
 def get_saisir_students(module_name, have_copies = True):
     all_students_assisting = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite = Module.objects.filter(titre_module = module_name)[0].id_specialite)))
-    # if have_copies:
+    # if not have_copies:
     #     students = all_students_assisting
-    #     return {'students' : students}
+    #     return {'assigned_students' : students}
     # else:
-    #     # students_have_copies = Copie.objects.filter(id_module = Module.objects.filter(titre_module = module_name)[0]).values_list('id_etudiant',flat = True)
-    #     # students = Etudiant.objects.filter(~Q(id_etudiant__in = Utilisateur.objects.filter(id_utilisateur__in = students_have_copies)) & Q(id_etudiant__in = all_students_assisting ) )
-    #     students = all_students_assisting
+    #     students_have_copies = Copie.objects.filter(id_module = Module.objects.filter(titre_module = module_name)[0]).values_list('id_etudiant',flat = True)
+    #     students = Etudiant.objects.filter(~Q(id_etudiant__in = Utilisateur.objects.filter(id_utilisateur__in = students_have_copies)) & Q(id_etudiant__in = all_students_assisting ) )
     #     return {'unassigned_students' : students}
-    return {'students' : all_students_assisting}
-
-
-## return uploaded but not yet assigned entries
-def get_saisir_new_files(module_name):
-    new_files = FichierCopie.objects.filter(Q(id_version = None) & Q(id_module = Module.objects.filter(titre_module = module_name)[0]))
-    return {'new_files' : new_files}
+    
+    if not have_copies:
+        return {'assigned_students' : all_students_assisting}
+    else:
+        return {'unassigned_students' : all_students_assisting}
 
 ## deletes entries
 def delete_saisir_entry(req):
@@ -256,21 +260,30 @@ def delete_saisir_entry(req):
                 file_to_delete.emplacement_fichier.delete()
                 file_to_delete.delete()
 
+
+## creating copie entries
+def create_new_copie_files(req,module_name): ## gets all uploaded files and saves them one by
+    files = req.FILES.getlist('emplacement_fichier')
+    for file_to_save in files:
+        req.FILES['emplacement_fichier'] = file_to_save
+        form = copies_file_upload_form(req.POST, req.FILES)
+        if form.is_valid():
+            obj = form.save(commit= False)
+            obj.id_module = Module.objects.filter(titre_module = module_name)[0]
+            obj.save()
+
+
 ## create new copie entry
 def create_new_copie_entry(module_name, student_id, files_ids):
     try:
         #create Copie
-        if datetime.now().month > 3 and datetime.now().month < 8: ## previous year
-            gen_annee = str(datetime.now().year - 1) + '-' + str(datetime.now().year)
-        else:
-            gen_annee = str(datetime.now().year) + '-' + str(datetime.now().year + 1)
         gen_module = Module.objects.filter(titre_module = module_name)[0]
         gen_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = student_id)[0])[0]
-        copie = Copie(annee_copie = gen_annee, id_module = gen_module, id_etudiant = gen_etudiant)
+        copie = Copie(annee_copie = ANNEE_SCOLAIRE, id_module = gen_module, id_etudiant = gen_etudiant)
         copie.save()
-
+       
         #create first version     
-        version = VersionCopie(numero_version = 1, note_version = 0 ,id_copie = copie)
+        version = VersionCopie(numero_version = 1, id_copie = copie)
         version.save()
 
         #asigning files
@@ -278,7 +291,15 @@ def create_new_copie_entry(module_name, student_id, files_ids):
             file_to_asign = FichierCopie.objects.filter(id = file_id)[0]
             file_to_asign.id_version = version
             file_to_asign.save()
-    except:
+        
+        return {
+            'student_id': student_id,
+            'version_id': version.id,
+            'version_note': '',
+        }
+
+    except Exception as e:
+        print(e)
         copie.delete()
 
 ### save button backend
@@ -286,10 +307,11 @@ def save_saisir_data(req, module_name):
     data = json.loads(req.POST.get('data'))
     completed = data['completed']
     uncompleted = data['uncompleted']
+    new_completed = [] ## will be used for the copie + file grouping
 
     if completed:
         ######## grouping copies with same name ########
-        similar_elems = {}
+        similar_elems = {} # used for copie + copie grouping
         for i in range(len(completed)):
             tmp = completed[:i] + completed[i+1:]
             for tmp_entry in tmp:
@@ -299,39 +321,48 @@ def save_saisir_data(req, module_name):
                     else:
                         similar_elems[completed[i]['student_id']] = [completed[i]['version_id']]
 
+
         # leaving only normal copies in completed (removing entries about to be grouped)
-        new_completed = []
         for i in range(len(completed)): 
             if completed[i]['student_id'] not in similar_elems:
                 new_completed += [completed[i]]
+        
 
         # creating new grouped copies and deleting seperate copies
         for student_id, versions in similar_elems.items():
             versions_objs = VersionCopie.objects.filter(id__in = versions)
             files_to_group = list(FichierCopie.objects.filter(id_version__in = versions_objs).values_list('id',flat = True)) # getting files of the copies to groupe
             Copie.objects.filter(id__in = versions_objs.values_list("id_copie", flat = True)).delete() #deleting copies to be grouped
-            create_new_copie_entry(module_name, student_id, files_to_group)
-        
-        ######## changing info from normal copies ########
+            ## creating copy and adding it for the case where we have copie +copie + file 
+            new_completed += [create_new_copie_entry(module_name, student_id, files_to_group)]
+            
+
+        ######## changing info for normal copies ########
         for entry in new_completed:
             try:
                 # modifying student note
                 version_to_modify = VersionCopie.objects.filter(id= entry['version_id'])[0]
                 old_note = version_to_modify.note_version
-                version_to_modify.note_version = float(entry['version_note'])
+                if (entry['version_note'] != ""):
+                    if float(entry['version_note']) >= 0 and float(entry['version_note']) <= 20:
+                        version_to_modify.note_version = float(entry['version_note'])
+                else:
+                    version_to_modify.note_version = None
                 version_to_modify.save()
+                
                 # modifying student name
                 copy_to_modify = version_to_modify.id_copie
                 old_student = copy_to_modify.id_etudiant
                 copy_to_modify.id_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = entry['student_id'])[0])[0]
                 copy_to_modify.save()
-            except:
+
+            except Exception as e:
+                print(e)
                 # restoring data
                 version_to_modify.note_version = old_note
                 version_to_modify.save()
                 copy_to_modify.id_etudiant = old_student
                 copy_to_modify.save()
-
 
     if uncompleted:
         ######## grouping normal files by student id ########
@@ -341,22 +372,32 @@ def save_saisir_data(req, module_name):
                 entries[entry['student_id']] += [ entry['file_id']]
             else:
                 entries.update({ entry['student_id'] : [entry['file_id']]})
-
-        print(entries)
-        if completed:
+        
+        if new_completed:
             ######## mergin files with copies of student ids who already have one ########
-            for entry in completed:
+            for entry in new_completed:
                 if entry['student_id'] in entries:
                     for file_id in entries[entry['student_id']]:
                         file_to_asign = FichierCopie.objects.filter(id = file_id)[0]
                         file_to_asign.id_version = VersionCopie.objects.filter(id = entry['version_id'])[0]
                         file_to_asign.save()
                     del entries[entry['student_id']]
-        print(entries)
-
+        
         ######## creating a copy per student id ########
         for student_id, files_ids in entries.items():
             create_new_copie_entry(module_name, student_id, files_ids)
+
+def get_saisir_stats(context):
+    noted = 0
+    if context['entries']:
+        for entry in context['entries']:
+                if len(entry) > 0 and entry[0].id_version.note_version:
+                        noted += 1
+    return {
+        'Fichiers': len(context['new_files']),
+        'Copies': len(context['entries']),
+        'Copies Notés': noted,
+    }
 
 #######################################################
 ###################### VIEWS ##########################
@@ -425,7 +466,7 @@ def search_result_feeder(req):
     return JsonResponse(stringfied_data, safe = False)
 
 #### Main View
-class mainView(TemplateView):
+class MainView(TemplateView):
     def post(self,req):
         if req.user.is_anonymous:
             username = req.POST.get('username')
@@ -455,8 +496,8 @@ class mainView(TemplateView):
         return get_home_template(req)
 
 
-#### STUDENT PROFILE VIEW
-class profileView(DetailView):
+#### SHARED : STUDENT PROFILE VIEW
+class StudentProfileView(DetailView):
     model = Etudiant
     template_name = 'gce_app/etud/etud_profile.html'
     context_object_name = 'student'
@@ -486,7 +527,8 @@ class profileView(DetailView):
                 obj.id_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].id_utilisateur
                 obj.save()
                 data = {'success': True, 'new_avatar':obj.avatar_utilisateur.url}
-            except:
+            except Exception as e:
+                print(e)
                 data = {'success': False}
             serialized_data = json.dumps(data)
             return JsonResponse(serialized_data, safe = False)
@@ -506,8 +548,8 @@ class profileView(DetailView):
 
 
 
-#### ANNONCE VIEW 
-class annonceView(TemplateView):
+#### SHARED : ANNONCE VIEW 
+class AnnonceView(TemplateView):
     template_name = 'gce_app/common/annonces.html'
 
     def get_context_data(self, **kwargs):
@@ -518,6 +560,8 @@ class annonceView(TemplateView):
         context['annonces'] = get_user_annonce(self.request, logged_in_user.type_utilisateur)
         if logged_in_user.type_utilisateur == 'chef':
             context['modules'] = Module.objects.all().filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0]))))
+            context['filiere'] = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0])[0]
+            context['parcours'] = Parcours.objects.filter(id_filiere = context['filiere'])
         return context
 
     def post(self, req, *args, **kwargs):
@@ -530,7 +574,8 @@ class annonceView(TemplateView):
                 try:
                     Annonce.objects.filter(id = req.POST.get('annonce_id'))[0].delete()
                     data = {'success': True}
-                except:
+                except Exception as e:
+                    print(e)
                     data = {'success': False}
                 serialized_data = json.dumps(data)
                 return JsonResponse(serialized_data, safe = False)
@@ -544,10 +589,16 @@ class annonceView(TemplateView):
                         'date': str(annonce.date_annonce),
                         'time': str(annonce.heure_annonce),
                         'show': annonce.afficher_annonce,
-                        'module': annonce.id_module.titre_module,
                         'user_type': Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur,
                     }}
-                except:
+                    if annonce.id_filiere:
+                        data['annonce']['filiere'] = annonce.id_filiere.nom;
+                    elif annonce.id_parcours:
+                        data['annonce']['parcours'] = annonce.id_parcours.nom;
+                    elif annonce.id_module:
+                        data['annonce']['module'] = annonce.id_module.titre_module;
+                except Exception as e:
+                    print(e)
                     data = {'success': False}
                 serialized_data = json.dumps(data)
                 return JsonResponse(serialized_data, safe = False)
@@ -562,7 +613,8 @@ class annonceView(TemplateView):
                         annonce_to_change.afficher_annonce = False
                         annonce_to_change.save()
                         data = {'success': True, 'hideCross': False}
-                except:
+                except Exception as e:
+                    print(e)
                     data = {'success': False}
                 serialized_data = json.dumps(data)
                 return JsonResponse(serialized_data, safe = False)
@@ -577,8 +629,8 @@ class annonceView(TemplateView):
             return HttpResponse("<h2>404</h2>")        
 
 
-### SAISIR VIEW
-class saisirView(TemplateView):
+### TECH : SAISIR VIEW
+class SaisirView(TemplateView):
     template_name = 'gce_app/tech/tech_saisir.html'
 
     def get_context_data(self, **kwargs):
@@ -591,6 +643,8 @@ class saisirView(TemplateView):
         return context
 
     def post(self, req, *args, **kwargs):
+        global ANNEE_SCOLAIRE
+        ANNEE_SCOLAIRE = AnneeScolaire.objects.all().order_by('-id')[0]
         if self.request.POST.get('logout'):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
@@ -606,15 +660,18 @@ class saisirView(TemplateView):
                 if req.POST.get('type') == 'delete':
                     delete_saisir_entry(req)
 
-                context = get_saisir_entries(module_name)
+                context = get_copy_entries(module_name)
                 context.update(get_saisir_students(module_name, True))
-                # context.update(get_saisir_students(module_name, False))
-                context.update(get_saisir_new_files(module_name))
-
+                context.update(get_saisir_students(module_name, False))
+                ## get new files not yet asigned
+                context['new_files'] = FichierCopie.objects.filter(Q(id_version = None) & Q(id_module = Module.objects.filter(titre_module = module_name)[0])).order_by('-id')
+                context['stats'] = get_saisir_stats(context)
+                
                 html = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
                 data = {'success': True, 'html': html}
             
-            except:
+            except Exception as e:
+                print(e)
                 data = {'success': False}
             
             serialized_data = json.dumps(data)
@@ -624,6 +681,35 @@ class saisirView(TemplateView):
     def get(self, req, *args, **kwargs):
         logged_in_user = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
         if logged_in_user.type_utilisateur == 'tech':
+            context = self.get_context_data()
+            return self.render_to_response(context)
+        else:
+            return HttpResponse("<h2>404</h2>")
+
+
+
+## ENSG : NOTES VIEW
+class NotesView(TemplateView):
+    template_name = 'gce_app/ensg/ensg_notes.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        logged_in_user = Utilisateur.objects.filter(info_utilisateur = self.request.user)[0]
+        context.update(get_user_data(logged_in_user))
+        context.update(get_user_notifications(logged_in_user))
+        return context
+
+    def post(self, req, *args, **kwargs):
+        if self.request.POST.get('logout'):
+            logout(req)
+            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.is_ajax():
+            pass
+        return HttpResponse(req)
+
+    def get(self, req, *args, **kwargs):
+        logged_in_user = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
+        if logged_in_user.type_utilisateur == 'ensg':
             context = self.get_context_data()
             return self.render_to_response(context)
         else:
