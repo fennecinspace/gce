@@ -17,7 +17,7 @@ import re # to use regex
 ## models
 from gce_app.models import *
 ## forms
-from gce_app.forms import avatar_upload_form, copies_file_upload_form
+from gce_app.forms import avatar_upload_form, copies_file_upload_form, correction_file_upload_form
 ## extra 
 from django.conf import settings
 from datetime import datetime
@@ -213,8 +213,8 @@ def get_home_template(req):
 
 
 ## returns entries not yet subbmited
-def get_copy_entries(module_title):
-    all_copies = Copie.objects.filter(id_module__in = Module.objects.filter(Q(titre_module = module_title) & Q(finsaisie_module = False))).order_by('id')
+def get_copy_entries(module_title, fin_saisie = False):
+    all_copies = Copie.objects.filter(Q(id_module__in = Module.objects.filter(Q(titre_module = module_title) & Q(finsaisie_module = fin_saisie))) & Q(annee_copie = ANNEE_SCOLAIRE) ).order_by('id')
     final_versions = get_final_versions(all_copies)
     entries = []
     for version in final_versions:
@@ -387,6 +387,24 @@ def save_saisir_data(req, module_name):
         for student_id, files_ids in entries.items():
             create_new_copie_entry(module_name, student_id, files_ids)
 
+
+def submit_saisir_data(req, module_name):
+    data = json.loads(req.POST.get('data'))
+    completed = data['completed']
+    version_ids = []
+    for entry in completed:
+        version_ids += [entry['version_id']]
+    entries_to_check = VersionCopie.objects.filter(id__in = version_ids)
+    for saved in entries_to_check:
+        if saved.note_version == None:
+            return 'copies not saved'
+    all_students_assisting = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite = Module.objects.filter(titre_module = module_name)[0].id_specialite)))
+    module_to_submit = Module.objects.filter(titre_module = module_name)[0]
+    module_to_submit.finsaisie_module = True
+    module_to_submit.save() ## will not be able to see module in saisir after this !
+
+
+
 def get_saisir_stats(context):
     noted = 0
     if context['entries']:
@@ -399,6 +417,77 @@ def get_saisir_stats(context):
         'Copies Notés': noted,
     }
 
+
+## creating correction 
+def create_module_correction(req,module_name): ## gets all uploaded files and saves them one by
+    try:
+        # create correction
+        user_obj = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0]
+        module_obj = Module.objects.filter(titre_module = module_name)[0]
+        correction_obj = Correction(id_module = module_obj, id_enseignant = user_obj, annee_correction = ANNEE_SCOLAIRE)
+        correction_obj.save()
+
+        # attach uploaded files
+        files = req.FILES.getlist('emplacement_fichier')
+        for file_to_save in files:
+            req.FILES['emplacement_fichier'] = file_to_save
+            form = correction_file_upload_form(req.POST, req.FILES)
+            if form.is_valid():
+                obj = form.save(commit= False)
+                obj.id_module = Module.objects.filter(titre_module = module_name)[0]
+                obj.id_correction = correction_obj
+                obj.save()
+    except Exception as e:
+        print(e)
+        correction_obj.delete()
+
+def delete_module_correction(req):
+    Correction.objects.filter(id = req.POST.get('data_to_delete')).delete()
+
+def get_module_correction(module_name):
+    module_obj = Module.objects.filter(titre_module = module_name)[0]
+    corrections = Correction.objects.filter(Q(id_module = module_obj) & Q(annee_correction = ANNEE_SCOLAIRE)).order_by('-id')
+    if (len(corrections) > 0):
+        return FichierCorrection.objects.filter(id_correction = corrections[0].id)
+
+def check_if_modifiable(all_notes):
+    nb_of_modifibale = 0
+    for entry in all_notes:
+        if entry[0].id_version.id_copie.modifiable == True:
+            nb_of_modifibale += 1
+
+    if len(all_notes) == nb_of_modifibale:
+        return True;
+    else: 
+        return False;
+
+def save_notes_module(req, module_name):
+    data = json.loads(req.POST.get('data_to_send'))
+    if data:
+        for entry in data:
+            try:
+                if float(entry['mark']) >= 0 and float(entry['mark']) <= 20:
+                    version_to_modify = VersionCopie.objects.filter(id = entry['version_id'])[0]
+                    old_note = version_to_modify.note_version
+                    version_to_modify.note_version = float(entry['mark'])
+                    version_to_modify.save()
+            except Exception as e:
+                print(e)
+                version_to_modify.note_version = old_note
+                version_to_modify.save()
+
+def submit_notes_module(req, module_name):
+    correction = json.loads(req.POST.get('correction'))
+    if correction:
+        all_copy_files = get_copy_entries(module_name, True)['entries']
+        for files in all_copy_files:
+            try:
+                files[0].id_version.id_copie.modifiable = False
+                files[0].id_version.id_copie.save()
+            except Exception as e:
+                print(e)
+                files[0].id_version.id_copie.modifiable = True
+                files[0].id_version.id_copie.save()
 #######################################################
 ###################### VIEWS ##########################
 #######################################################
@@ -651,16 +740,18 @@ class SaisirView(TemplateView):
         if req.is_ajax():
             try:
                 module_name = req.POST.get('module_name')
-                if req.POST.get('type') == 'submit':
-                    pass
-                if req.POST.get('type') == 'save':
-                    save_saisir_data(req, module_name)
                 if req.POST.get('type') == 'upload':
                     create_new_copie_files(req, module_name)
                 if req.POST.get('type') == 'delete':
                     delete_saisir_entry(req)
+                if req.POST.get('type') == 'save':
+                    save_saisir_data(req, module_name)
+                if req.POST.get('type') == 'submit':
+                    res = submit_saisir_data(req, module_name)
+                    if res == 'copies not saved': ## in case a copîe doesn't have a saved note
+                        return JsonResponse(json.dumps({ 'success': False, 'error' : 'Sauvgarder avant d\'envoyer !'}), safe = False)      
 
-                context = get_copy_entries(module_name)
+                context = get_copy_entries(module_name, False)
                 context.update(get_saisir_students(module_name, True))
                 context.update(get_saisir_students(module_name, False))
                 ## get new files not yet asigned
@@ -668,7 +759,7 @@ class SaisirView(TemplateView):
                 context['stats'] = get_saisir_stats(context)
                 
                 html = render_to_string('gce_app/tech/unfinished_entries.html', context = context)
-                data = {'success': True, 'html': html}
+                data = {'success': True, 'html': html, 'type': req.POST.get('type')}
             
             except Exception as e:
                 print(e)
@@ -697,15 +788,42 @@ class NotesView(TemplateView):
         logged_in_user = Utilisateur.objects.filter(info_utilisateur = self.request.user)[0]
         context.update(get_user_data(logged_in_user))
         context.update(get_user_notifications(logged_in_user))
+        context['modules'] = Enseignant.objects.filter(id_enseignant = logged_in_user)[0].modules.filter(finsaisie_module = True)
+        # print(Enseignant.objects.filter(id_enseignant = logged_in_user)[0].modules.all()[0].titre_module)
+        context['upload_form'] = correction_file_upload_form
         return context
 
     def post(self, req, *args, **kwargs):
+        global ANNEE_SCOLAIRE
+        ANNEE_SCOLAIRE = AnneeScolaire.objects.all().order_by('-id')[0]
+        
         if self.request.POST.get('logout'):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        
         if req.is_ajax():
-            pass
+            try:
+                module_name = req.POST.get('module_name')
+                if req.POST.get('type') == 'upload':
+                    create_module_correction(req, module_name)
+                if req.POST.get('type') == 'delete':
+                    delete_module_correction(req)
+                if req.POST.get('type') == 'save':
+                    save_notes_module(req, module_name)
+                if req.POST.get('type') == 'submit':
+                    submit_notes_module(req, module_name)
+                context = get_copy_entries(module_name, True)
+                context['correction'] = get_module_correction(module_name)
+                context['modifiable_enabled'] = check_if_modifiable(context['entries'])
+                html = render_to_string('gce_app/ensg/module_notes.html', context = context)
+                data = {'success': True, 'html': html, 'type': req.POST.get('type')}
+            except Exception as e:
+                print(e)
+                data = {'success': False}
+            serialized_data = json.dumps(data)
+            return JsonResponse(serialized_data, safe = False) 
         return HttpResponse(req)
+
 
     def get(self, req, *args, **kwargs):
         logged_in_user = Utilisateur.objects.filter(info_utilisateur = req.user)[0]

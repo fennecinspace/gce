@@ -1,0 +1,70 @@
+{% load staticfiles %}
+{% if entries %}
+    {% if correction %}
+        <div id="correction_entry" class="mark_item_large no_bt_pad_mark_item_large">
+            <div class="mark_correction_id">{{ correction.0.id_correction.id }}</div>
+            <div class = "mark_item_image correction_item_image" data-list-length="{{ correction|length }}" onmouseout="copie_mouse_up(this, event);">
+                {% for elem in correction %}
+                    <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onclick="copie_click(this,event);" onmousewheel="change_zoom_scroll(this,event);" onmousedown="copie_mouse_down(this, event)" onmouseup="copie_mouse_up(this, event);" onmouseout="copie_mouse_up(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
+                {% endfor %} 
+                    <div class="delete_entry" onclick="delete_correction(this, event);"><div></div><div></div></div>  
+                    <div class="delete_entry_text">Supprimer Correction</div>
+                {% if correction|length > 1 %}
+                    <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
+                    <div class="previous_image" onclick="previous_image(this, event);"><div></div><div></div></div>
+                {% endif %}
+            </div>
+            <div class="zoomlevel in_image_zoom_level" onclick="change_zoom(this,event);">x2</div>
+        </div>
+    {% else %}
+        <div class="saisir_item_small" id="upload_correction_button" onclick="toggle_upload_correction(this,event);" data-toggled="false">Televerser Correction</div>
+    {% endif %}
+    {% for entry in entries %}
+        <div class="notes_item_small">
+            <div class="notes_item_id">{{ entry.0.id_version.id }}</div>
+            <div class="notes_item_info">
+                <img class="notes_item_info_avatar" src="{{ entry.0.emplacement_fichier.url }}" onclick="mark_image_viewer(this, event)">
+                <div class="notes_item_info_text">
+                    <div class="notes_item_info_name">
+                        <label class="notes_item_name_label">Etudiant :</label>
+                        <div class="notes_item_name_value" data-student-id = "{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur }}">{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}</div>
+                    </div>
+                    <div class="notes_item_info_mark">
+                        <label class="notes_item_mark_label">Note :</label>
+                        <input class="notes_item_mark_value" placeholder="Note" value="{{ entry.0.id_version.note_version }}" {% if not modifiable_enabled %}disabled{% endif %}>
+                    </div>
+                </div>
+            </div>
+            <div class="notes_item_image">
+                <div data-list-length = '{{ entry|length }}'>
+                    {% for file in entry %}
+                        <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+                    {% endfor %}
+                    {% if entry|length > 1 %}
+                        <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                        <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="saisir_item_small" id="fin_de_saisie">Pas de Note</div>
+{% endif %}
+<!-- SIDE CONTROLS -->
+{% if entries %}
+    <div id="right_move_controls" class="clearfix">
+        <div class="move_controls_item" id="go_to_top" onclick="go_to_top(event)"><div></div><div></div></div>
+        <div class="move_controls_item" id="go_to_bottom" onclick="go_to_bottom(event)"><div></div><div></div></div>
+    </div>
+    {% if modifiable_enabled %}
+        <div id="left_move_controls">
+            <div class="move_controls_item" id="data_save" onclick="send_notes_data(this, event, false);"><span>Sauvgarder</span></div>
+            <div class="move_controls_item" id="data_submit" onclick="send_notes_data(this, event, true);"><span>Envoyer</span></div>
+            <div class="move_controls_item" id="notes_stats">
+                <span>Stats</span>
+                <div>Copies: {{ entries|length }}</div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}

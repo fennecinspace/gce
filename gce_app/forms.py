@@ -1,5 +1,5 @@
 from django import forms
-from gce_app.models import Utilisateur, FichierCopie
+from gce_app.models import Utilisateur, FichierCopie, FichierCorrection
 
 class avatar_upload_form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -14,8 +14,17 @@ class avatar_upload_form(forms.ModelForm):
 class copies_file_upload_form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['emplacement_fichier'].widget.attrs.update({'onchange': 'upload_copies(this,event);', 'id': 'upload_copies_input', 'multiple': 'true', 'accept': 'image/jpeg'})
+        self.fields['emplacement_fichier'].widget.attrs.update({'onchange': 'upload_copies(this,event);', 'id': 'upload_input', 'multiple': 'true', 'accept': 'image/jpeg'})
     
     class Meta():
         model = FichierCopie
+        fields = ['emplacement_fichier']
+
+class correction_file_upload_form(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['emplacement_fichier'].widget.attrs.update({'onchange': 'upload_correction(this,event);', 'id': 'upload_input', 'multiple': 'true', 'accept': 'image/jpeg'})
+    
+    class Meta():
+        model = FichierCorrection
         fields = ['emplacement_fichier']

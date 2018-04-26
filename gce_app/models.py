@@ -27,7 +27,12 @@ def copies_file_path(instance, filename):
 def corrections_file_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join('corrections', filename)
+    current_annee = AnneeScolaire.objects.all().order_by('-id')[0].annee_scolaire
+    path = os.path.join('corrections', current_annee)
+    path = os.path.join(path, instance.id_correction.id_module.id_specialite.id_parcours.id_filiere.id_domaine.nom)
+    path = os.path.join(path, instance.id_correction.id_module.id_specialite.id_parcours.nom)
+    path = os.path.join(path, instance.id_correction.id_module.titre_module)
+    return os.path.join(path, filename)
 
 def avatars_file_path(instance, filename):
     ext = filename.split('.')[-1]
@@ -242,7 +247,8 @@ class Correction(models.Model):
     # id_correction = models.CharField(db_column='id_Correction', primary_key=True, max_length=100)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
-
+    annee_correction = models.ForeignKey('AnneeScolaire', models.SET_NULL, db_column='annee_Correction', blank=True, null=True)
+    
     class Meta:
         db_table = 'Correction'
 

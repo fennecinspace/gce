@@ -1,7 +1,37 @@
 {% extends 'gce_app/common/base_page.html' %}
 {% block base_extender %}
 <div id="notes_container">
-    hELLO WORLD
+    {% if modules %}
+        <div id="notes_editing_area">
+            <div id="retour" class="saisir_item_small" onclick="leave_notes_area(event);"><div><div></div><div></div></div><div></div></div>
+            <div id="upload_area" onclick="trigger_upload(event);" class="upload_unactive_drag upload_is_allowed hide">
+                <div id='glisser-fichier'>Glisser-Déposer</div>
+                <div id="progress_percent" class="hide">0%</div>
+                <div id="progress_bar" class="hide"><div id="progress_bar_status"></div></div>
+                <div id='selectioner-fichier'>Clicker pour Sélectionner un Fichier</div>
+            </div>
+            <form id='upload_form' class='hide' enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ upload_form }}
+            </form>
+            <div id="notes_area"></div>
+            <div id="image_show_large"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
+            <div id="note_image_overlay" class="notes_item_image"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
+        </div>
+        <div id="saisir_chose_module">
+            <div class="saisir_item_small" id="saisir_search_module">
+                <input type="text" name="search_module" placeholder="Trouver un module" oninput="filter_modules(event);" autocomplete="off" >
+            </div>
+            {% for module in modules %}
+                <div class="saisir_item_small saisir_module_item {% if forloop.counter0|divisibleby:2 %}left_item{% else%}right_item{% endif %}" onclick="get_module_notes(this,event);">
+                    <span class="saisir_module_level">{{ module.id_specialite.id_parcours.nom }} : </span>
+                    <span class="saisir_module_title">{{ module.titre_module }}</span>
+                    <div class="lds-spinner saisir_module_item_loader"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Vérifier</div>
+    {% endif %}
 </div>
-
 {% endblock %}

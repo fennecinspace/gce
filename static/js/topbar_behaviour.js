@@ -37,11 +37,18 @@ function notification_toggler(){
 
 function profile_option_handler() {
     var profile_options_item = document.getElementById('profile_options_item');
-    if (profile_options_item ){
+    if (profile_options_item){
         profile_options_item.addEventListener('click', function(e) {
             e.preventDefault();
             var user_id = document.getElementById('logged_in_user_id').innerHTML;
-            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
+            if (profile_options_item.dataset.userType == "etud")
+                $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
+            else if (profile_options_item.dataset.userType == "ensg")
+                $('#content_container').load(`${location.origin}/ensgs/${user_id} #content_container > *`);
+            else if (profile_options_item.dataset.userType == "chef")
+                $('#content_container').load(`${location.origin}/chefs/${user_id} #content_container > *`);
+            else if (profile_options_item.dataset.userType == "tech")
+                $('#content_container').load(`${location.origin}/techs/${user_id} #content_container > *`);
             options_hider();
         });
     }

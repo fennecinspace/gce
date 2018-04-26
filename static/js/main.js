@@ -125,7 +125,7 @@ var create_annonce_show = false;
 
 function annonceVisibility(element,e) {
     e.stopPropagation();
-    if (confirm('Confirmer le Changement d\'Etat d\'Affichage')){
+    if (confirm('Confirmez le Changement d\'Etat d\'Affichage')){
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/annonces/`,
@@ -160,7 +160,7 @@ function annonceVisibility(element,e) {
 
 function deleteAnnonce(element,e) {
     e.stopPropagation();
-    if (confirm('Confirmer la Suppression')){
+    if (confirm('Confirmez la Suppression')){
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/annonces/`,
@@ -403,11 +403,11 @@ function leave_upload_area(e) {
 
 function trigger_upload(e){
     if(!upload_in_progress)
-        $('#upload_copies_input').trigger('click');
+        $('#upload_input').trigger('click');
 }
 
 function upload_copies(element,e){
-    if (document.getElementById('upload_copies_input').value != '')
+    if (document.getElementById('upload_input').value != '')
         start_copies_upload();
 }
 
@@ -481,7 +481,11 @@ function start_copies_upload(){
 }
 
 function leave_image_overlay(elem, e) {
-    $('#image_show_large').hide();
+    if (document.getElementById('image_show_large'))
+        $('#image_show_large').hide();
+    if (document.getElementById('note_image_overlay'))
+        $('#note_image_overlay').hide();
+
 }
 
 function copie_click(img, e) {
@@ -489,14 +493,14 @@ function copie_click(img, e) {
     if(!disable_click){
         overlay = document.getElementById('image_show_large');
         overlay.innerHTML = `<img src='${ img.src }'>` + '<div onclick="leave_image_overlay(this,event);">&#10006;</div>';
-        if (overlay.querySelector('img').clientWidth > overlay.querySelector('img').clientHeight){
-            overlay.querySelector('img').style.width = '100%';
-            overlay.querySelector('img').style.height = 'auto';
-        }
-        else {
-            overlay.querySelector('img').style.width = 'auto';
-            overlay.querySelector('img').style.height = '100%';
-        }
+        // if (overlay.querySelector('img').clientWidth > overlay.querySelector('img').clientHeight){
+        //     overlay.querySelector('img').style.width = '100%';
+        //     overlay.querySelector('img').style.height = 'auto';
+        // }
+        // else {
+        //     overlay.querySelector('img').style.width = 'auto';
+        //     overlay.querySelector('img').style.height = '100%';
+        // }
         $(overlay).show();
     }
 }
@@ -604,7 +608,10 @@ function go_to_top(e) {
 }
 
 function go_to_bottom(e) {
-    $('#site_container').animate({ scrollTop: $('#saisir_area').height() }, 500);
+    if(document.querySelector('#saisir_area'))
+        $('#site_container').animate({ scrollTop: $('#saisir_area').height() }, 500);
+    if(document.querySelector('#notes_area'))
+        $('#site_container').animate({ scrollTop: $('#notes_area').height() }, 500);
 }
 
 function go_to_copies(e) {
@@ -704,10 +711,30 @@ function send_copies_data(elem, e, final) {
     if (uncmp) 
         data.uncompleted = [...check_valid_entries(uncmp)];
 
-    if (final)
-        data = format_data_to_send(data, "submit");
-    else
+    if (final && data.completed) {  //submit
+        for (let i = 0; i < data.completed.length; i++)
+            if (data.completed[i].querySelector(".saisir_student_mark").value == ""){
+                alert('Erreur : Pas tous les copies ont une note !');
+                return;
+            }
+        
+        var files = document.querySelectorAll('#uncompleted_entries .mark_item_large');
+        if (files.length == 0)
+            data = format_data_to_send(data, "submit"); 
+        else {
+            alert('Erreur : Supprimer tous les fichiers supplementaire avant d\'envoyer');
+            return;
+        }
+    }
+    else  //submit
         data = format_data_to_send(data, "save");
+    
+    if (final){
+        if(!confirm('Confirmez la fin de la saisie'))
+            return;
+        if(!confirm('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes et les copies !'))
+            return;
+    }
 
     $('#main_loader_overlay').fadeIn();
     $.ajax({
@@ -717,12 +744,21 @@ function send_copies_data(elem, e, final) {
         success: function (response) {
             data = JSON.parse(response);
             if (data.success){
-                $('#saisir_area').html(data.html);
+                if (data.type == 'submit') {
+                    $('#content_container').load(`${location.origin}/saisir #content_container > *`);
+                }
+                else {
+                    $('#saisir_area').html(data.html);
+                }
                 files_selection_status = false;
                 copies_selection_status = false;
             }
             else
-                alert('Echec !');
+                if (data.error)
+                    alert(data.error);
+                else
+                    alert('Echec !');
+                
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
@@ -769,9 +805,9 @@ function send_delete_request(data_to_send, type) {
 function delete_entry(elem, e, type) {
     var message_confirmation;
     if (type == 'file')
-        message_confirmation = 'Confirmer la Suppression';
+        message_confirmation = 'Confirmez la Suppression';
     else if (type == 'copy')
-        message_confirmation = 'Confirmer le Dégroupage';
+        message_confirmation = 'Confirmez le Dégroupage';
 
     if (confirm(message_confirmation)){
         var data_to_send = [elem.parentElement.parentElement.querySelector('.mark_version_id').innerHTML];
@@ -804,7 +840,7 @@ function delete_multiple_entry(e) {
 
 
     if(Object.keys(data_to_send).length > 0)
-        if (confirm('Confirmer la Suppression de Plusieurs Entrées')) {
+        if (confirm('Confirmez la Suppression de Plusieurs Entrées')) {
             data_to_send = JSON.stringify(data_to_send);
             send_delete_request(data_to_send, 'both');
         }
@@ -858,3 +894,223 @@ function show_more(elem,e) {
 
 ////////////////// ENSEIGNANT ////////////////////
 //////////////////// NOTES ///////////////////////
+var upload_correction_req;
+
+function get_module_notes(element,e) {
+    e.stopPropagation();
+    e.preventDefault();
+    module_to_upload_to = element.querySelector('.saisir_module_title').innerHTML;
+    element.querySelector('.saisir_module_item_loader').style.display = "block";
+    setTimeout(function() {
+        $.ajax({
+            url: `${location.origin}/notes/`,
+            type: 'POST',
+            data: {
+                'module_name' : module_to_upload_to,
+            },
+            success: function (response) {
+                data = JSON.parse(response);
+                if (data.success){
+                    $('#notes_area').html(data.html);
+                    $(element.parentElement).slideUp(500);
+                    $('#notes_editing_area').slideDown(500);
+                }
+                else
+                    alert('Echec !');
+            },
+            complete: function (){
+                element.querySelector('.saisir_module_item_loader').style.display = "none";
+            },
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
+        }); 
+    },100);
+    document.querySelector('#retour > div:last-child').innerHTML = module_to_upload_to;
+}
+
+
+function leave_notes_area(e) {
+    e.stopPropagation();
+    module_to_upload_to = null;
+    $('#notes_editing_area').slideUp(500);
+    $('#saisir_chose_module').slideDown(500);
+    $('#upload_area').slideUp();
+}
+
+
+function mark_image_viewer(elem, e) {
+    $('#note_image_overlay').html('<div onclick="leave_image_overlay(this,event);">&#10006;</div>');
+    item = elem.parentElement.parentElement.querySelector('.notes_item_image > div');
+    $(item).clone().prependTo('#note_image_overlay');
+    $('#note_image_overlay').show();
+}
+
+
+function send_notes_data(elem, e, final) {
+    e.stopPropagation();
+    var data = {
+        'type' : final ? 'submit' : 'save',
+        'module_name' : module_to_upload_to
+    };
+
+    data.data_to_send = [];
+    var items = document.querySelectorAll('.notes_item_small');
+    for (let i = 0; i < items.length; i++)
+        data.data_to_send = [
+            ...data.data_to_send, 
+            {
+                "version_id": items[i].querySelector('.notes_item_id').innerHTML,
+                "mark": items[i].querySelector('.notes_item_mark_value').value,
+            }];
+
+    if (final) {
+        if (document.getElementById('correction_entry'))
+            data.correction = true;
+        else {
+            data.correction = false;
+            alert('Téléverser une correction');
+            return;
+        }
+    }
+
+    data.data_to_send = JSON.stringify(data.data_to_send);
+    $('#main_loader_overlay').fadeIn();
+    $.ajax({
+        url: `${location.origin}/notes/`,
+        type: 'POST',
+        data: data,
+        success: function (response) {
+            data = JSON.parse(response);
+            if (data.success)
+                if (data.type == 'submit') {
+                    $('#notes_area').html(data.html);
+                    alert('les notes ne sont plus modifiable');
+                }
+                else
+                    $('#notes_area').html(data.html);
+            else
+                alert('Echec !');
+        },
+        complete: function (){
+            $('#main_loader_overlay').fadeOut();
+        },
+        error: function (xhr, textStatus, thrownError){
+            alert('Echec !');
+        },
+    });
+}
+
+
+function toggle_upload_correction(elem, e) {
+    if (elem.dataset.toggled == 'false'){
+        $('#upload_area').slideDown();
+        elem.dataset.toggled = 'true';
+    }
+    else {
+        $('#upload_area').slideUp();
+        elem.dataset.toggled = 'false';
+    }
+}
+
+function upload_correction(element,e){
+    if (document.getElementById('upload_input').value != '')
+        start_correction_upload();
+}
+
+function start_correction_upload() {
+    if (!upload_correction_req) {
+        ajax_data = new FormData(document.getElementById('upload_form'));
+        ajax_data.append('type','upload');
+        ajax_data.append('module_name',module_to_upload_to);
+        if (droppedFiles)
+            for (var i = 0; i < droppedFiles.length; i++)
+                ajax_data.append( 'emplacement_fichier', droppedFiles[i] );
+
+        upload_correction_req = $.ajax({
+            url: `${location.origin}/notes/`,
+            type: 'POST',
+            data: ajax_data,
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                data = JSON.parse(response);
+                if (data.success){
+                    $('#notes_area').html(data.html);
+                    $('#upload_area').slideUp();
+                }
+                else
+                    alert('Echec !');
+                droppedFiles = null;
+                upload_correction_req = null;
+            },
+            complete: function (){
+                document.getElementById('progress_percent').className = "hide";
+                document.getElementById('progress_bar').className = "hide";
+                document.getElementById('glisser-fichier').className = "";
+                document.getElementById('selectioner-fichier').className = "";
+                document.getElementById('upload_area').className = "upload_unactive_drag upload_is_allowed";
+                document.getElementById('progress_percent').innerHTML = "0%";
+                document.getElementById('progress_bar_status').style.width = '0%';
+                upload_in_progress = false;
+            },
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
+            xhr: function () {
+                var jqXHR = new window.XMLHttpRequest();
+                jqXHR.upload.addEventListener( "progress", function ( e ) {
+                    if (e.lengthComputable) {
+                        var percentComplete = Math.round( (e.loaded * 100) / e.total );
+                        document.getElementById('progress_percent').innerHTML = percentComplete + "%";
+                        document.getElementById('progress_bar_status').style.width = percentComplete + '%';
+                    }
+                });
+                return jqXHR;
+            },
+            beforeSend: function() {
+                document.getElementById('progress_percent').className = "";
+                document.getElementById('progress_bar').className = "";
+                document.getElementById('glisser-fichier').className = "hide";
+                document.getElementById('selectioner-fichier').className = "hide";
+                document.getElementById('upload_area').className = "upload_unactive_drag";
+                upload_in_progress = true;
+            }
+        });
+    }
+    else {
+        alert('un autre upload est en cours');
+    }
+}
+
+function delete_correction(elem, e) {
+    if (confirm('Confirmez la Suppression')) {
+        var data_to_send = elem.parentElement.parentElement.querySelector('.mark_correction_id').innerHTML;
+        $('#main_loader_overlay').fadeIn();
+        $.ajax({
+            url: `${location.origin}/notes/`,
+            type: 'POST',
+            data: {
+                'type': 'delete',
+                'data_to_delete': data_to_send,
+                'module_name': module_to_upload_to,
+            },
+            success: function (response) {
+                data = JSON.parse(response);
+                if (data.success){
+                    $('#notes_area').html(data.html);
+                }
+                else
+                    alert('Echec !');
+            },
+            complete: function (){
+                $('#main_loader_overlay').fadeOut();
+            },
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
+        });
+    }
+}
