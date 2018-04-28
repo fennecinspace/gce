@@ -11,7 +11,7 @@ urlpatterns = [
     path('annonces/', login_required(AnnonceView.as_view()), name='annonces'),
     path('saisir/', login_required(SaisirView.as_view()), name='saisir'),
     path('notes/', login_required(NotesView.as_view()), name='notes'),
-    path('affichage/', login_required(AffichageView.as_view()), name='affichage'),
+    path('affichages/', login_required(AffichageView.as_view()), name='affichage'),
     path('personnels/', login_required(UsersView.as_view()), name='personnels'),
     ## ajax only
     path('notification_state_changer_VIEW/', notification_state_changer, name='notification_state_changer'),

@@ -7,7 +7,9 @@
                 {% for elem in correction %}
                     <img src="{{ elem.emplacement_fichier.url }}" data-index-number="{{ forloop.counter0 }}" alt="copie preview" onclick="copie_click(this,event);" onmousewheel="change_zoom_scroll(this,event);" onmousedown="copie_mouse_down(this, event)" onmouseup="copie_mouse_up(this, event);" onmouseout="copie_mouse_up(this, event);" onmousemove="copie_move(this, event);" {% if forloop.counter0 != 0 %}class="hide"{% endif %}>
                 {% endfor %} 
-                    <div class="delete_entry" onclick="delete_correction(this, event);"><div></div><div></div></div>  
+                    {% if modifiable_enabled %}
+                        <div class="delete_entry" onclick="delete_correction(this, event);"><div></div><div></div></div>  
+                    {% endif %}
                     <div class="delete_entry_text">Supprimer Correction</div>
                 {% if correction|length > 1 %}
                     <div class="next_image" onclick="next_image(this, event);"><div></div><div></div></div>
@@ -66,5 +68,11 @@
                 <div>Copies: {{ entries|length }}</div>
             </div>
         </div>
+    {% else %}
+        {% if not entries.0.0.id_version.afficher_copie %}
+            <div id="left_move_controls">
+                <div class="move_controls_item" id="modifiable_right" onclick="demande_modification_right(this, event);"><span>Demande de Droit de Modification</span></div>
+            </div>
+        {% endif %}
     {% endif %}
 {% endif %}

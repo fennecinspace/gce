@@ -350,6 +350,7 @@
 }
 
 #notification_button {
+    position: relative;
     background: url(../images/notification_bell_filled.png) no-repeat center;
     background-size: 100%;
     width: 1.6em;
@@ -357,6 +358,20 @@
     margin: .4em;
     cursor: pointer;
     display: inline-block;
+}
+
+#notification_numbers {
+    height: 20px;
+    width: 20px;
+    background-color: rgba(255, 0, 0, 0.808);
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 13px;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    color: rgb(245, 245, 245);
 }
 
 #notification_box, #options_box {
@@ -447,6 +462,7 @@
     transition: .2s;
 }
 
+
 /* #region NOTIFICATION BOX*/
 #no_notification {
     padding: 0 1em;
@@ -465,9 +481,9 @@
     display: flex;
     padding: 0 16px 0 6px;
     width: 400px;
-    height: 56px;
+    height: auto;
     text-align: left;
-    line-height: 56px;
+    /* line-height: 56px; */
 }
 
 .notification_item:hover {
@@ -507,12 +523,13 @@
 }
 
 .notification_description {
-    height: 2em;
+    /* height: 2em; */
     line-height: 1.2em;
     font-size: .85em;
-    text-overflow: ellipsis;
+    padding-bottom: 10px; /* new */
+    /* text-overflow: ellipsis;
     overflow:hidden;
-    white-space: nowrap; 
+    white-space: nowrap;  */
 }
 
 .notification_id > div:first-child {
@@ -1672,15 +1689,22 @@
     font-weight: 400; 
 }
 
-.affichage_module_button {
+.affichage_module_button, .modifiable_module_button {
     position: absolute;
-    right: 1em;
-    top: 1em;
-    right: 0;
-    transform: scale(0.8);
+    transform: scale(0.7);
 }
 
-.affichage_module_button:hover { 
+.affichage_module_button {
+    right: -.7em;
+    top: 0em;
+}
+
+.modifiable_module_button {
+    right: -1.1em;
+    top: 1.8em;
+}
+
+.affichage_module_button:hover, .modifiable_module_button:hover { 
     animation: none;
 }
 
@@ -1698,10 +1722,6 @@
     background-color: rgba(218, 218, 218, .7);
     color: #0070c9;
     cursor: pointer;
-}
-
-.personnel_user_item:hover {
-    
 }
 
 .personnel_user_img {
@@ -1899,7 +1919,7 @@
     background-repeat: no-repeat;
 }
 
-#data_submit {
+#data_submit, #modifiable_right {
     background-image: url('../images/send_file_icon.png');
     background-size: 25px;
     background-position: 4px 3px;
@@ -1914,11 +1934,15 @@
     width: 98px;
 }
 
-#go_to_copies, #go_to_files, #data_submit, #data_save, #delete_multiple_entries, #saisir_stats, #notes_stats {
+#modifiable_right:hover {
+    width: 285px;
+}
+
+#modifiable_right, #go_to_copies, #go_to_files, #data_submit, #data_save, #delete_multiple_entries, #saisir_stats, #notes_stats {
     transition: width .5s, height .5s;
 }
 
-#go_to_copies:hover, #go_to_files:hover, #data_submit:hover, #data_save:hover, #delete_multiple_entries:hover, #saisir_stats:hover,  #notes_stats:hover {
+#modifiable_right, #go_to_copies:hover, #go_to_files:hover, #data_submit:hover, #data_save:hover, #delete_multiple_entries:hover, #saisir_stats:hover,  #notes_stats:hover {
     transition: width .5s, height .5s;
 }
 
@@ -2264,6 +2288,7 @@
     #data_save:hover {width: 130px;}
     #delete_multiple_entries:hover {width: 200px;}
     #data_submit:hover {width: 100px;}
+    #modifiable_right:hover {width: 310px;}
     .check_item_control::after {font-size: 18px;}
     .select_all > span {padding-left: 1px;}
 }

@@ -47,11 +47,8 @@ def get_user_data(u_obj):
 ## returns the user's querylist of notifications in a dictionary
 def get_user_notifications(u_obj):
     notifications = []
-    allNotifications = Notification.objects.filter(Q(id_utilisateur__in = [u_obj]) & Q(vue_notification = False))
-    for notification in allNotifications:
-        if notification.vue_notification == False:
-            notifications += [notification]
-    return {'notifications_list': notifications,}
+    allNotifications = Notification.objects.filter(Q(id_utilisateur__in = [u_obj]) & Q(vue_notification = False)).order_by('-id')
+    return {'notifications_list': allNotifications,}
 
 
 ## chages user avatar
@@ -857,8 +854,14 @@ class NotesView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/ensg/ensg_notes.html'
 
     def get_context_data(self, **kwargs):
+        global ANNEE_SCOLAIRE 
+        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
         context = super().get_context_data(**kwargs)
-        context['modules'] = Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.filter(finsaisie_module = True)
+        context['modules'] = []
+        user_modules = Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.filter(finsaisie_module = True)
+        for module in user_modules:
+            if len(Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE))) > 0:
+                context['modules'] += [module]
         # print(Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.all()[0].titre_module)
         context['upload_form'] = correction_file_upload_form
         return context
@@ -883,6 +886,8 @@ class NotesView(TemplateView, BaseContextMixin):
                     save_notes_module(req, module_name)
                 if req.POST.get('type') == 'submit':
                     submit_notes_module(req, module_name)
+                if req.POST.get('type') == 'access_right':
+                    demande_access_right_ensg_notes(module_name)
                 context = get_copy_entries(module_name, True)
                 context['correction'] = get_module_correction(module_name)
                 context['modifiable_enabled'] = check_if_modifiable(context['entries'])
@@ -903,6 +908,17 @@ class NotesView(TemplateView, BaseContextMixin):
         else:
             return HttpResponse("<h2>404</h2>")
 
+def demande_access_right_ensg_notes(module_name):
+    print(Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement.info_utilisateur.username)
+    user_to_notify = Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement
+    notif = Notification(
+        sujet_notification = 'Demande de Droit de Modification',
+        description_notification = 'l\'enseignant du module ' + module_name +' demande le droit de modification avant l\'affichage',
+        icon_notification = 'images/notifications/save_notification.png',
+        id_utilisateur = user_to_notify
+    )
+    notif.save()
+
 class AffichageView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/chef/chef_affichage.html'
 
@@ -921,12 +937,17 @@ class AffichageView(TemplateView, BaseContextMixin):
         
         if req.is_ajax():
             try:
-                module = Module.objects.filter(id = req.POST.get('data_to_delete'))[0]
+                module = Module.objects.filter(id = req.POST.get('data'))[0]
                 module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE))
-                for copy in module_copies:
-                    print('here')
-                    copy.afficher_copie = True
-                    copy.save()
+                if req.POST.get('type') == 'show':
+                    for copy in module_copies:
+                        copy.afficher_copie = True
+                        copy.save()
+                if req.POST.get('type') == 'grant_access':
+                    for copy in module_copies:
+                        print('here')
+                        copy.modifiable = True
+                        copy.save()
                 data = {'success': True, 'module': module.titre_module}
             except Exception as e:
                 print(e)

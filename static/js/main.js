@@ -79,7 +79,7 @@ function load_reclamations(e) {
 }
 function load_affichages(e) {
     $('#main_loader_overlay').fadeIn();
-    $('#content_container').load(`${location.origin}/affichage #content_container > *`,()=> {
+    $('#content_container').load(`${location.origin}/affichages #content_container > *`,()=> {
         $('#main_loader_overlay').fadeOut();
     });
 }
@@ -333,13 +333,13 @@ function filter_modules(e) {
 
     if (filter_value.length == 0)
         for (var i = 0; i < all_modules.length; i++)
-            all_modules.eq(i).slideDown()
+            all_modules.eq(i).slideDown();
     else
         for (var x = 0; x < all_modules.length; x++)
             if (all_modules[x].querySelector('.saisir_module_title').innerHTML.toLowerCase().includes(filter_value) || all_modules[x].querySelector('.saisir_module_level').innerHTML.toLowerCase().includes(filter_value))
-                all_modules.eq(x).slideDown()
+                all_modules.eq(x).slideDown();
             else
-                all_modules.eq(x).slideUp()  
+                all_modules.eq(x).slideUp(); 
 }
 
 
@@ -1137,6 +1137,33 @@ function delete_correction(elem, e) {
     }
 }
 
+function demande_modification_right(elem, e) {
+    if (confirm('Voulez-vous envoyer une demande au chef de departement ?')) {
+        $('#main_loader_overlay').fadeIn();
+        $.ajax({
+            url: `${location.origin}/notes/`,
+            type: 'POST',
+            data: {
+                'type': 'access_right',
+                'module_name': module_to_upload_to,
+            },
+            success: function (response) {
+                data = JSON.parse(response);
+                if (data.success)
+                    alert('Une demande a été envoyée au responsable de la filière, vous recevrez une notification, si cette dernière est acceptée');
+            else
+                    alert('Echec !');
+            },
+            complete: function (){
+                $('#main_loader_overlay').fadeOut();
+            },
+            error: function (xhr, textStatus, thrownError){
+                alert('Echec !');
+            },
+        });
+    }
+}
+
 
 ////////////////// CHEF ///////////////////
 //////////////// AFFICHAGE ////////////////
@@ -1147,11 +1174,11 @@ function afficher_module(elem,e){
             var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
             $.ajax({
-                url: `${location.origin}/affichage/`,
+                url: `${location.origin}/affichages/`,
                 type: 'POST',
                 data: {
-                    'type': 'delete',
-                    'data_to_delete': data_to_send,
+                    'type': 'show',
+                    'data': data_to_send,
                 },
                 success: function (response) {
                     data = JSON.parse(response);
@@ -1173,6 +1200,41 @@ function afficher_module(elem,e){
             });
         }
 }
+
+function enable_module_modification(elem,e) {
+    e.stopPropagation();
+    if (confirm('autorisez l\'enseignant a reverifié et remodifié les notes'))
+        if (confirm('Êtes-vous sûr ?')) {
+            var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
+            $('#main_loader_overlay').fadeIn();
+            $.ajax({
+                url: `${location.origin}/affichages/`,
+                type: 'POST',
+                data: {
+                    'type': 'grant_access',
+                    'data': data_to_send,
+                },
+                success: function (response) {
+                    data = JSON.parse(response);
+                    if (data.success){
+                        alert(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
+                        $(elem.parentElement).slideUp().remove();
+                        if (document.querySelectorAll('.affichage_item_large').length == 0)
+                            document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
+                    }
+                    else
+                        alert('Echec !');
+                },
+                complete: function (){
+                    $('#main_loader_overlay').fadeOut();
+                },
+                error: function (xhr, textStatus, thrownError){
+                    alert('Echec !');
+                },
+            });
+        }
+}
+
 
 
 function filter_affichage(e) {

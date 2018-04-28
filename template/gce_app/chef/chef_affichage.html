@@ -13,7 +13,8 @@
                     <div class="affichage_module_spec">Specialite : <span>{{ entry.id_specialite.nom }}</span></div>
                     <div class="affichage_module_parc">Parcours : <span>{{ entry.id_specialite.id_parcours.nom }}</span></div>
                 </div>
-                <div class="default_button affichage_module_button" onclick="afficher_module(this,event)">Afficher</div>
+                <div class="default_button modifiable_module_button" onclick="enable_module_modification(this,event);">Activer Modification</div>
+                <div class="default_button affichage_module_button" onclick="afficher_module(this,event);">Afficher Notes</div>
             </div>
         {% endfor %}
     {% else %}

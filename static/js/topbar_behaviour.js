@@ -105,7 +105,7 @@ function toggled_areas_closer(){ // closes the toggled windows when clicking els
 
 //////////////// NOTIFICATIONS STATE CHANGER ////////////////
 function mark_notification_as_read(){
-    allNotifications = document.querySelectorAll('.notification_id');
+    var allNotifications = document.querySelectorAll('.notification_id');
     for (var i = 0; i < allNotifications.length; i++)
         allNotifications[i].addEventListener('click', function(e) {
             var notification = this;
@@ -117,8 +117,14 @@ function mark_notification_as_read(){
                 },
                 success: function(response){
                     notification.parentElement.remove();
-                    if (!(document.querySelector('#notification_box div').children).length) //if there are no more notification items
+                    if (!(document.querySelector('#notification_box div').children).length){
                         document.querySelector('#notification_box').innerHTML = '<span id="no_notification">Pas de Notification</span>';
+                        document.querySelector('#notification_numbers').remove();
+                    } //if there are no more notification items
+                    else {
+                        var notification_list = document.querySelectorAll('.notification_item');
+                        document.querySelector('#notification_numbers').innerHTML = notification_list.length;
+                    }
                 },
                 complete:function(){},
                 error:function (xhr, textStatus, thrownError){}
@@ -493,7 +499,7 @@ function pages_handler() {
 
         document.getElementById("billboard_entry").addEventListener('click', function () {
             $('#main_loader_overlay').fadeIn();
-            $('#content_container').load(`${location.origin}/affichage #content_container > *`,()=> {
+            $('#content_container').load(`${location.origin}/affichages #content_container > *`,()=> {
                 $('#main_loader_overlay').fadeOut();
             });
             responsive_menu_hider();
