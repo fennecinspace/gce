@@ -41,14 +41,23 @@ function profile_option_handler() {
         profile_options_item.addEventListener('click', function(e) {
             e.preventDefault();
             var user_id = document.getElementById('logged_in_user_id').innerHTML;
+            $('#main_loader_overlay').fadeIn();
             if (profile_options_item.dataset.userType == "etud")
-                $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
+                $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`,()=> {
+                    $('#main_loader_overlay').fadeOut();
+                });
             else if (profile_options_item.dataset.userType == "ensg")
-                $('#content_container').load(`${location.origin}/ensgs/${user_id} #content_container > *`);
+                $('#content_container').load(`${location.origin}/ensgs/${user_id} #content_container > *`,()=> {
+                    $('#main_loader_overlay').fadeOut();
+                });
             else if (profile_options_item.dataset.userType == "chef")
-                $('#content_container').load(`${location.origin}/chefs/${user_id} #content_container > *`);
+                $('#content_container').load(`${location.origin}/chefs/${user_id} #content_container > *`,()=> {
+                    $('#main_loader_overlay').fadeOut();
+                });
             else if (profile_options_item.dataset.userType == "tech")
-                $('#content_container').load(`${location.origin}/techs/${user_id} #content_container > *`);
+                $('#content_container').load(`${location.origin}/techs/${user_id} #content_container > *`,()=> {
+                    $('#main_loader_overlay').fadeOut();
+                });
             options_hider();
         });
     }
@@ -170,7 +179,10 @@ function search_result_click_handler(){
         all_search_results[i].addEventListener('click', function(e) {
             e.stopPropagation();
             user_id = this.querySelector('.search_result_item_id').innerHTML;
-            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             hideSearch();
         });
     }
@@ -285,7 +297,10 @@ function suggestions_click_handler(){
         all_suggestions[i].addEventListener('click', function(e) {
             e.stopPropagation();
             var user_id = this.querySelector('.suggestion_item_id').innerHTML;
-            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`);
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/etuds/${user_id} #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             hideSearch();
         });
     }
@@ -406,7 +421,10 @@ function responsive_menu_hider() {
 
 function pages_handler() {
     document.getElementById("home_entry").addEventListener('click', function () {
-        $('#content_container').load(`${location.origin} #content_container > *`);
+        $('#main_loader_overlay').fadeIn();
+        $('#content_container').load(`${location.origin} #content_container > *`,()=> {
+            $('#main_loader_overlay').fadeOut();
+        });
         responsive_menu_hider();
     });
     user_type = $("#logged_in_user_id").html().substring(0, 4);
@@ -418,13 +436,19 @@ function pages_handler() {
         });
 
         document.getElementById("marks_entry").addEventListener('click', function () {
-            $('#content_container').load(`${location.origin}/saisir #content_container > *`);
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/saisir #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             responsive_menu_hider();
         });
     }
     else {
         document.getElementById("news_entry").addEventListener('click', function () {
-            $('#content_container').load(`${location.origin}/annonces #content_container > *`);
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/annonces #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             responsive_menu_hider();
         });
 
@@ -436,7 +460,10 @@ function pages_handler() {
 
     if (user_type == 'ensg' || user_type == 'etud') {
         document.getElementById("results_entry").addEventListener('click', function () {
-            $('#content_container').load(`${location.origin}/notes #content_container > *`);
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/notes #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             responsive_menu_hider();
         });
     }
@@ -457,12 +484,18 @@ function pages_handler() {
 
     if (user_type == 'chef') {
         document.getElementById("users_entry").addEventListener('click', function () {
-            alert('users');
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/personnels #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             responsive_menu_hider();
         });
 
         document.getElementById("billboard_entry").addEventListener('click', function () {
-            alert('billboard');
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/affichage #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             responsive_menu_hider();
         });
     }

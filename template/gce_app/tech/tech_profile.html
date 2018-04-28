@@ -1,0 +1,39 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% load custom_filters %}
+{% load staticfiles %}
+{% block base_extender %}
+    <div id="profile_container">
+        <div id='left_profile_section' class='left_item'>
+            <div id='profile_avatar'>
+                {% if user == technicien.id_technicien.info_utilisateur %}
+                <form id ='avatar_form' method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}{% for field in form %}{{ field }}{% endfor %}
+                </form>
+                {% endif %}
+                <img {% if user == technicien.id_technicien.info_utilisateur %} onclick='avatar_selector(event)' class="change_avatar"{% endif %} src="{{ technicien.id_technicien.avatar_utilisateur.url}}">
+                <div><div class="change_avatar_child"><div></div>Changer Avatar</div></div>
+            </div>
+            <span>
+                <div id="profile_name">{{ technicien.id_technicien.info_utilisateur.first_name|lower }} {{technicien.id_technicien.info_utilisateur.last_name|lower }}
+                    <div id="profile_email">{{ technicien.id_technicien.info_utilisateur.email }}</div>
+                </div>
+                <div id="profile_career">
+                    <div id="profile_faculty"><strong>Faculté :</strong> {{ technicien.id_faculte.nom }}</div>
+                    <div id="profile_university"><strong>Université :</strong> {{ technicien.id_faculte.id_universite.nom }}</div>
+                </div>
+            </span>
+        </div>
+        <div id='right_profile_section' class='right_item'>
+            {% if modules %}
+                <div class="profile_area">
+                    <div id='profile_modules' class="profile_area_title">Modules</div>
+                    <div class="profile_area_content">
+                        {% for module in modules %}
+                            <div>{{ module.titre_module|lower }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

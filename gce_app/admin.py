@@ -30,6 +30,10 @@ admin.site.register(VersionCopie)
 admin.site.register(FichierCopie)
 admin.site.register(FichierCorrection)
 
+class AnneeScolaireAdmin(admin.ModelAdmin):
+    list_display = ('annee_scolaire', 'active')
+admin.site.register(AnneeScolaire, AnneeScolaireAdmin)
+
 #admin.site.register(Appartientfiliere)
 # admin.site.register(Appartientfaculte)
 # admin.site.register(Etudier)

@@ -21,11 +21,11 @@
                     <div id="profile_groupe"><strong>Groupe :</strong> {{ student.id_groupe.numero }}</div>
                     <div id="profile_section"><strong>Section :</strong> {{ student.id_groupe.id_section.numero }}</div>
                     <div id="profile_specialty"><strong>Specialité :</strong> {{ student.id_groupe.id_section.id_specialite.nom }}</div>
-                    <div id="profile_level"><strong>Parcours :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.nom }}</div>
-                    <div id="profile_branch"><strong>Filiere :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.nom }}</div>
-                    <div id="profile_domain"><strong>Domaine :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.nom }}</div>
-                    <div id="profile_faculty"><strong>Faculté :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.id_faculte.nom }}</div>
-                    <div id="profile_university"><strong>Université :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.id_faculte.id_universite.nom }}</div>
+                    <div id="profile_level"><strong>Parcours :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.nom|lower|title }}</div>
+                    <div id="profile_branch"><strong>Filiere :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.nom|lower|title }}</div>
+                    <div id="profile_domain"><strong>Domaine :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.nom|lower|title }}</div>
+                    <div id="profile_faculty"><strong>Faculté :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.id_faculte.nom|lower|title }}</div>
+                    <div id="profile_university"><strong>Université :</strong> {{ student.id_groupe.id_section.id_specialite.id_parcours.id_filiere.id_domaine.id_faculte.id_universite.nom|lower|title }}</div>
                 </div>
             </span>
         </div>
@@ -46,7 +46,7 @@
                     <div class="profile_area_content">
                         {% for year,notes in marks.items %}
                             <div class="profile_area_result">
-                                <div class='profile_school_year'>{{ year }} :</div>
+                                <div class='profile_school_year'>{{ year.annee_scolaire }} :</div>
                                 <span>
                                     <div class='profile_notes_modules'>
                                         {% for note in notes %}

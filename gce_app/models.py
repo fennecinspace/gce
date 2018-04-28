@@ -215,6 +215,7 @@ class Copie(models.Model):
     # id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)
     annee_copie = models.ForeignKey('AnneeScolaire', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
     afficher_copie = models.BooleanField(db_column='afficher_Copie', default=False)
+    date_affichage = models.DateField(db_column='date_Affichage', blank=True, null=True)
     modifiable = models.BooleanField(db_column='Modifiable', default=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
@@ -334,6 +335,7 @@ class MessagesReclamation(models.Model):
 
 class AnneeScolaire(models.Model):
     annee_scolaire = models.CharField(db_column='annee_Scolaire', max_length=500, null=True)
-
+    active = models.BooleanField(db_column='active_Scolaire', default = False)
+    
     class Meta:
         db_table = 'anneeScolaire'

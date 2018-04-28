@@ -57,25 +57,40 @@ function load_televerser(e) {
     alert('no yet');
 }
 function load_saisir(e) {
-    $('#content_container').load(`${location.origin}/saisir #content_container > *`);
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/saisir #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
 }
 function load_annonces(e) {
-    $('#content_container').load(`${location.origin}/annonces #content_container > *`);
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/annonces #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
 }
 function load_resultats(e) {
-    $('#content_container').load(`${location.origin}/notes #content_container > *`);
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/notes #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
 }
 function load_reclamations(e) {
     alert('no yet');
 }
 function load_affichages(e) {
-    alert('no yet');
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/affichage #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
 }
 function load_consultations(e) {
     alert('no yet');
 }
 function load_utilisateur(e) {
-    alert('no yet');
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/personnels #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
 }
 function load_messenger(e) {
     alert('no yet');
@@ -318,13 +333,13 @@ function filter_modules(e) {
 
     if (filter_value.length == 0)
         for (var i = 0; i < all_modules.length; i++)
-            all_modules.eq(i).removeClass('hide');
+            all_modules.eq(i).slideDown()
     else
         for (var x = 0; x < all_modules.length; x++)
             if (all_modules[x].querySelector('.saisir_module_title').innerHTML.toLowerCase().includes(filter_value) || all_modules[x].querySelector('.saisir_module_level').innerHTML.toLowerCase().includes(filter_value))
-                all_modules.eq(x).removeClass('hide'); 
+                all_modules.eq(x).slideDown()
             else
-                all_modules.eq(x).addClass('hide');   
+                all_modules.eq(x).slideUp()  
 }
 
 
@@ -974,6 +989,13 @@ function send_notes_data(elem, e, final) {
         }
     }
 
+    if (final){
+        if(!confirm('Confirmez la fin de la verification'))
+            return;
+        if(!confirm('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes !'))
+            return;
+    }
+
     data.data_to_send = JSON.stringify(data.data_to_send);
     $('#main_loader_overlay').fadeIn();
     $.ajax({
@@ -1113,4 +1135,89 @@ function delete_correction(elem, e) {
             },
         });
     }
+}
+
+
+////////////////// CHEF ///////////////////
+//////////////// AFFICHAGE ////////////////
+function afficher_module(elem,e){
+    e.stopPropagation();
+    if (confirm('Confirmez l\'affichage'))
+        if (confirm('Êtes-vous sûr ?')) {
+            var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
+            $('#main_loader_overlay').fadeIn();
+            $.ajax({
+                url: `${location.origin}/affichage/`,
+                type: 'POST',
+                data: {
+                    'type': 'delete',
+                    'data_to_delete': data_to_send,
+                },
+                success: function (response) {
+                    data = JSON.parse(response);
+                    if (data.success){
+                        alert(`les notes du module ${data.module} ont été affichées`);
+                        $(elem.parentElement).slideUp().remove();
+                        if (document.querySelectorAll('.affichage_item_large').length == 0)
+                            document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
+                    }
+                    else
+                        alert('Echec !');
+                },
+                complete: function (){
+                    $('#main_loader_overlay').fadeOut();
+                },
+                error: function (xhr, textStatus, thrownError){
+                    alert('Echec !');
+                },
+            });
+        }
+}
+
+
+function filter_affichage(e) {
+    e.stopPropagation();
+    var filter_value = e.target.value.trim().toLowerCase();
+    var all_affichages = $('.affichage_item_large');
+
+    if (filter_value.length == 0)
+        for (var i = 0; i < all_affichages.length; i++)
+        all_affichages.eq(i).slideDown();
+    else
+        for (var x = 0; x < all_affichages.length; x++)
+            if (all_affichages[x].querySelector('.affichage_module_name').innerHTML.toLowerCase().includes(filter_value) || all_affichages[x].querySelector('.affichage_module_spec').innerHTML.toLowerCase().includes(filter_value) || all_affichages[x].querySelector('.affichage_module_parc').innerHTML.toLowerCase().includes(filter_value))
+                all_affichages.eq(x).slideDown();
+            else
+                all_affichages.eq(x).slideUp();
+}
+
+
+function access_personnel_profile(elem, e){
+    e.stopPropagation();
+    user_id = elem.querySelector('.personnel_user_id').innerHTML;
+    user_type = elem.querySelector('.personnel_user_type').innerHTML;
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/${user_type}/${user_id} #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
+}
+
+function filter_users(e) {
+    e.stopPropagation();
+    var filter_value = e.target.value.trim().toLowerCase();
+    var all_users = $('.personnel_user_item');
+    
+    if (filter_value.length == 0)
+        for (var i = 0; i < all_users.length; i++)
+            all_users.eq(i).slideDown();
+    else
+        for (var x = 0; x < all_users.length; x++){
+            var last_name = all_users[x].querySelector('.personnel_user_lastname').innerHTML.trim().toLowerCase();
+            var first_name = all_users[x].querySelector('.personnel_user_firstname').innerHTML.trim().toLowerCase();
+            if (first_name.includes(filter_value) || last_name.includes(filter_value) || (last_name + " " + first_name).includes(filter_value) || (first_name + " " + last_name).includes(filter_value))
+                all_users.eq(x).slideDown(); 
+            else
+                all_users.eq(x).slideUp(); 
+        }
+
 }

@@ -1,0 +1,43 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% load staticfiles %}
+{% block base_extender %}
+<div id="personnels_container">
+    {% if teachers or students %}
+        <div class="saisir_item_small" id="saisir_search_module">
+            <input type="text" name="search_module" placeholder="Trouver une personne" oninput="filter_users(event);" autocomplete="off" >
+        </div>
+        {% if teachers %}
+        <div id="teachers_container" class="go_up_anim">
+            <div class="default_title">Enseignants</div>
+            {% for teacher in teachers %}
+                <div class="saisir_item_small personnel_user_item" onclick="access_personnel_profile(this,event)">
+                    <div class="personnel_user_id">{{ teacher.id_utilisateur }}</div>
+                    <div class="personnel_user_type">ensgs</div>
+                    <img class="personnel_user_img" src="{{ teacher.avatar_utilisateur.url }}">
+                    <div class="personnel_user_info">
+                        <span class="personnel_user_lastname">{{ teacher.info_utilisateur.last_name|lower|title }}</span> <span class="personnel_user_firstname">{{ teacher.info_utilisateur.first_name|lower|title }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if students %}
+            <div id="students_container" class="go_up_anim" >
+                <div class="default_title">Etudiants</div>
+                {% for student in students %}
+                    <div class="saisir_item_small personnel_user_item" onclick="access_personnel_profile(this,event)">
+                        <div class="personnel_user_id">{{ student.id_utilisateur }}</div>
+                        <div class="personnel_user_type">etuds</div>
+                        <img class="personnel_user_img" src="{{ student.avatar_utilisateur.url }}">
+                        <div class="personnel_user_info">
+                            <span class="personnel_user_lastname">{{ student.info_utilisateur.last_name|lower|title }}</span> <span class="personnel_user_firstname">{{ student.info_utilisateur.first_name|lower|title }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="saisir_item_small" id="fin_de_verification_note">Pas de Personnels</div>
+    {% endif %}
+</div>
+{% endblock %}

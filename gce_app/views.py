@@ -3,10 +3,11 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import TemplateView, DetailView
+from django.views.generic.base import ContextMixin
 ## authentification modules
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 ## json modules for ajax
 from django.http.response import JsonResponse
 import json
@@ -23,6 +24,7 @@ from django.conf import settings
 from datetime import datetime
 import os
 
+    
 
 ## returns the user's data
 def get_user_data(u_obj):
@@ -50,6 +52,19 @@ def get_user_notifications(u_obj):
         if notification.vue_notification == False:
             notifications += [notification]
     return {'notifications_list': notifications,}
+
+
+## chages user avatar
+def change_user_avatar(req, form):
+    user_acct = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
+    if user_acct.avatar_utilisateur.url[-18:] != 'default_avatar.png':
+        user_acct.avatar_utilisateur.delete(False)
+    obj = form.save(commit=False)
+    obj.info_utilisateur = req.user
+    obj.type_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur
+    obj.id_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].id_utilisateur
+    obj.save()
+    return obj
 
 
 ## returns student data
@@ -84,6 +99,24 @@ def get_student_data(student):
         'modules': modules,
         'teachers': teachers,
         'marks': marks,
+    }
+
+
+def get_technicien_data(technicien):
+    return {
+        'modules': Module.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = technicien.id_faculte))))),
+    }
+
+def get_teacher_data(teacher):
+    return {
+        'chefs': ChefDepartement.objects.filter(id_chef_departement__in = Utilisateur.objects.filter(id_utilisateur__in =  teacher.filieres.all().values_list('id_chef_departement',flat = True))),
+    }
+
+def get_chef_data(chef):
+    return {
+        'filiere': Filiere.objects.filter(id_chef_departement = chef)[0],
+        'modules': Module.objects.filter(id_specialite__in = Specialite.objects.filter(id__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = chef))))),
+        'teachers': Enseignant.objects.filter(filieres__in = [Filiere.objects.filter(id_chef_departement = chef)[0]]),
     }
 
 
@@ -204,6 +237,8 @@ def create_new_annonce(req):
 
 ## returns the template based on the signed in user's type
 def get_home_template(req):
+    if req.user.is_superuser or req.user.is_staff:
+        return HttpResponseRedirect(reverse('admin:index'))
     loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [req.user])[0]
     user_data = get_user_data(loggedin_user)
     notifications = get_user_notifications(loggedin_user)
@@ -488,6 +523,21 @@ def submit_notes_module(req, module_name):
                 print(e)
                 files[0].id_version.id_copie.modifiable = True
                 files[0].id_version.id_copie.save()
+
+
+def get_affichable_modules(logged_in_user):
+    ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+    all_user_modules = Module.objects.filter(Q(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0])))) & Q(finsaisie_module = True))
+    affichable_modules = []
+    for module in all_user_modules:
+        module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE) & Q(afficher_copie = False))
+        module_final_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE) & Q(modifiable = False))
+        if len(module_final_copies) == len(module_copies) and len(module_copies) > 0: ## use != to get copies done in tech but still awaiting aproval from ensg
+            affichable_modules += [module]
+
+    return affichable_modules
+
+
 #######################################################
 ###################### VIEWS ##########################
 #######################################################
@@ -555,6 +605,15 @@ def search_result_feeder(req):
     return JsonResponse(stringfied_data, safe = False)
 
 #### Main View
+
+class BaseContextMixin(ContextMixin):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['loggedin_user'] = Utilisateur.objects.all().filter(info_utilisateur__in = [self.request.user])[0]
+        context.update(get_user_data(context['loggedin_user']))
+        context.update(get_user_notifications(context['loggedin_user']))
+        return context
+    
 class MainView(TemplateView):
     def post(self,req):
         if req.user.is_anonymous:
@@ -585,18 +644,22 @@ class MainView(TemplateView):
         return get_home_template(req)
 
 
-#### SHARED : STUDENT PROFILE VIEW
-class StudentProfileView(DetailView):
-    model = Etudiant
-    template_name = 'gce_app/etud/etud_profile.html'
-    context_object_name = 'student'
-    
+#### PROFILES VIEWS
+class ProfileView(DetailView, BaseContextMixin):
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        loggedin_user = Utilisateur.objects.all().filter(info_utilisateur__in = [self.request.user])[0]
-        context.update(get_user_data(loggedin_user))
-        context.update(get_student_data(kwargs['object']))
-        context.update(get_user_notifications(loggedin_user))
+        if kwargs['profile'] == 'etud':
+            context.update(get_student_data(kwargs['object']))
+        if kwargs['profile'] == 'tech':
+            context['allowed_types'] = ['chef','tech']
+            context.update(get_technicien_data(kwargs['object']))
+        if kwargs['profile'] == 'ensg':
+            context['allowed_types'] = ['chef','ensg']
+            context.update(get_teacher_data(kwargs['object']))
+        if kwargs['profile'] == 'chef':
+            context['allowed_types'] = ['chef']
+            context.update(get_chef_data(kwargs['object']))
         context.update({'form': avatar_upload_form })
         return context
 
@@ -607,14 +670,7 @@ class StudentProfileView(DetailView):
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
         if form.is_valid(): ## changing user avatar
             try:
-                user_acct = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
-                if user_acct.avatar_utilisateur.url[-18:] != 'default_avatar.png':
-                    user_acct.avatar_utilisateur.delete(False)
-                obj = form.save(commit=False)
-                obj.info_utilisateur = req.user
-                obj.type_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur
-                obj.id_utilisateur = Utilisateur.objects.filter(info_utilisateur = req.user)[0].id_utilisateur
-                obj.save()
+                obj = change_user_avatar(req, form)
                 data = {'success': True, 'new_avatar':obj.avatar_utilisateur.url}
             except Exception as e:
                 print(e)
@@ -625,31 +681,53 @@ class StudentProfileView(DetailView):
 
 
     def get (self,req,*args,**kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        profile_to_access = context['student'].id_etudiant
-        logged_in_user_type = context['user_id'][:4]
-        allowed_profiles = get_permitted_search_group(req, logged_in_user_type)
-        if profile_to_access in allowed_profiles:
+        ## etudiant profile
+        if kwargs['profile'] == 'etud':
+            self.model = Etudiant
+            self.template_name = 'gce_app/etud/etud_profile.html'
+            self.context_object_name = 'student'
+            self.object = self.get_object() 
+            context = self.get_context_data(object=self.object,**kwargs)
+            profile_to_access = context['student'].id_etudiant
+            logged_in_user_type = context['loggedin_user'].type_utilisateur
+            allowed_profiles = get_permitted_search_group(req, logged_in_user_type)
+            if profile_to_access in allowed_profiles:
+                return self.render_to_response(context)
+            else:
+                return HttpResponse("<h2>404</h2>")
+        
+        ## other users profiles
+        if kwargs['profile'] == 'tech':
+            self.model = Technicien
+            self.template_name = 'gce_app/tech/tech_profile.html'
+            self.context_object_name = 'technicien'
+        if kwargs['profile'] == 'ensg':
+            self.model = Enseignant
+            self.template_name = 'gce_app/ensg/ensg_profile.html'
+            self.context_object_name = 'teacher'
+        if kwargs['profile'] == 'chef':
+            self.model = ChefDepartement
+            self.template_name = 'gce_app/chef/chef_profile.html'
+            self.context_object_name = 'chef'
+
+        self.object = self.get_object() 
+        context = self.get_context_data(object=self.object,**kwargs)
+        if context['loggedin_user'].type_utilisateur in context['allowed_types']:
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")
 
 
-
 #### SHARED : ANNONCE VIEW 
-class AnnonceView(TemplateView):
+class AnnonceView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/common/annonces.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        logged_in_user = Utilisateur.objects.filter(info_utilisateur = self.request.user)[0]
-        context.update(get_user_data(logged_in_user))
-        context.update(get_user_notifications(logged_in_user))
-        context['annonces'] = get_user_annonce(self.request, logged_in_user.type_utilisateur)
-        if logged_in_user.type_utilisateur == 'chef':
-            context['modules'] = Module.objects.all().filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0]))))
-            context['filiere'] = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0])[0]
+        context['annonces'] = get_user_annonce(self.request, context['loggedin_user'].type_utilisateur)
+        if context['loggedin_user'].type_utilisateur == 'chef':
+            context['modules'] = Module.objects.all().filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = context['loggedin_user'])[0]))))
+            context['filiere'] = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = context['loggedin_user'])[0])[0]
             context['parcours'] = Parcours.objects.filter(id_filiere = context['filiere'])
         return context
 
@@ -710,30 +788,26 @@ class AnnonceView(TemplateView):
         return HttpResponse(req)
 
     def get(self, req, *args, **kwargs):
-        logged_in_user = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
-        if logged_in_user.type_utilisateur != 'tech':
-            context = self.get_context_data()
+        context = self.get_context_data()
+        if context['loggedin_user'].type_utilisateur in ['etud','ensg','chef']:
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")        
 
 
 ### TECH : SAISIR VIEW
-class SaisirView(TemplateView):
+class SaisirView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/tech/tech_saisir.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        logged_in_user = Utilisateur.objects.filter(info_utilisateur = self.request.user)[0]
-        context.update(get_user_data(logged_in_user))
-        context.update(get_user_notifications(logged_in_user))
-        context['modules'] = Module.objects.filter(Q(id_specialite__in = Specialite.objects.filter(id__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = Technicien.objects.filter(Q(id_technicien = logged_in_user))[0].id_faculte)))))) & Q(finsaisie_module = False))
+        context['modules'] = Module.objects.filter(Q(id_specialite__in = Specialite.objects.filter(id__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_domaine__in = Domaine.objects.filter(id_faculte = Technicien.objects.filter(Q(id_technicien = context['loggedin_user']))[0].id_faculte)))))) & Q(finsaisie_module = False))
         context['upload_form'] = copies_file_upload_form
         return context
 
     def post(self, req, *args, **kwargs):
         global ANNEE_SCOLAIRE
-        ANNEE_SCOLAIRE = AnneeScolaire.objects.all().order_by('-id')[0]
+        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
         if self.request.POST.get('logout'):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
@@ -770,9 +844,8 @@ class SaisirView(TemplateView):
         return HttpResponse(req)
 
     def get(self, req, *args, **kwargs):
-        logged_in_user = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
-        if logged_in_user.type_utilisateur == 'tech':
-            context = self.get_context_data()
+        context = self.get_context_data()
+        if context['loggedin_user'].type_utilisateur == 'tech':
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")
@@ -780,22 +853,20 @@ class SaisirView(TemplateView):
 
 
 ## ENSG : NOTES VIEW
-class NotesView(TemplateView):
+class NotesView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/ensg/ensg_notes.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        logged_in_user = Utilisateur.objects.filter(info_utilisateur = self.request.user)[0]
-        context.update(get_user_data(logged_in_user))
-        context.update(get_user_notifications(logged_in_user))
-        context['modules'] = Enseignant.objects.filter(id_enseignant = logged_in_user)[0].modules.filter(finsaisie_module = True)
-        # print(Enseignant.objects.filter(id_enseignant = logged_in_user)[0].modules.all()[0].titre_module)
+        context['modules'] = Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.filter(finsaisie_module = True)
+        # print(Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.all()[0].titre_module)
         context['upload_form'] = correction_file_upload_form
         return context
 
     def post(self, req, *args, **kwargs):
-        global ANNEE_SCOLAIRE
-        ANNEE_SCOLAIRE = AnneeScolaire.objects.all().order_by('-id')[0]
+        ## added order by -id to fix stupid admin fault in case he/she leaves 2 active years /last entry created will be taken
+        global ANNEE_SCOLAIRE 
+        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
         
         if self.request.POST.get('logout'):
             logout(req)
@@ -826,9 +897,66 @@ class NotesView(TemplateView):
 
 
     def get(self, req, *args, **kwargs):
-        logged_in_user = Utilisateur.objects.filter(info_utilisateur = req.user)[0]
-        if logged_in_user.type_utilisateur == 'ensg':
-            context = self.get_context_data()
+        context = self.get_context_data()
+        if context['loggedin_user'].type_utilisateur == 'ensg':
+            return self.render_to_response(context)
+        else:
+            return HttpResponse("<h2>404</h2>")
+
+class AffichageView(TemplateView, BaseContextMixin):
+    template_name = 'gce_app/chef/chef_affichage.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entries'] = get_affichable_modules(context['loggedin_user'])
+        return context
+
+    def post(self, req, *args, **kwargs):
+        global ANNEE_SCOLAIRE
+        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+        
+        if self.request.POST.get('logout'):
+            logout(req)
+            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        
+        if req.is_ajax():
+            try:
+                module = Module.objects.filter(id = req.POST.get('data_to_delete'))[0]
+                module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE))
+                for copy in module_copies:
+                    print('here')
+                    copy.afficher_copie = True
+                    copy.save()
+                data = {'success': True, 'module': module.titre_module}
+            except Exception as e:
+                print(e)
+                data = {'success': False}
+            serialized_data = json.dumps(data)
+            return JsonResponse(serialized_data, safe = False) 
+        return HttpResponse(req)
+
+
+    def get(self, req, *args, **kwargs):
+        context = self.get_context_data()
+        if context['loggedin_user'].type_utilisateur == 'chef':
+            return self.render_to_response(context)
+        else:
+            return HttpResponse("<h2>404</h2>")
+
+
+class UsersView(TemplateView, BaseContextMixin):
+    template_name = 'gce_app/chef/chef_personnels.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = context['loggedin_user'])[0])[0]
+        context['teachers'] = Utilisateur.objects.filter(id_utilisateur__in = Enseignant.objects.filter(filieres__in = [filiere]).values_list('id_enseignant', flat=True))
+        context['students'] = Utilisateur.objects.filter(id_utilisateur__in = Etudiant.objects.filter(id_groupe__in = Groupe.objects.filter(id_section__in = Section.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = filiere))))))
+        return context
+
+    def get(self, req, *args, **kwargs):
+        context = self.get_context_data()
+        if context['loggedin_user'].type_utilisateur == 'chef':
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")

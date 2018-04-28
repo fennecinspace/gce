@@ -412,7 +412,7 @@ def RelationEnseignantModule():
 def PopulateAnneeScolaire():
     nbOfEntries = 0
     nbOfEntriesToCreate = 1
-    AnneeScolaire(annee_scolaire = '2017-2018').save()
+    AnneeScolaire(annee_scolaire = '2017-2018', active=True).save()
     nbOfEntries += 1
     sys.stdout.write('\n[19/{}]AnneeScolaire : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 

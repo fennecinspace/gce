@@ -24,7 +24,7 @@
     transition: .5s;
 }
 
-#logged_in_user_id {
+#logged_in_user_id  {
     display: none;
 }
 
@@ -212,7 +212,7 @@
     line-height: 2.3em;
 }
 
-.suggestion_item_info, .suggestion_item_name, .suggestion_item_filiere, #completed_entries_title, #uncompleted_entries_title {
+.suggestion_item_info, .suggestion_item_name, .suggestion_item_filiere, #completed_entries_title, #uncompleted_entries_title, .default_title, .personnel_user_name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -569,12 +569,12 @@
     transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
 }
 
-#home_container, #profile_container, #annonce_container, #saisir_container, #notes_container {
+#home_container, #profile_container, #annonce_container, #saisir_container, #notes_container, #affichage_container, #personnels_container {
     max-width: 1000px;
     margin: 0 auto;
 }
 
-#annonce_container, #profile_container, #saisir_container, #notes_container {
+#annonce_container, #profile_container, #saisir_container, #notes_container, #affichage_container, #personnels_container {
     padding: 1.5em 1em 0em 1em;
     user-select: none;
 }
@@ -895,7 +895,7 @@
     background: rgba(255, 0, 0, 0.808);
 }
 
-.annonce_item_id, .mark_version_id, .mark_correction_id {
+.annonce_item_id, .mark_version_id, .mark_correction_id, .personnel_user_id, .personnel_user_type  {
     display: none;
 }
 
@@ -1177,7 +1177,7 @@
     transition: 0.5s;
 }
 
-#completed_entries_title, #uncompleted_entries_title {
+#completed_entries_title, #uncompleted_entries_title, .default_title {
     position: relative;
     width: 80%;
     margin: 0 auto;
@@ -1526,7 +1526,7 @@
     height: calc(50px + 2em); /* child height + padding-top + padding-bottom */
 }
 
-#notes_editing_area, .notes_item_id {
+#notes_editing_area, .notes_item_id, .affichage_module_id {
     display: none;
 }
 
@@ -1666,6 +1666,62 @@
     right: 1em;
 }
 /* #endregion NOTES ENSG */
+
+/* #region Affichage*/
+.affichage_item_info span {
+    font-weight: 400; 
+}
+
+.affichage_module_button {
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    right: 0;
+    transform: scale(0.8);
+}
+
+.affichage_module_button:hover { 
+    animation: none;
+}
+
+.affichage_item_info {
+    width: calc(100% - 4.8em);
+}
+/* #endregion Affichage */
+
+/* #region personnels */
+.personnel_user_item {
+    height: 70px;
+}
+
+.personnel_user_item:hover {
+    background-color: rgba(218, 218, 218, .7);
+    color: #0070c9;
+    cursor: pointer;
+}
+
+.personnel_user_item:hover {
+    
+}
+
+.personnel_user_img {
+    position: absolute;
+    border-radius: 15px;
+    width: 50px;
+    height: 50px;
+    top: 10px;
+}
+
+.personnel_user_info {
+    line-height: 35px;
+    padding-left: 60px;
+}
+
+.go_up_anim {
+    animation-name: go_up;
+    animation-duration:  1.5s;
+}
+/* #endregion personnels */
 /* #endregion CONTENT */
 
 /* #region loaders */
@@ -2044,7 +2100,7 @@
         text-align: center;
     }
 
-    .annonce_item, #annonce_add_button, #no_annonce, #annonce_create, .mark_item_large, #completed_entries_title, #uncompleted_entries_title {
+    .annonce_item, #annonce_add_button, #no_annonce, #annonce_create, .mark_item_large, #completed_entries_title, #uncompleted_entries_title, .default_title {
         width: 100%;
     }
 
@@ -2081,6 +2137,16 @@
     #left_move_controls {
         left: 0.5em;
     }
+    
+    .affichage_module_button {
+        position: relative;
+        top: 0;
+        margin-bottom: 0; 
+    }
+
+    .affichage_item_info {
+        width: 100%;
+    }
 }
 
 @media only screen and (max-width: 499px) { 
@@ -2105,6 +2171,18 @@
 	}
 }
 
+@keyframes go_up {
+	from {
+        opacity: 0;
+		transform: translateY(10em);;
+	}
+
+	to {
+        opacity: 1;
+		transform: translateY(0px);
+	}
+}
+
 @keyframes top_bar_animation {
 	from {
 		transform: translateY(-3.1em);;
@@ -2113,18 +2191,6 @@
 	to {
 		transform: translateY(0px);
 	}
-}
-
-@keyframes pop_animation1 {
-    0% {
-        background-size: 100%;
-    }
-    50% {
-        background-size: 95%;
-    }
-    100% {
-        background-size: 100%;
-    }
 }
 
 @keyframes pop_animation2 {
