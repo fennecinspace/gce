@@ -409,12 +409,12 @@ def RelationEnseignantModule():
         nbOfEntries += 1
         sys.stdout.write('\r[18/{}]Relation ENSEIGNANT MODULE : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
-def PopulateAnneeScolaire():
+def PopulateAnneeUniv():
     nbOfEntries = 0
     nbOfEntriesToCreate = 1
-    AnneeScolaire(annee_scolaire = '2017-2018', active=True).save()
+    AnneeUniv(annee_univ = '2017-2018', active=True).save()
     nbOfEntries += 1
-    sys.stdout.write('\n[19/{}]AnneeScolaire : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+    sys.stdout.write('\n[19/{}]AnneeUniv : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateCopie():
     allStudents = Etudiant.objects.all()
@@ -444,7 +444,7 @@ def PopulateCopie():
                 gen_modifiable = False
                 gen_afficher_copie = random.choice([False,True])
             # obj = Copie(id_copie = gen_id, annee_copie = '2017-2018', id_module = gen_id_module, id_etudiant = gen_id_etudiant)
-            obj = Copie(annee_copie = AnneeScolaire.objects.all()[0], id_module = gen_id_module, id_etudiant = gen_id_etudiant, afficher_copie = gen_afficher_copie, modifiable = gen_modifiable)
+            obj = Copie(annee_copie = AnneeUniv.objects.all()[0], id_module = gen_id_module, id_etudiant = gen_id_etudiant, afficher_copie = gen_afficher_copie, modifiable = gen_modifiable)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[20/{}]Copie : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
@@ -678,7 +678,7 @@ def Populate():
     RelationEnseignantModule()
     ###RelationChefDepartementModule()
     ###RelationEtudiantModule()
-    PopulateAnneeScolaire()
+    PopulateAnneeUniv()
     # PopulateCopie()
     # PopulateVersionCopie()
     # PopulateFichierCopie()

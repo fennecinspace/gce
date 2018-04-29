@@ -107,9 +107,9 @@ class FichierCorrectionAdmin(admin.ModelAdmin):
     list_display = ('emplacement_fichier', 'id_correction',)
 admin.site.register(FichierCorrection, FichierCorrectionAdmin)
 
-class AnneeScolaireAdmin(admin.ModelAdmin):
-    list_display = ('annee_scolaire', 'active',)
-admin.site.register(AnneeScolaire, AnneeScolaireAdmin)
+class AnneeUnivAdmin(admin.ModelAdmin):
+    list_display = ('annee_univ', 'active',)
+admin.site.register(AnneeUniv, AnneeUnivAdmin)
 
 #admin.site.register(Appartientfiliere)
 # admin.site.register(Appartientfaculte)

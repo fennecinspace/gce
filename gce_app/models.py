@@ -17,7 +17,7 @@ from gce_app.functions import image_center_crop
 def copies_file_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
-    current_annee = AnneeScolaire.objects.all().order_by('-id')[0].annee_scolaire
+    current_annee = AnneeUniv.objects.all().order_by('-id')[0].annee_univ
     path = os.path.join('copies', current_annee)
     path = os.path.join(path, instance.id_module.id_specialite.id_parcours.id_filiere.id_domaine.nom)
     path = os.path.join(path, instance.id_module.id_specialite.id_parcours.nom)
@@ -27,7 +27,7 @@ def copies_file_path(instance, filename):
 def corrections_file_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
-    current_annee = AnneeScolaire.objects.all().order_by('-id')[0].annee_scolaire
+    current_annee = AnneeUniv.objects.all().order_by('-id')[0].annee_univ
     path = os.path.join('corrections', current_annee)
     path = os.path.join(path, instance.id_correction.id_module.id_specialite.id_parcours.id_filiere.id_domaine.nom)
     path = os.path.join(path, instance.id_correction.id_module.id_specialite.id_parcours.nom)
@@ -213,7 +213,7 @@ class Annonce(models.Model):
 
 class Copie(models.Model):
     # id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)
-    annee_copie = models.ForeignKey('AnneeScolaire', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
+    annee_copie = models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
     afficher_copie = models.BooleanField(db_column='afficher_Copie', default=False)
     date_affichage = models.DateField(db_column='date_Affichage', blank=True, null=True)
     modifiable = models.BooleanField(db_column='Modifiable', default=True)
@@ -248,7 +248,7 @@ class Correction(models.Model):
     # id_correction = models.CharField(db_column='id_Correction', primary_key=True, max_length=100)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
-    annee_correction = models.ForeignKey('AnneeScolaire', models.SET_NULL, db_column='annee_Correction', blank=True, null=True)
+    annee_correction = models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Correction', blank=True, null=True)
     
     class Meta:
         db_table = 'Correction'
@@ -333,9 +333,9 @@ class MessagesReclamation(models.Model):
         db_table = 'Messages_Reclamation'
 
 
-class AnneeScolaire(models.Model):
-    annee_scolaire = models.CharField(db_column='annee_Scolaire', max_length=500, null=True)
-    active = models.BooleanField(db_column='active_Scolaire', default = False)
+class AnneeUniv(models.Model):
+    annee_univ = models.CharField(db_column='annee_Univ', max_length=500, null=True)
+    active = models.BooleanField(db_column='active_Univ', default = False)
     
     class Meta:
-        db_table = 'anneeScolaire'
+        db_table = 'anneeUniv'

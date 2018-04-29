@@ -246,7 +246,7 @@ def get_home_template(req):
 
 ## returns entries not yet subbmited
 def get_copy_entries(module_title, fin_saisie = False):
-    all_copies = Copie.objects.filter(Q(id_module__in = Module.objects.filter(Q(titre_module = module_title) & Q(finsaisie_module = fin_saisie))) & Q(annee_copie = ANNEE_SCOLAIRE) ).order_by('id')
+    all_copies = Copie.objects.filter(Q(id_module__in = Module.objects.filter(Q(titre_module = module_title) & Q(finsaisie_module = fin_saisie))) & Q(annee_copie = ANNEE_UNIV) ).order_by('id')
     final_versions = get_final_versions(all_copies)
     entries = []
     for version in final_versions:
@@ -311,7 +311,7 @@ def create_new_copie_entry(module_name, student_id, files_ids):
         #create Copie
         gen_module = Module.objects.filter(titre_module = module_name)[0]
         gen_etudiant = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = student_id)[0])[0]
-        copie = Copie(annee_copie = ANNEE_SCOLAIRE, id_module = gen_module, id_etudiant = gen_etudiant)
+        copie = Copie(annee_copie = ANNEE_UNIV, id_module = gen_module, id_etudiant = gen_etudiant)
         copie.save()
        
         #create first version     
@@ -456,7 +456,7 @@ def create_module_correction(req,module_name): ## gets all uploaded files and sa
         # create correction
         user_obj = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0]
         module_obj = Module.objects.filter(titre_module = module_name)[0]
-        correction_obj = Correction(id_module = module_obj, id_enseignant = user_obj, annee_correction = ANNEE_SCOLAIRE)
+        correction_obj = Correction(id_module = module_obj, id_enseignant = user_obj, annee_correction = ANNEE_UNIV)
         correction_obj.save()
 
         # attach uploaded files
@@ -478,7 +478,7 @@ def delete_module_correction(req):
 
 def get_module_correction(module_name):
     module_obj = Module.objects.filter(titre_module = module_name)[0]
-    corrections = Correction.objects.filter(Q(id_module = module_obj) & Q(annee_correction = ANNEE_SCOLAIRE)).order_by('-id')
+    corrections = Correction.objects.filter(Q(id_module = module_obj) & Q(annee_correction = ANNEE_UNIV)).order_by('-id')
     if (len(corrections) > 0):
         return FichierCorrection.objects.filter(id_correction = corrections[0].id)
 
@@ -523,12 +523,12 @@ def submit_notes_module(req, module_name):
 
 
 def get_affichable_modules(logged_in_user):
-    ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+    ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
     all_user_modules = Module.objects.filter(Q(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0])))) & Q(finsaisie_module = True))
     affichable_modules = []
     for module in all_user_modules:
-        module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE) & Q(afficher_copie = False))
-        module_final_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE) & Q(modifiable = False))
+        module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV) & Q(afficher_copie = False))
+        module_final_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV) & Q(modifiable = False))
         if len(module_final_copies) == len(module_copies) and len(module_copies) > 0: ## use != to get copies done in tech but still awaiting aproval from ensg
             affichable_modules += [module]
 
@@ -803,8 +803,8 @@ class SaisirView(TemplateView, BaseContextMixin):
         return context
 
     def post(self, req, *args, **kwargs):
-        global ANNEE_SCOLAIRE
-        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+        global ANNEE_UNIV
+        ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         if self.request.POST.get('logout'):
             logout(req)
             return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
@@ -854,13 +854,13 @@ class NotesView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/ensg/ensg_notes.html'
 
     def get_context_data(self, **kwargs):
-        global ANNEE_SCOLAIRE 
-        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+        global ANNEE_UNIV 
+        ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         context = super().get_context_data(**kwargs)
         context['modules'] = []
         user_modules = Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.filter(finsaisie_module = True)
         for module in user_modules:
-            if len(Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE))) > 0:
+            if len(Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))) > 0:
                 context['modules'] += [module]
         # print(Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.all()[0].titre_module)
         context['upload_form'] = correction_file_upload_form
@@ -868,8 +868,8 @@ class NotesView(TemplateView, BaseContextMixin):
 
     def post(self, req, *args, **kwargs):
         ## added order by -id to fix stupid admin fault in case he/she leaves 2 active years /last entry created will be taken
-        global ANNEE_SCOLAIRE 
-        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+        global ANNEE_UNIV 
+        ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         
         if self.request.POST.get('logout'):
             logout(req)
@@ -928,8 +928,8 @@ class AffichageView(TemplateView, BaseContextMixin):
         return context
 
     def post(self, req, *args, **kwargs):
-        global ANNEE_SCOLAIRE
-        ANNEE_SCOLAIRE = AnneeScolaire.objects.filter(active = True).order_by('-id')[0]
+        global ANNEE_UNIV
+        ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         
         if self.request.POST.get('logout'):
             logout(req)
@@ -938,7 +938,7 @@ class AffichageView(TemplateView, BaseContextMixin):
         if req.is_ajax():
             try:
                 module = Module.objects.filter(id = req.POST.get('data'))[0]
-                module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_SCOLAIRE))
+                module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))
                 if req.POST.get('type') == 'show':
                     for copy in module_copies:
                         copy.afficher_copie = True

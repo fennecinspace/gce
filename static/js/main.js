@@ -140,7 +140,7 @@ var create_annonce_show = false;
 
 function annonceVisibility(element,e) {
     e.stopPropagation();
-    if (confirm('Confirmez le Changement d\'Etat d\'Affichage')){
+    if (confirm('Confirmer le Changement d\'Etat d\'Affichage')){
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/annonces/`,
@@ -175,7 +175,7 @@ function annonceVisibility(element,e) {
 
 function deleteAnnonce(element,e) {
     e.stopPropagation();
-    if (confirm('Confirmez la Suppression')){
+    if (confirm('Confirmer la Suppression')){
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/annonces/`,
@@ -745,7 +745,7 @@ function send_copies_data(elem, e, final) {
         data = format_data_to_send(data, "save");
     
     if (final){
-        if(!confirm('Confirmez la fin de la saisie'))
+        if(!confirm('Confirmer la fin de la saisie'))
             return;
         if(!confirm('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes et les copies !'))
             return;
@@ -820,9 +820,9 @@ function send_delete_request(data_to_send, type) {
 function delete_entry(elem, e, type) {
     var message_confirmation;
     if (type == 'file')
-        message_confirmation = 'Confirmez la Suppression';
+        message_confirmation = 'Confirmer la Suppression';
     else if (type == 'copy')
-        message_confirmation = 'Confirmez le Dégroupage';
+        message_confirmation = 'Confirmer le Dégroupage';
 
     if (confirm(message_confirmation)){
         var data_to_send = [elem.parentElement.parentElement.querySelector('.mark_version_id').innerHTML];
@@ -855,7 +855,7 @@ function delete_multiple_entry(e) {
 
 
     if(Object.keys(data_to_send).length > 0)
-        if (confirm('Confirmez la Suppression de Plusieurs Entrées')) {
+        if (confirm('Confirmer la Suppression de Plusieurs Entrées')) {
             data_to_send = JSON.stringify(data_to_send);
             send_delete_request(data_to_send, 'both');
         }
@@ -990,7 +990,7 @@ function send_notes_data(elem, e, final) {
     }
 
     if (final){
-        if(!confirm('Confirmez la fin de la verification'))
+        if(!confirm('Confirmer la fin de la verification'))
             return;
         if(!confirm('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes !'))
             return;
@@ -1007,7 +1007,7 @@ function send_notes_data(elem, e, final) {
             if (data.success)
                 if (data.type == 'submit') {
                     $('#notes_area').html(data.html);
-                    alert('les notes ne sont plus modifiable');
+                    alert('les notes ne sont plus modifiables');
                 }
                 else
                     $('#notes_area').html(data.html);
@@ -1108,7 +1108,7 @@ function start_correction_upload() {
 }
 
 function delete_correction(elem, e) {
-    if (confirm('Confirmez la Suppression')) {
+    if (confirm('Confirmer la Suppression')) {
         var data_to_send = elem.parentElement.parentElement.querySelector('.mark_correction_id').innerHTML;
         $('#main_loader_overlay').fadeIn();
         $.ajax({
@@ -1169,7 +1169,7 @@ function demande_modification_right(elem, e) {
 //////////////// AFFICHAGE ////////////////
 function afficher_module(elem,e){
     e.stopPropagation();
-    if (confirm('Confirmez l\'affichage'))
+    if (confirm('Confirmer l\'affichage'))
         if (confirm('Êtes-vous sûr ?')) {
             var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
@@ -1203,7 +1203,7 @@ function afficher_module(elem,e){
 
 function enable_module_modification(elem,e) {
     e.stopPropagation();
-    if (confirm('autorisez l\'enseignant a reverifié et remodifié les notes'))
+    if (confirm('autoriser l\'enseignant a reverifié et remodifié les notes'))
         if (confirm('Êtes-vous sûr ?')) {
             var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
