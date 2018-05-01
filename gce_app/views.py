@@ -112,7 +112,7 @@ def get_teacher_data(teacher):
 def get_chef_data(chef):
     return {
         'filiere': Filiere.objects.filter(id_chef_departement = chef)[0],
-        'modules': Module.objects.filter(id_specialite__in = Specialite.objects.filter(id__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = chef))))),
+        'modules': Module.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = Filiere.objects.filter(id_chef_departement = chef)[0]))),
         'teachers': Enseignant.objects.filter(filieres__in = [Filiere.objects.filter(id_chef_departement = chef)[0]]),
     }
 
@@ -441,8 +441,8 @@ def get_saisir_stats(context):
     noted = 0
     if context['entries']:
         for entry in context['entries']:
-                if len(entry) > 0 and entry[0].id_version.note_version:
-                        noted += 1
+            if len(entry) > 0 and entry[0].id_version.note_version:
+                noted += 1
     return {
         'Fichiers': len(context['new_files']),
         'Copies': len(context['entries']),
@@ -891,6 +891,7 @@ class NotesView(TemplateView, BaseContextMixin):
                 context = get_copy_entries(module_name, True)
                 context['correction'] = get_module_correction(module_name)
                 context['modifiable_enabled'] = check_if_modifiable(context['entries'])
+                context['can_ask_for_right'] = get_can_ask_for_right(context['entries'])
                 html = render_to_string('gce_app/ensg/module_notes.html', context = context)
                 data = {'success': True, 'html': html, 'type': req.POST.get('type')}
             except Exception as e:
@@ -918,6 +919,14 @@ def demande_access_right_ensg_notes(module_name):
         id_utilisateur = user_to_notify
     )
     notif.save()
+
+def get_can_ask_for_right(versions):
+    for files in versions:
+        for file in files:
+            if file.id_version.id_copie.afficher_copie == True:
+                return False
+    return True
+    
 
 class AffichageView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/chef/chef_affichage.html'

@@ -33,7 +33,7 @@
                     </div>
                     <div class="notes_item_info_mark">
                         <label class="notes_item_mark_label">Note :</label>
-                        <input class="notes_item_mark_value" placeholder="Note" value="{{ entry.0.id_version.note_version }}" {% if not modifiable_enabled %}disabled{% endif %}>
+                        <input oninput='enable_saving(event);' class="notes_item_mark_value" placeholder="Note" value="{{ entry.0.id_version.note_version }}" {% if not modifiable_enabled %}disabled{% endif %}>
                     </div>
                 </div>
             </div>
@@ -61,15 +61,15 @@
     </div>
     {% if modifiable_enabled %}
         <div id="left_move_controls">
-            <div class="move_controls_item" id="data_save" onclick="send_notes_data(this, event, false);"><span>Sauvgarder</span></div>
-            <div class="move_controls_item" id="data_submit" onclick="send_notes_data(this, event, true);"><span>Envoyer</span></div>
+            <div class="move_controls_item data_save_btn hide" id="data_save" onclick="send_notes_data(this, event, false);"><span>Sauvgarder</span></div>
+            <div class="move_controls_item data_submit_btn" id="data_submit_ensg" onclick="send_notes_data(this, event, true);"><span>Envoyer au chef de departement</span></div>
             <div class="move_controls_item" id="notes_stats">
                 <span>Stats</span>
                 <div>Copies: {{ entries|length }}</div>
             </div>
         </div>
     {% else %}
-        {% if not entries.0.0.id_version.afficher_copie %}
+        {% if can_ask_for_right %}
             <div id="left_move_controls">
                 <div class="move_controls_item" id="modifiable_right" onclick="demande_modification_right(this, event);"><span>Demande de Droit de Modification</span></div>
             </div>

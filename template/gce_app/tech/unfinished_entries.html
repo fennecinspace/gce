@@ -25,7 +25,7 @@
                     </div>
                     <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
                     <div class="student_infos" >
-                        <input list="assigned_students" class="saisir_student_name" placeholder="Nom et Prenom">
+                        <input oninput='enable_saving(event);' list="assigned_students" class="saisir_student_name" placeholder="Nom et Prenom">
                     </div>
                 </div>
             {% endfor %}
@@ -43,7 +43,7 @@
                     </div>
                     <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
                     <div class="student_infos" >
-                        <input list="assigned_students" class="saisir_student_name" placeholder="Nom et Prenom">
+                        <input oninput='enable_saving(event);' list="assigned_students" class="saisir_student_name" placeholder="Nom et Prenom">
                     </div>
                 </div>
             {% endfor %}
@@ -89,8 +89,8 @@
                     </div>
                     <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
                     <div class="student_infos" >
-                        <input list="unassigned_students" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
-                        <input class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version|none_to_empty }}">
+                        <input oninput='enable_saving(event);' list="unassigned_students" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
+                        <input oninput='enable_saving(event);' class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version|none_to_empty }}">
                     </div>
                 </div>
             {% endfor %}
@@ -114,8 +114,8 @@
                     </div>
                     <div class="zoomlevel" onclick="change_zoom(this,event);">x2</div>
                     <div class="student_infos" >
-                        <input list="unassigned_students" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
-                        <input class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version|none_to_empty }}">
+                        <input oninput='enable_saving(event);' list="unassigned_students" class="saisir_student_name" placeholder="Nom et Prenom" value="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}">
+                        <input oninput='enable_saving(event);' class="saisir_student_mark" placeholder="Note" value="{{ entry.0.id_version.note_version|none_to_empty }}">
                     </div>
                 </div>
             {% endfor %}
@@ -143,9 +143,9 @@
         <div class="move_controls_item" id="go_to_bottom" onclick="go_to_bottom(event)"><div></div><div></div></div>
     </div>
     <div id="left_move_controls">
-        <div class="move_controls_item" id="data_save" onclick="send_copies_data(this, event, false);"><span>Sauvgarder</span></div>
-        <div class="move_controls_item" id="data_submit" onclick="send_copies_data(this, event, true);"><span>Envoyer</span></div>
-        <div class="move_controls_item" id="delete_multiple_entries" onclick="delete_multiple_entry(event);">&#10006;<span>Supprimer Selection</span></div>
+        <div class="move_controls_item data_save_btn hide" id="data_save" onclick="send_copies_data(this, event, false);"><span>Sauvgarder</span></div>
+        <div class="move_controls_item data_submit_btn" id="data_submit_tech" onclick="send_copies_data(this, event, true);"><span>Envoyer a l'enseignant</span></div>
+        <div class="move_controls_item" id="delete_multiple_entries" onclick="delete_multiple_entry(event);">&#10006;<span>Supprimer la Selection</span></div>
         <div class="move_controls_item" id="saisir_stats">
             <span>Stats</span>
             {% for key, value in stats.items %}

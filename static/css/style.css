@@ -584,6 +584,10 @@
 #content_container {
     padding: 3em 10% 0em 10%;
     transition: padding .5s; /* for the tebalet media query (smooth responsivness)*/
+    /* -webkit-perspective: 1000; */
+    /* -webkit-font-smoothing: subpixel-antialiased; */
+    /* backface-visibility: hidden; */
+    /* transform: translateZ(0); */
 }
 
 #home_container, #profile_container, #annonce_container, #saisir_container, #notes_container, #affichage_container, #personnels_container {
@@ -1362,6 +1366,22 @@
     animation: wobble-horizontal 1s;
 }
 
+.default_button_small {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, .8);
+    color: rgba(255, 255, 255, 1);
+    padding: 7px;
+    font-size: 16px;
+    border-radius: 8px; 
+    font-weight: bold;
+    line-height: 16px;
+}
+
+.default_button_small:hover {
+    background-color: rgba(0, 0, 0, 1);
+    cursor: pointer;
+}
+
 .delete_entry {
     display: none;
     width: 1.1em;
@@ -1744,6 +1764,50 @@
 /* #endregion personnels */
 /* #endregion CONTENT */
 
+/* #region POP_UP_MESSAGE */
+#pop_up_message_overlay {
+    display: none;
+    z-index: 9;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#pop_up_message_container {
+    position: absolute;
+    top: 40%;
+    width: 100%;
+}
+
+#pop_up_message {
+    position: relative;
+    margin: 0 auto;
+    width: 300px;
+    background: rgba(210, 210, 210, .8);
+    border-radius: 10px;
+    padding: 10px 10px 38px 10px;
+}
+
+.pop_up_message_content {
+    font-weight: bold;
+    text-align: justify;
+}
+
+#pop_up_message_ok, #pop_up_message_cancel {
+    position: absolute;
+    bottom: 5px;
+}
+
+#pop_up_message_ok {
+    right: 5px;
+}
+
+#pop_up_message_cancel {
+    right: 45px;
+    display: none;
+}
+/* #endregion POP_UP_MESSAGE */
+
 /* #region loaders */
 #main_loader_overlay {
     display: none;
@@ -1909,7 +1973,7 @@
 }
 
 #delete_multiple_entries:hover {
-    width: 185px;
+    width: 200px;
 }
 
 #data_save {
@@ -1919,7 +1983,7 @@
     background-repeat: no-repeat;
 }
 
-#data_submit, #modifiable_right {
+#data_submit_tech, #data_submit_ensg, #modifiable_right {
     background-image: url('../images/send_file_icon.png');
     background-size: 25px;
     background-position: 4px 3px;
@@ -1930,19 +1994,23 @@
     width: 120px;
 }
 
-#data_submit:hover  {
-    width: 98px;
+#data_submit_tech:hover  {
+    width: 197px;
+}
+
+#data_submit_ensg:hover  {
+    width: 270px;
 }
 
 #modifiable_right:hover {
     width: 285px;
 }
 
-#modifiable_right, #go_to_copies, #go_to_files, #data_submit, #data_save, #delete_multiple_entries, #saisir_stats, #notes_stats {
+#modifiable_right, #go_to_copies, #go_to_files, #data_submit_tech, #data_submit_ensg, #data_save, #delete_multiple_entries, #saisir_stats, #notes_stats {
     transition: width .5s, height .5s;
 }
 
-#modifiable_right, #go_to_copies:hover, #go_to_files:hover, #data_submit:hover, #data_save:hover, #delete_multiple_entries:hover, #saisir_stats:hover,  #notes_stats:hover {
+#modifiable_right, #go_to_copies:hover, #go_to_files:hover, #data_submit_tech:hover, #data_submit_ensg:hover, #data_save:hover, #delete_multiple_entries:hover, #saisir_stats:hover,  #notes_stats:hover {
     transition: width .5s, height .5s;
 }
 
@@ -2284,10 +2352,10 @@
     #notification_box > div {overflow-y: scroll;}
     .change_avatar_child {font-size: 13px;}
     .select_all > div {left: -160px;}
-    #data_submit:hover {width: 100px;}
+    #data_submit_tech:hover {width: 218px;}
+    #data_submit_ensg:hover {width: 295px;}
     #data_save:hover {width: 130px;}
-    #delete_multiple_entries:hover {width: 200px;}
-    #data_submit:hover {width: 100px;}
+    #delete_multiple_entries:hover {width: 220px;}
     #modifiable_right:hover {width: 310px;}
     .check_item_control::after {font-size: 18px;}
     .select_all > span {padding-left: 1px;}

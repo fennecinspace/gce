@@ -175,15 +175,15 @@ def PopulateFiliere():
     nbOfEntries = 0 
     sys.stdout.write('\n[07/{}]Filiere : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
     for i in range(0,len(allDomains)):
-            for domain in allDomains[i]:
-                for branch in BRANCHES[i]:
-                    gen_id = IDS[7] + str(nbOfEntries) 
-                    gen_nom = branch
-                    # obj = Filiere(id_filiere = gen_id, nom = gen_nom, id_domaine = domain, id_chef_departement = allChefDepartement[nbOfEntries])
-                    obj = Filiere(nom = gen_nom, id_domaine = domain, id_chef_departement = allChefDepartement[nbOfEntries])
-                    obj.save()
-                    nbOfEntries += 1
-                    sys.stdout.write('\r[07/{}]Filiere : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
+        for domain in allDomains[i]:
+            for branch in BRANCHES[i]:
+                gen_id = IDS[7] + str(nbOfEntries) 
+                gen_nom = branch
+                # obj = Filiere(id_filiere = gen_id, nom = gen_nom, id_domaine = domain, id_chef_departement = allChefDepartement[nbOfEntries])
+                obj = Filiere(nom = gen_nom, id_domaine = domain, id_chef_departement = allChefDepartement[nbOfEntries])
+                obj.save()
+                nbOfEntries += 1
+                sys.stdout.write('\r[07/{}]Filiere : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
 
 def PopulateParcours():
     allBranchs = Filiere.objects.all()

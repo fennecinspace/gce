@@ -25,6 +25,7 @@ $.ajaxSetup({
 
 
 /////////////////// OTHER /////////////////////
+
 function shake(obj_to_shake) {
     var interval = 100;
     var distance = 10;
@@ -50,11 +51,44 @@ function rtrim(str) {
     return str.replace(/\s+$/g, '');
 }
 
+function show_pop_up(content, type = 'alert', ok_callback = function(){}, cancel_callback = function(){}, last = true, second = false) {
+    var overlay = document.getElementById('pop_up_message_overlay');
+    overlay.innerHTML = `<div id="pop_up_message_container">
+    <div id="pop_up_message">
+        <div class="pop_up_message_content">${content}</div>
+        <div id="pop_up_message_cancel" class="default_button_small">Annuler</div>
+        <div id="pop_up_message_ok" class="default_button_small">OK</div>
+    </div>`;
+
+    overlay.querySelector('#pop_up_message_ok').addEventListener('click',function ok_fct() {
+        overlay.querySelector('#pop_up_message_cancel').style.display = 'none';
+        if (last) {
+            $(overlay).fadeOut();
+            $('#content_container').removeClass('blur_elem');
+        }
+        ok_callback();
+    }, false);
+
+    if (type == 'confirm') {
+        overlay.querySelector('#pop_up_message_cancel').style.display = 'block';
+        overlay.querySelector('#pop_up_message_cancel').addEventListener('click',function cancel_fct() {
+            overlay.querySelector('#pop_up_message_cancel').style.display = 'none';
+            $(overlay).fadeOut();
+            $('#content_container').removeClass('blur_elem');
+            cancel_callback();
+        });
+    }
+
+    $('#content_container').addClass('blur_elem');
+    $(overlay).fadeIn(500);
+    if (second)
+        shake($('#pop_up_message'));
+}
 
 
 /////////////////// HOME MENU /////////////////////
 function load_televerser(e) {
-    alert('no yet');
+    show_pop_up('not yet !');
 }
 function load_saisir(e) {
     $('#main_loader_overlay').fadeIn();
@@ -75,7 +109,7 @@ function load_resultats(e) {
     });
 }
 function load_reclamations(e) {
-    alert('no yet');
+    show_pop_up('not yet !');
 }
 function load_affichages(e) {
     $('#main_loader_overlay').fadeIn();
@@ -84,7 +118,7 @@ function load_affichages(e) {
     });
 }
 function load_consultations(e) {
-    alert('no yet');
+    show_pop_up('not yet !');
 }
 function load_utilisateur(e) {
     $('#main_loader_overlay').fadeIn();
@@ -93,7 +127,7 @@ function load_utilisateur(e) {
     });
 }
 function load_messenger(e) {
-    alert('no yet');
+    show_pop_up('not yet !');
 }
 
 
@@ -118,13 +152,13 @@ function avatar_uploader(e) {
                     document.querySelector('.change_avatar').src = data.new_avatar;
                 }
                 else
-                    alert('Erreur !');
+                    show_pop_up('Echec !'); 
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
             cache: false,
             contentType: false,
@@ -140,7 +174,7 @@ var create_annonce_show = false;
 
 function annonceVisibility(element,e) {
     e.stopPropagation();
-    if (confirm('Confirmer le Changement d\'Etat d\'Affichage')){
+    show_pop_up('Confirmer le Changement d\'Etat d\'Affichage','confirm',() => {
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/annonces/`,
@@ -152,30 +186,27 @@ function annonceVisibility(element,e) {
     
             success: function (response) {
                 data = JSON.parse(response);
-                if (data.success){
-                    if (data.hideCross){
+                if (data.success)
+                    if (data.hideCross)
                         element.querySelector('div').className = "hide";
-                    }
                     else
                         element.querySelector('div').className = "";
-                }
-                else {
-                    alert('Echec !');
-                }
+                else 
+                    show_pop_up('Echec !');
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
         });
-    }
+    });
 }
 
 function deleteAnnonce(element,e) {
     e.stopPropagation();
-    if (confirm('Confirmer la Suppression')){
+    show_pop_up('Confirmer la Suppression','confirm',() => {
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/annonces/`,
@@ -192,17 +223,17 @@ function deleteAnnonce(element,e) {
                         document.getElementById('annonce_items_container').innerHTML = "<span id='no_annonce'>Pas de nouvelles annonces </span>";
                 }
                 else {
-                    alert('Echec !');
+                    show_pop_up('Echec !');
                 }
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
         });
-    }
+    });
 }
 
 function toggleCreateAnnonce(e) {
@@ -301,14 +332,14 @@ function send_create_annonce(data_to_send, title, content){
                 },'html');
             }
             else {
-                alert('Echec !');
+                show_pop_up('Echec !');
             }
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            alert('Echec !');
+            show_pop_up('Echec !');
         },
     });
 }
@@ -365,13 +396,13 @@ function choose_module(element,e) {
                     copies_selection_status = false;
                 }
                 else
-                    alert('Echec !');
+                    show_pop_up('Echec !');
             },
             complete: function (){
                 element.querySelector('.saisir_module_item_loader').style.display = "none";
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
         }); 
     },100);
@@ -452,7 +483,7 @@ function start_copies_upload(){
                     copies_selection_status = false;
                 }
                 else
-                    alert('Echec !');
+                    show_pop_up('Echec !');
                 droppedFiles = null;
                 upload_file_req = null;
             },
@@ -467,7 +498,7 @@ function start_copies_upload(){
                 upload_in_progress = false;
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
             xhr: function () {
                 var jqXHR = new window.XMLHttpRequest();
@@ -491,7 +522,7 @@ function start_copies_upload(){
         });
     }
     else {
-        alert('un autre upload est en cours');
+        show_pop_up('un autre upload est en cours');
     }
 }
 
@@ -729,7 +760,7 @@ function send_copies_data(elem, e, final) {
     if (final && data.completed) {  //submit
         for (let i = 0; i < data.completed.length; i++)
             if (data.completed[i].querySelector(".saisir_student_mark").value == ""){
-                alert('Erreur : Pas tous les copies ont une note !');
+                show_pop_up('Erreur : Pas tous les copies ont une note !');
                 return;
             }
         
@@ -737,20 +768,25 @@ function send_copies_data(elem, e, final) {
         if (files.length == 0)
             data = format_data_to_send(data, "submit"); 
         else {
-            alert('Erreur : Supprimer tous les fichiers supplementaire avant d\'envoyer');
-            return;
+            show_pop_up('Erreur : Il existe des fichiers qui n\'appartiennent à aucune copie, il faut les attribuer a un étudiant ou les supprimer !');
+            return; 
         }
     }
-    else  //submit
+    else  //save
         data = format_data_to_send(data, "save");
     
-    if (final){
-        if(!confirm('Confirmer la fin de la saisie'))
-            return;
-        if(!confirm('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes et les copies !'))
-            return;
-    }
 
+    if (final)
+        show_pop_up('Confirmer la fin de la saisie','confirm',() => {
+            show_pop_up('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes et les copies !','confirm',() => {
+                send_copies_data_request (data);
+            },() => {}, last = true, second = true);
+        },() => {}, last = false);
+    else
+        send_copies_data_request (data);
+}
+
+function send_copies_data_request (data){ 
     $('#main_loader_overlay').fadeIn();
     $.ajax({
         url: `${location.origin}/saisir/`,
@@ -770,16 +806,16 @@ function send_copies_data(elem, e, final) {
             }
             else
                 if (data.error)
-                    alert(data.error);
+                    show_pop_up(data.error);
                 else
-                    alert('Echec !');
+                    show_pop_up('Echec !');
                 
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            alert('Echec !');
+            show_pop_up('Echec !');
         },
     });
 }
@@ -805,13 +841,13 @@ function send_delete_request(data_to_send, type) {
                 copies_selection_status = false;
             }
             else
-                alert('Echec !');
+                show_pop_up('Echec !');
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            alert('Echec !');
+            show_pop_up('Echec !');
         },
     });
 }
@@ -824,10 +860,10 @@ function delete_entry(elem, e, type) {
     else if (type == 'copy')
         message_confirmation = 'Confirmer le Dégroupage';
 
-    if (confirm(message_confirmation)){
+    show_pop_up(message_confirmation, 'confirm', () => {
         var data_to_send = [elem.parentElement.parentElement.querySelector('.mark_version_id').innerHTML];
         send_delete_request(data_to_send, type);
-    }
+    });
 }
 
 
@@ -855,11 +891,10 @@ function delete_multiple_entry(e) {
 
 
     if(Object.keys(data_to_send).length > 0)
-        if (confirm('Confirmer la Suppression de Plusieurs Entrées')) {
+        show_pop_up('Confirmer la Suppression de Plusieurs Entrées', 'confirm', () => {
             data_to_send = JSON.stringify(data_to_send);
             send_delete_request(data_to_send, 'both');
-        }
-
+        });
 }
 
 
@@ -931,13 +966,13 @@ function get_module_notes(element,e) {
                     $('#notes_editing_area').slideDown(500);
                 }
                 else
-                    alert('Echec !');
+                    show_pop_up('Echec !');
             },
             complete: function (){
                 element.querySelector('.saisir_module_item_loader').style.display = "none";
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
         }); 
     },100);
@@ -984,18 +1019,22 @@ function send_notes_data(elem, e, final) {
             data.correction = true;
         else {
             data.correction = false;
-            alert('Téléverser une correction');
+            show_pop_up('Téléverser une correction');
             return;
         }
     }
 
-    if (final){
-        if(!confirm('Confirmer la fin de la verification'))
-            return;
-        if(!confirm('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes !'))
-            return;
-    }
+    if (final)
+        show_pop_up('Confirmer la fin de la verification', 'confirm', () => {
+            show_pop_up('Êtes-vous sûr ? Vous ne pourrez plus modifier les notes !', 'confirm', () => {
+                send_notes_data_request (data);
+            },() => {}, last = true , second = true);
+        },() => {}, last = false);
+    else 
+        send_notes_data_request (data);
+}
 
+function send_notes_data_request (data) {
     data.data_to_send = JSON.stringify(data.data_to_send);
     $('#main_loader_overlay').fadeIn();
     $.ajax({
@@ -1007,18 +1046,18 @@ function send_notes_data(elem, e, final) {
             if (data.success)
                 if (data.type == 'submit') {
                     $('#notes_area').html(data.html);
-                    alert('les notes ne sont plus modifiables');
+                    show_pop_up('les notes ne sont plus modifiables');
                 }
                 else
                     $('#notes_area').html(data.html);
             else
-                alert('Echec !');
+                show_pop_up('Echec !');
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            alert('Echec !');
+            show_pop_up('Echec !');
         },
     });
 }
@@ -1064,7 +1103,7 @@ function start_correction_upload() {
                     $('#upload_area').slideUp();
                 }
                 else
-                    alert('Echec !');
+                    show_pop_up('Echec !');
                 droppedFiles = null;
                 upload_correction_req = null;
             },
@@ -1079,7 +1118,7 @@ function start_correction_upload() {
                 upload_in_progress = false;
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
             xhr: function () {
                 var jqXHR = new window.XMLHttpRequest();
@@ -1103,12 +1142,12 @@ function start_correction_upload() {
         });
     }
     else {
-        alert('un autre upload est en cours');
+        show_pop_up('un autre upload est en cours');
     }
 }
 
 function delete_correction(elem, e) {
-    if (confirm('Confirmer la Suppression')) {
+    show_pop_up('Confirmer la Suppression','confirm',() => {
         var data_to_send = elem.parentElement.parentElement.querySelector('.mark_correction_id').innerHTML;
         $('#main_loader_overlay').fadeIn();
         $.ajax({
@@ -1125,20 +1164,20 @@ function delete_correction(elem, e) {
                     $('#notes_area').html(data.html);
                 }
                 else
-                    alert('Echec !');
+                    show_pop_up('Echec !');
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
         });
-    }
+    });
 }
 
 function demande_modification_right(elem, e) {
-    if (confirm('Voulez-vous envoyer une demande au chef de departement ?')) {
+    show_pop_up('Voulez-vous envoyer une demande au chef de departement ?', () => {
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/notes/`,
@@ -1150,18 +1189,18 @@ function demande_modification_right(elem, e) {
             success: function (response) {
                 data = JSON.parse(response);
                 if (data.success)
-                    alert('Une demande a été envoyée au responsable de la filière, vous recevrez une notification, si cette dernière est acceptée');
+                    show_pop_up('Une demande a été envoyée au responsable de la filière, vous recevrez une notification, si cette dernière est acceptée');
             else
-                    alert('Echec !');
+                show_pop_up('Echec !');
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                alert('Echec !');
+                show_pop_up('Echec !');
             },
         });
-    }
+    });
 }
 
 
@@ -1169,8 +1208,8 @@ function demande_modification_right(elem, e) {
 //////////////// AFFICHAGE ////////////////
 function afficher_module(elem,e){
     e.stopPropagation();
-    if (confirm('Confirmer l\'affichage'))
-        if (confirm('Êtes-vous sûr ?')) {
+    show_pop_up('Confirmer l\'affichage', () => {
+        show_pop_up('Êtes-vous sûr ?', () => {
             var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
             $.ajax({
@@ -1183,28 +1222,29 @@ function afficher_module(elem,e){
                 success: function (response) {
                     data = JSON.parse(response);
                     if (data.success){
-                        alert(`les notes du module ${data.module} ont été affichées`);
+                        show_pop_up(`les notes du module ${data.module} ont été affichées`);
                         $(elem.parentElement).slideUp().remove();
                         if (document.querySelectorAll('.affichage_item_large').length == 0)
                             document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
                     }
                     else
-                        alert('Echec !');
+                        show_pop_up('Echec !');
                 },
                 complete: function (){
                     $('#main_loader_overlay').fadeOut();
                 },
                 error: function (xhr, textStatus, thrownError){
-                    alert('Echec !');
+                    show_pop_up('Echec !');
                 },
             });
-        }
+        }, () => {}, last = true, second = true);
+    }, () => {}, last = false);
 }
 
 function enable_module_modification(elem,e) {
     e.stopPropagation();
-    if (confirm('autoriser l\'enseignant a reverifié et remodifié les notes'))
-        if (confirm('Êtes-vous sûr ?')) {
+    show_pop_up('autoriser l\'enseignant a reverifié et remodifié les notes', 'confirm', () => {
+        show_pop_up('Êtes-vous sûr ?', 'confirm', () => {
             var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
             $.ajax({
@@ -1217,22 +1257,23 @@ function enable_module_modification(elem,e) {
                 success: function (response) {
                     data = JSON.parse(response);
                     if (data.success){
-                        alert(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
+                        show_pop_up(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
                         $(elem.parentElement).slideUp().remove();
                         if (document.querySelectorAll('.affichage_item_large').length == 0)
                             document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
                     }
                     else
-                        alert('Echec !');
+                        show_pop_up('Echec !');
                 },
                 complete: function (){
                     $('#main_loader_overlay').fadeOut();
                 },
                 error: function (xhr, textStatus, thrownError){
-                    alert('Echec !');
+                    show_pop_up('Echec !');
                 },
             });
-        }
+        },() => {}, last = true , second = true);
+    }, () => {}, last = false);
 }
 
 
@@ -1281,5 +1322,13 @@ function filter_users(e) {
             else
                 all_users.eq(x).slideUp(); 
         }
+}
 
+
+////////////////////// SAVING ENABLING ///////////////////
+function enable_saving(e) {
+    e.stopPropagation();
+    console.log('here')
+    $('.data_save_btn').removeClass('hide');
+    $('.data_submit_btn').addClass('hide');
 }

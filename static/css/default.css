@@ -170,3 +170,9 @@ textarea {
     animation-name: wobble-horizontal;
     animation-duration: 1.5s;
 }
+
+/** BLUR **/
+.blur_elem {
+    filter: blur(5px);
+    transition: 2s -webkit-filter linear;
+}
