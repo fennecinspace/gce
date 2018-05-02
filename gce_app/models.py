@@ -202,10 +202,9 @@ class Annonce(models.Model):
     date_annonce = models.DateField(db_column='date_Annonce', blank=True, null=True)
     heure_annonce = models.TimeField(db_column='heure_Annonce', blank=True, null=True)
     afficher_annonce = models.BooleanField(db_column='afficher_Annonce', default=False)
-    id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
-    id_parcours = models.ForeignKey('Parcours', models.CASCADE, db_column='id_Parcours', blank=True, null=True)
+    id_module = models.ManyToManyField('Module', blank = True)
+    id_parcours = models.ManyToManyField('Parcours', blank = True)
     id_filiere = models.ForeignKey('Filiere', models.CASCADE, db_column='id_Filiere', blank=True, null=True)
-    
 
     class Meta:
         db_table = 'Annonce'

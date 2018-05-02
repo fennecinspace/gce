@@ -260,40 +260,40 @@ function createAnnonceShow(element,e) {
     }
 }
 
-function trigger_select(elem,e) {
-    var selections = Array.from(elem.parentElement.querySelectorAll('select'));
-    selections = selections.filter(x => x != elem);
-    if (elem.options[elem.selectedIndex].value == '')
-        for (let i = 0; i < selections.length; i++) {
-            selections[i].removeAttribute('disabled');
-            selections[i].options[0].innerHTML = selections[i].dataset.fillerText;
-        }
-    else 
-        for (let i = 0; i < selections.length; i++) {
-            selections[i].setAttribute('disabled',true);
-            selections[i].options[0].innerHTML = "Desactiver";
-        }
+// function trigger_select(elem,e) {
+//     var selections = Array.from(elem.parentElement.querySelectorAll('select'));
+//     selections = selections.filter(x => x != elem);
+//     if (elem.options[elem.selectedIndex].value == '')
+//         for (let i = 0; i < selections.length; i++) {
+//             selections[i].removeAttribute('disabled');
+//             selections[i].options[0].innerHTML = selections[i].dataset.fillerText;
+//         }
+//     else 
+//         for (let i = 0; i < selections.length; i++) {
+//             selections[i].setAttribute('disabled',true);
+//             selections[i].options[0].innerHTML = "Desactiver";
+//         }
         
-}
+// }
 
 function createAnnonce(e) {
     e.stopPropagation();
     var title_annonce = document.getElementById('annonce_create_title');
     var content_annonce = document.getElementById('annonce_create_content');
-    var chosen_category = document.querySelector('select:not([disabled])');
+    var chosen_category = document.querySelector('select:not([disabled])').parentElement;
     var type;
     if (chosen_category.id == 'annonce_create_filiere')
         type = 'filiere';
-    if (chosen_category.id == 'annonce_create_parcours')
+    else if (chosen_category.id == 'annonce_create_parcours')
         type = 'parcours';
-    if (chosen_category.id == 'annonce_create_module')
+    else if (chosen_category.id == 'annonce_create_module')
         type = 'module' ;
 
-    var chosen_item =  chosen_category.options[chosen_category.selectedIndex].value;
-    if (title_annonce.value.trim().length > 5 && content_annonce.value.trim().length > 5 && chosen_item.trim().length > 0){
+    var chosen_items =  get_selected_items(chosen_category.id, 'value');
+    if (title_annonce.value.trim().length > 5 && content_annonce.value.trim().length > 5 && chosen_items != null){
         var data_to_send = {
             'type': type,
-            'data': [chosen_item],
+            'data': chosen_items,
         };
         send_create_annonce(data_to_send, title_annonce.value, content_annonce.value);
     }

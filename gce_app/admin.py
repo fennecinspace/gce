@@ -64,7 +64,7 @@ class CorrectionAdmin(admin.ModelAdmin):
 admin.site.register(Correction, CorrectionAdmin)
 
 class AnnonceAdmin(admin.ModelAdmin):
-    list_display = ('sujet_annonce', 'description_annonce', 'date_annonce', 'heure_annonce', 'afficher_annonce', 'id_module', 'id_parcours', 'id_filiere',)
+    list_display = ('sujet_annonce', 'description_annonce', 'date_annonce', 'heure_annonce', 'afficher_annonce',)
 admin.site.register(Annonce, AnnonceAdmin)
 
 class CopieAdmin(admin.ModelAdmin):

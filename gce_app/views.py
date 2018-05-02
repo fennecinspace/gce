@@ -192,20 +192,21 @@ def get_search_data(search_entry, req, req_type):
 ### annonce
 def get_user_annonce(req, user_type):
     if user_type == 'etud':
-        etud_models = Module.objects.filter(id_specialite = Specialite.objects.filter(id = (Section.objects.filter(id = Groupe.objects.filter(id = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id)[0].id_section.id)[0].id_specialite.id))[0])
+        etud_modules = Module.objects.filter(id_specialite = Specialite.objects.filter(id = (Section.objects.filter(id = Groupe.objects.filter(id = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id)[0].id_section.id)[0].id_specialite.id))[0])
         etud_parcours = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id_section.id_specialite.id_parcours
         etud_filiere = etud_parcours.id_filiere
-        annonces = Annonce.objects.filter(Q(Q(id_module__in = etud_models) | Q(id_parcours = etud_parcours) | Q(id_filiere = etud_filiere)) & Q(afficher_annonce = True)).order_by('-id')
+        annonces = Annonce.objects.filter(Q(Q(id_module__in = etud_modules) | Q(id_parcours = etud_parcours) | Q(id_filiere = etud_filiere)) & Q(afficher_annonce = True)).distinct().order_by('-id')
+        print(annonces)
     elif user_type == 'ensg':
         ensg_filieres = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].filieres.all()
         ensg_parcours = Parcours.objects.filter(id_filiere__in = ensg_filieres)
         ensg_modules = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].modules.all()
-        annonces = Annonce.objects.filter(Q(Q(id_module__in = ensg_modules ) | Q(id_parcours__in = ensg_parcours ) | Q(id_filiere__in = ensg_filieres )) & Q(afficher_annonce = True)).order_by('-id')
+        annonces = Annonce.objects.filter(Q(Q(id_module__in = ensg_modules ) | Q(id_parcours__in = ensg_parcours ) | Q(id_filiere__in = ensg_filieres )) & Q(afficher_annonce = True)).distinct().order_by('-id')
     elif user_type == 'chef':
         chef_filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0])[0]
         chef_parcours = Parcours.objects.filter(id_filiere = chef_filiere)
         chef_modules = Module.objects.filter(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0])[0])))
-        annonces = Annonce.objects.filter(Q(id_module__in = chef_modules) | Q(id_parcours__in = chef_parcours) | Q(id_filiere = chef_filiere)).order_by('-id')
+        annonces = Annonce.objects.filter(Q(id_module__in = chef_modules) | Q(id_parcours__in = chef_parcours) | Q(id_filiere = chef_filiere)).distinct().order_by('-id')
     return annonces
 
 def create_new_annonce(req):
@@ -217,20 +218,43 @@ def create_new_annonce(req):
     data = json.loads(req.POST.get('create_group'))
     data_type = data['type']
     data_list = data['data']
+    annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce)
     if data_type == 'filiere':
-        for elem in data_list:
-            annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_filiere = Filiere.objects.filter(id = elem)[0])
+            annonce.id_filiere = Filiere.objects.filter(id = data_list[0])[0]
             annonce.save()
     if data_type == 'parcours':
+        annonce.save()
         for elem in data_list:
-            annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_parcours = Parcours.objects.filter(id = elem)[0])
-            annonce.save()
+            print('here')
+            annonce.id_parcours.add(Parcours.objects.filter(id = elem)[0])
     if data_type == 'module':
+        annonce.save()
         for elem in data_list:
-            annonce = Annonce(sujet_annonce = title_annonce, description_annonce = content_annonce, date_annonce = date_annonce, heure_annonce = time_annonce, afficher_annonce = show_annonce, id_module = Module.objects.filter(id = elem)[0])
-            annonce.save()
-    return annonce
+            annonce.id_module.add(Module.objects.filter(id = elem)[0])
+    # annonce_info = {
+    #     'annonce': {
+    #         'id': annonce.id,
+    #         'title': annonce.sujet_annonce,
+    #         'content': annonce.description_annonce,
+    #         'date': str(annonce.date_annonce),
+    #         'time': str(annonce.heure_annonce),
+    #         'show': annonce.afficher_annonce,
+    #         'user_type': Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur,
+    #     }    
+    # }
+    # print('helo')
+    # if annonce.id_filiere:
+    #     annonce_info['filiere'] = annonce.id_filiere.nom;
+    # elif annonce.id_parcours:
+    #     annonce_info['parcours'] = []
+    #     for parcours in annonce.id_parcours.all():
+    #         annonce_info['parcours'] += [parcours.nom];
+    # elif annonce.id_module:
+    #     annonce_info['module'] = []
+    #     for module in annonce.id_module.all():
+    #         annonce_info['module'] += [module.titre_module];
 
+    # return annonce_info
 
 ## returns the template based on the signed in user's type
 def get_home_template(req):
@@ -745,22 +769,10 @@ class AnnonceView(TemplateView, BaseContextMixin):
                 return JsonResponse(serialized_data, safe = False)
             if req_type == 'create':
                 try:
-                    annonce = create_new_annonce(req)
-                    data = {'success': True, 'annonce': {
-                        'id': annonce.id,
-                        'title': annonce.sujet_annonce,
-                        'content': annonce.description_annonce,
-                        'date': str(annonce.date_annonce),
-                        'time': str(annonce.heure_annonce),
-                        'show': annonce.afficher_annonce,
-                        'user_type': Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur,
-                    }}
-                    if annonce.id_filiere:
-                        data['annonce']['filiere'] = annonce.id_filiere.nom;
-                    elif annonce.id_parcours:
-                        data['annonce']['parcours'] = annonce.id_parcours.nom;
-                    elif annonce.id_module:
-                        data['annonce']['module'] = annonce.id_module.titre_module;
+                    # annonce_info = create_new_annonce(req)
+                    create_new_annonce(req)
+                    data = {'success': True}
+                    # data.update(annonce_info)
                 except Exception as e:
                     print(e)
                     data = {'success': False}

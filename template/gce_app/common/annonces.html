@@ -5,26 +5,41 @@
             <div id='annonce_create'>
                 <!-- par filiere -->
                 <label class="annonce_create_label" for="annonce_filiere">FILIERE :</label>
-                <select name='annonce_filiere' id='annonce_create_filiere' onchange="trigger_select(this,event);" data-filler-text=" -- Selectionner une Filiere -- ">
-                    <option selected value =""> -- Selectionner une Filiere -- </option>
-                    <option value="{{ filiere.id }}">{{ filiere.nom }}</option>
-                </select>
+                <div name='annonce_filiere' id='annonce_create_filiere' class="select7_container">
+                    <div class="select7_arrow">&#9662;</div>
+                    <div class="select7_placeholder">-- Selectionner une Filiere --</div>
+                    <select class="select7_select" onchange="add_selected_item(this, event);" data-filler-text="-- Selectionner une Filiere --">
+                        <option class="select7_hide" value="filler"></option>
+                        <option value="{{ filiere.id }}">{{ filiere.nom }}</option>
+                    </select>
+                    <div class="select7_items"></div>
+                </div>
                 <!-- par parcours -->
                 <label class="annonce_create_label" for="annonce_parcours">Parcours :</label>
-                <select name='annonce_parcours' id='annonce_create_parcours' onchange="trigger_select(this,event);" data-filler-text=" -- Selectionner un Parcours -- ">
-                    <option selected value=""> -- Selectionner un Parcours -- </option>
-                    {% for parc in parcours %}
-                        <option value="{{ parc.id }}">{{ parc.nom }}</option>
-                    {% endfor %}
-                </select>
+                <div name='annonce_parcours' id='annonce_create_parcours' class="select7_container">
+                    <div class="select7_arrow">&#9662;</div>
+                    <div class="select7_placeholder">-- Selectionner un Parcours --</div>
+                    <select class="select7_select" onchange="add_selected_item(this, event);" data-filler-text="-- Selectionner un Parcours --">
+                        <option class="select7_hide" value="filler"></option>
+                        {% for parc in parcours %}
+                            <option value="{{ parc.id }}">{{ parc.nom }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="select7_items"></div>
+                </div>
                 <!-- par module -->
                 <label class="annonce_create_label" for="annonce_module">Module :</label>
-                <select name='annonce_module' id='annonce_create_module' onchange="trigger_select(this,event);" data-filler-text=" -- Selectionner un Module -- ">
-                    <option selected value=""> -- Selectionner un Module -- </option>
-                    {% for module in modules %}
-                        <option value="{{ module.id }}">{{ module.titre_module}}</option>
-                    {% endfor %}
-                </select>
+                <div name='annonce_module' id='annonce_create_module' class="select7_container">
+                    <div class="select7_arrow">&#9662;</div>
+                    <div class="select7_placeholder">-- Selectionner un Module --</div>
+                    <select class="select7_select" onchange="add_selected_item(this, event);" data-filler-text="-- Selectionner un Module --">
+                        <option class="select7_hide" value="filler"></option>
+                        {% for module in modules %}
+                            <option value="{{ module.id }}">{{ module.titre_module}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="select7_items"></div>
+                </div>
                 <label class="annonce_create_label" for="annonce_title">Sujet :</label>
                 <input type="text" name="annonce_title" id="annonce_create_title" maxlength="500">
                 <label class="annonce_create_label" for="annonce_content">Contenu :</label>
@@ -47,15 +62,17 @@
                             <div class='annonce_item_subject'>{{ annonce.sujet_annonce }}</div>
                             <div class='annonce_item_datetime'>{{ annonce.date_annonce|date:"d/m/Y" }} - {{ annonce.heure_annonce }}</div>
                             <div class='annonce_item_content'>{{ annonce.description_annonce }}</div>
-                            {% if annonce.id_filiere %}
-                                <div class='annonce_item_module'>{{ annonce.id_filiere.nom  }}</div>
-                            {% endif %}
-                            {% if annonce.id_parcours %}
-                                <div class='annonce_item_module'>{{ annonce.id_parcours.nom }}</div>
-                            {% endif %}
-                            {% if annonce.id_module %}
-                                <div class='annonce_item_module'>{{ annonce.id_module.titre_module }}</div>
-                            {% endif %}
+                            <div class='annonce_item_module'>
+                                {% if annonce.id_filiere %}
+                                    {{ annonce.id_filiere.nom }},
+                                {% endif %}
+                                {% if annonce.id_parcours %}
+                                    {% for elem in annonce.id_parcours.all %}{{ elem.nom }}, {% endfor %}
+                                {% endif %}
+                                {% if annonce.id_module %}
+                                    {% for elem in annonce.id_module.all %}{{ elem.titre_module }}, {% endfor %}
+                                {% endif %}
+                            </div>
                         </div>
                         {% if user_type == 'chef' %}
                             <div class='annonce_item_show' onclick="annonceVisibility(this,event);"><div class='{% if annonce.afficher_annonce == True %}hide{% endif %}'></div></div>

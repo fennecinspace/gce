@@ -955,9 +955,12 @@
     padding: 0 0 .5em 0.2em;
 }
 
-#annonce_create_title, #annonce_create_content, #annonce_create_module, #annonce_create_parcours, #annonce_create_filiere {
-    border: transparent;
+#annonce_create_title, #annonce_create_content {
     padding: 0.3em;
+}
+
+#annonce_create_module, #annonce_create_parcours, #annonce_create_filiere, #annonce_create_title, #annonce_create_content  {
+    border: transparent;
     border-radius: 5px;
     background: rgba(218, 218, 218, .37);
     color: white;
