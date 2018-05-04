@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from gce_app.views import MainView, ProfileView, AnnonceView , SaisirView, NotesView, AffichageView, UsersView
 ## ajax only views
 from gce_app.views import notification_state_changer, search_suggestion_feeder, search_result_feeder
+## scheduled_operation
+from gce_app.views import scheduled_operation
 
 app_name = 'gce_app'
 
@@ -23,4 +25,7 @@ urlpatterns = [
     path('techs/<slug:pk>/', login_required(ProfileView.as_view()), {'profile': 'tech'}, name='technicien_profile'),
     path('ensgs/<slug:pk>/', login_required(ProfileView.as_view()), {'profile': 'ensg'}, name='enseignant_profile'),
     path('chefs/<slug:pk>/', login_required(ProfileView.as_view()), {'profile': 'chef'}, name='chef_departement_profile'),
+
+    ## scheduled_operation
+    path('scheduled_operation/', scheduled_operation, name='scheduled_operation'),
 ]

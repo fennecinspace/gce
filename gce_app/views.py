@@ -24,7 +24,13 @@ from django.conf import settings
 from datetime import datetime
 import os
 
-    
+## scheduled_operation
+
+def scheduled_operation(req):
+    print('Hello World')
+    return HttpResponse('success')
+    ## will check for annonces here
+
 
 ## returns the user's data
 def get_user_data(u_obj):

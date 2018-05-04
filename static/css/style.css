@@ -579,6 +579,7 @@
 /* #endregion NOTIFICATION and OPTIONS AREAS*/
 /* #endregion TOP BAR*/
 
+
 /* #region CONTENT */
 /* #region containers*/
 #content_container {
@@ -1767,6 +1768,7 @@
 /* #endregion personnels */
 /* #endregion CONTENT */
 
+
 /* #region POP_UP_MESSAGE */
 #pop_up_message_overlay {
     display: none;
@@ -1810,6 +1812,7 @@
     display: none;
 }
 /* #endregion POP_UP_MESSAGE */
+
 
 /* #region loaders */
 #main_loader_overlay {
@@ -1866,6 +1869,7 @@
     top: 18%;
 }
 /* #endregion loaders */
+
 
 /* #region move_controls */
 #right_move_controls {
@@ -2100,6 +2104,7 @@
     background-position: 0em -.2em;
 }
 /* #endregion icons */
+
 
 /* #region MEDIA QUERIES */
 @media only screen and (max-width: 799px) { 
@@ -2349,6 +2354,7 @@
     }
   }
 /* #endregion keyframes */
+
 
 /* #region MOZILLA COMPATIBILITY */
 @-moz-document url-prefix() {

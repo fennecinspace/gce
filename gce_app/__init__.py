@@ -1,0 +1,1 @@
+default_app_config = 'gce_app.apps.GceAppConfig'
