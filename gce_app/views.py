@@ -26,10 +26,10 @@ import os
 
 ## scheduled_operation
 
-def scheduled_operation(req):
-    print('Hello World')
-    return HttpResponse('success')
-    ## will check for annonces here
+# def scheduled_operation(req):
+#     print('Hello World')
+#     return HttpResponse('success')
+#     ## will check for annonces here
 
 
 ## returns the user's data
@@ -568,6 +568,34 @@ def get_affichable_modules(logged_in_user):
 #######################################################
 ###################### VIEWS ##########################
 #######################################################
+## AJAX RECLAMATION HANDLER 
+@login_required
+def reclamation_handler(req):
+    if req.method == 'POST' and req.is_ajax():
+        try:
+            if req.POST.get('type') == 'create':
+                sujet = req.POST.get('title')
+                content = req.POST.get('content')
+                student = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = req.POST.get('student_id'))[0])[0]
+                module = Module.objects.filter(id = req.POST.get('module_id'))[0]
+                new_reclamation = Reclamation(sujet_reclamation = sujet, description_reclamation = content, id_etudiant = student, id_module = module)
+                new_reclamation.save()
+                context_to_use = {'entry': {
+                    'reclamation': new_reclamation,
+                }}
+            
+            if req.POST.get('type') == 'delete':
+                Reclamation.objects.filter(id = req.POST.get('reclam_id')).delete()
+                context_to_use = None
+            data = {'success': True, 'html': render_to_string('gce_app/etud/reclam_content.html', context = context_to_use)}
+        except Exception as e:
+            print(e)
+            data = {'success': False}
+            
+    stringfied_data = json.dumps(data)
+    return JsonResponse(stringfied_data, safe = False)        
+
+
 
 ## AJAX NOTIFICATION HANDLER VIEW
 @login_required
@@ -869,19 +897,41 @@ class SaisirView(TemplateView, BaseContextMixin):
 
 ## ENSG : NOTES VIEW
 class NotesView(TemplateView, BaseContextMixin):
-    template_name = 'gce_app/ensg/ensg_notes.html'
-
+    
     def get_context_data(self, **kwargs):
         global ANNEE_UNIV 
         ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         context = super().get_context_data(**kwargs)
-        context['modules'] = []
-        user_modules = Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.filter(finsaisie_module = True)
-        for module in user_modules:
-            if len(Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))) > 0:
-                context['modules'] += [module]
-        # print(Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.all()[0].titre_module)
-        context['upload_form'] = correction_file_upload_form
+        if context['loggedin_user'].type_utilisateur == 'ensg':
+            context['modules'] = []
+            user_modules = Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.filter(finsaisie_module = True)
+            for module in user_modules:
+                if len(Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))) > 0:
+                    context['modules'] += [module]
+            # print(Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.all()[0].titre_module)
+            context['upload_form'] = correction_file_upload_form
+        elif context['loggedin_user'].type_utilisateur == 'etud':
+            student = Etudiant.objects.filter(id_etudiant = context['loggedin_user'])[0]
+            notes = get_student_notes(student) # gettings final versions of copies categorized by school year
+            marks = {k: notes[k] for k in sorted(notes,reverse=True)} # sorting from newest school year to oldest
+            results = {}
+            for year, versions in marks.items():
+                modules_data = []
+                for version in versions:
+                    copy_files = FichierCopie.objects.filter(id_version = version)
+                    module_correction = Correction.objects.filter(Q(annee_correction = year) & Q(id_module = version.id_copie.id_module))[0]
+                    module_reclamation = Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = version.id_copie.id_module)).order_by('-id')
+                    if len(module_reclamation) > 0:
+                        module_reclamation = module_reclamation[0]
+                    else:
+                        module_reclamation = None
+                    modules_data += [{
+                        'files':list(copy_files),
+                        'correction': list(FichierCorrection.objects.filter(id_correction = module_correction).order_by('-id')),
+                        'reclamation': module_reclamation,
+                    }]
+                results[year] = modules_data
+            context['results'] = results
         return context
 
     def post(self, req, *args, **kwargs):
@@ -923,9 +973,12 @@ class NotesView(TemplateView, BaseContextMixin):
     def get(self, req, *args, **kwargs):
         context = self.get_context_data()
         if context['loggedin_user'].type_utilisateur == 'ensg':
-            return self.render_to_response(context)
+            self.template_name = 'gce_app/ensg/ensg_notes.html'
+        elif context['loggedin_user'].type_utilisateur == 'etud':
+            self.template_name = 'gce_app/etud/etud_notes.html'
         else:
             return HttpResponse("<h2>404</h2>")
+        return self.render_to_response(context)
 
 def demande_access_right_ensg_notes(module_name):
     print(Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement.info_utilisateur.username)

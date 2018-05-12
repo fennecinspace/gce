@@ -1533,7 +1533,8 @@
     /* border-radius: 2em; */
 }
 
-#image_show_large > div:last-child, #note_image_overlay > div:last-child {
+
+#image_show_large > div:last-child, #note_image_overlay > div:last-child, #leave_student_consult_center {
     position: absolute;
     top: 2em;
     right: 2em;
@@ -1544,6 +1545,10 @@
     height: 30px;
     width: 30px;
     margin: 0;
+}
+
+#note_image_overlay, #image_show_large {
+    z-index: 5;
 }
 /* #endregion SAISIR */
 
@@ -1590,7 +1595,7 @@
     height: calc(100% - 6em);
 }
 
-.notes_item_image > div > img {
+.notes_item_image > div > img, #std_center_copy img, #std_center_correct img {
     position : absolute;
     object-fit: contain;
     top: 0;
@@ -1702,11 +1707,162 @@
     background: rgb(231, 231, 231);
 }
 
-#note_image_overlay > div:last-child {
+#note_image_overlay > div:last-child, #leave_student_consult_center{
     top: 2em;
     right: 1em;
 }
 /* #endregion NOTES ENSG */
+
+/* #region NOTES ETUD */
+.annee_title {
+    line-height: 20px;
+}
+
+#std_notes_area {
+    animation-name: go_up;
+    animation-duration: 1.5s;
+}
+
+#student_consult_center {
+    display: none;
+    z-index: 5;
+    position : absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: rgba(0, 0, 0, .8);
+}
+
+#std_center_bar {
+    height: 2em;
+    width: 100%;
+    text-align: center;
+    background: black;
+    height: 3em;
+    line-height: 3em;
+    overflow: hidden;
+}
+
+#leave_student_consult_center {
+    right: .2em;
+    top: .2em;
+}
+
+.std_center_bar_btn {
+    display: inline;
+    line-height: 1em;
+    font-weight: bold;
+    color: rgb(231, 231, 231);
+    font-size: 20px;
+    margin-right: .5em;
+    line-height: 1.5em;
+    padding-bottom: .2em;
+    padding: .2em;
+    border-radius: 5px; 
+}
+
+.std_center_bar_btn:hover {
+    background: rgba(189, 189, 189, 0.5)!important;
+    cursor: pointer;
+}
+
+#std_center_correct, #std_center_reclam {
+    display: none;
+}
+
+#std_center_copy, #std_center_correct, #std_center_reclam {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    height: 100%;
+    width: 100%;
+    padding-top: 3em;
+}
+
+.std_center_content {
+    position : relative;
+    margin: 1em 4em 1em 4em;
+    width: calc(100% - 8em);
+    height: calc(100% - 2em); 
+}
+
+
+#reclam_tab {
+    margin: 0 auto;
+    padding: 1em;
+    max-width: 600px;
+    color: white;
+    width: 100%;
+    height: auto;
+}
+
+#reclam_tab > div {
+    background: rgba(218, 218, 218, .37);
+    background: rgba(0, 0, 0, .8);
+    border-radius: 8px;
+    padding: 1em;
+}
+
+.reclam_tab_label {
+    font-weight: bold;
+}
+
+.reclam_tab_item, .reclam_tab_label {
+    border-radius: 5px;
+    color: white;
+    margin-bottom: .5em;
+    width: 100%;
+}
+
+.reclam_tab_item {
+    border-radius: 5px;
+    background: rgba(0, 0, 0, .8);
+    background: rgba(218, 218, 218, .37);
+    padding: .4em;
+    word-wrap: break-word;
+    border: transparent;
+}
+
+.reclam_tab_bool {
+    position: relative;
+    display: inline-block;
+    font-weight: 700; 
+    width: auto;
+    padding-left: 25px;
+}
+
+.reclam_lower_section {
+    position: relative;
+    height: 30px;
+}
+
+.reclam_tab_bool > span {
+    position: absolute;
+    font-size: 20px;
+    line-height: 20px;
+    top: 5px;
+    left: 5px;
+    text-shadow: 0px 0px 5px #000000;
+}
+
+.reclam_tab_button {
+    padding: .6em;
+    position: absolute;
+    right: 0em;
+    background-color: rgba(119, 21, 21, 0.445); 
+}
+
+.reclam_tab_button:hover {
+    background-color: rgba(185, 8, 8, 0.445); 
+}
+
+textarea.reclam_tab_item {
+    height: 100px;
+}
+/* #endregion NOTES ETUD */
 
 /* #region Affichage*/
 .affichage_item_info span {
@@ -2254,6 +2410,39 @@
         font-size: 6vw;
         background-size: 15vw;
     }
+
+    #std_center_bar {
+        padding-right: 2em;
+    }
+    .std_center_bar_btn {
+        margin-right: .2em;
+        font-size: 18px;
+    }
+
+    #leave_student_consult_center {
+        font-size: 25px;
+        top: .4em;
+    }
+
+    .notes_item_image > div {
+        margin: 4em 2em 2em 2em;
+        width: calc(100% - 4em);
+    }
+
+    .std_center_content {
+        margin: 1em 2em 1em 2em;
+        width: calc(100% - 4em);
+    }
+
+    #reclam_tab {
+        padding: 0;
+        height: 100%;
+    }
+      
+    #reclam_tab > div {
+        border-radius: 0;
+        height: 100%;
+    }
 }
 /* #endregion MEDIA QUERIES */
 
@@ -2370,3 +2559,10 @@
     .select_all > span {padding-left: 1px;}
 }
 /* #endregion MOZILLA COMPATIBILITY */
+
+
+/* #region EXTRA */
+.no_right_margin {
+    margin-right: 0; 
+}
+/* #endregion EXTRA*/

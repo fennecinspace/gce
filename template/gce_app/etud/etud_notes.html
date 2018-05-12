@@ -1,0 +1,73 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% block base_extender %}
+<div id="notes_container">
+    {% if results %}
+        <div id="student_consult_center">
+            <div id="leave_student_consult_center" onclick="leave_image_overlay(this,event);">&#10006;</div>
+            <div id="std_center_bar">
+                <div onclick="change_student_center_tab(this,event);" class="std_center_bar_btn" id="std_center_copy_btn">Copie</div>
+                <div onclick="change_student_center_tab(this,event);" class="std_center_bar_btn" id="std_center_correct_btn">Correction</div>
+                <div onclick="change_student_center_tab(this,event);" class="std_center_bar_btn no_right_padding" id="std_center_reclam_btn">Réclamation</div>
+            </div>
+            <div id="std_center_copy"><div class="std_center_content"></div></div>
+            <div id="std_center_correct"><div class="std_center_content"></div></div>
+            <div id="std_center_reclam">
+                <div id="reclam_tab" class="std_center_content"></div>
+            </div>
+            <div id="std_center_module_id" class="std_center_content hide"></div>
+            <div id="std_center_item_year" class="std_center_content hide"></div>
+            <div id="std_center_item_id" class="std_center_content hide"></div>
+        </div>
+        <div id="std_notes_area">
+            {% for year, versions in results.items %}
+                <div class="default_title annee_title">{{ year.annee_univ }}</div>
+                {% for entry in versions %}
+                    <div class="notes_item_small" data-item-year="{{ year.annee_univ }}" data-item-id="{{ forloop.counter0 }}">
+                        <div class="notes_item_id">{{ entry.files.0.id_version.id }}</div>
+                        <div class="notes_item_info">
+                            <img class="notes_item_info_avatar" src="{{ entry.files.0.emplacement_fichier.url }}" onclick="toggle_std_center(this, event)">
+                            <div class="notes_item_info_text">
+                                <div class="notes_item_info_name">
+                                    <label class="notes_item_name_label">Module :</label>
+                                    <div class="notes_item_name_value" data-module-id = "{{ entry.files.0.id_module.id }}">{{ entry.files.0.id_module.titre_module|title }}</div>
+                                </div>
+                                <div class="notes_item_info_mark">
+                                    <label class="notes_item_mark_label">Note :</label>
+                                    <input oninput='enable_saving(event);' class="notes_item_mark_value" placeholder="Note" value="{{ entry.files.0.id_version.note_version }}" {% if not modifiable_enabled %}disabled{% endif %}>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notes_item_image">
+                            <div data-list-length = '{{ entry.files|length }}'>
+                                {% for file in entry.files %}
+                                    <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+                                {% endfor %}
+                                {% if entry.files|length > 1 %}
+                                    <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                                    <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="notes_item_correction hide">
+                            <div data-list-length = '{{ entry.correction|length }}'>
+                                {% for file in entry.correction %}
+                                    <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+                                {% endfor %}
+                                {% if entry.correction|length > 1 %}
+                                    <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                                    <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+                                {% endif %}
+                            </div>
+                        </div>  
+                        <div class="notes_item_reclam hide">
+                            {% include 'gce_app/etud/reclam_content.html' %}
+                        </div>
+                    </div>
+                {% endfor %} 
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>
+    {% endif %}
+</div>
+{% endblock %}

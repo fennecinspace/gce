@@ -265,11 +265,12 @@ class FichierCorrection(models.Model):
 class Reclamation(models.Model):
     # id_reclamation = models.CharField(db_column='id_Reclamation', primary_key=True, max_length=100)
     sujet_reclamation = models.CharField(db_column='Sujet_Reclamation', max_length=500, blank=True, null=True)
-    regler_reclamation = models.BooleanField(db_column='regler_Reclamation', default=False)
     description_reclamation = models.CharField(db_column='Description_Reclamation', max_length=10000, blank=True, null=True)
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
-
+    regler_reclamation = models.BooleanField(db_column='regler_Reclamation', default=False)
+    approver_reclamation = models.BooleanField(db_column='approver_Reclamation', default=False)
+    
     class Meta:
         db_table = 'Reclamation'
 

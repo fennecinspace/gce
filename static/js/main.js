@@ -51,7 +51,7 @@ function rtrim(str) {
     return str.replace(/\s+$/g, '');
 }
 
-function show_pop_up(content, type = 'alert', ok_callback = function(){}, cancel_callback = function(){}, last = true, second = false) {
+function show_pop_up(content, type = 'alert', ok_callback = function(){}, cancel_callback = function(){}, last = true, second = false, general = true) {
     var overlay = document.getElementById('pop_up_message_overlay');
     overlay.innerHTML = `<div id="pop_up_message_container">
     <div id="pop_up_message">
@@ -78,8 +78,8 @@ function show_pop_up(content, type = 'alert', ok_callback = function(){}, cancel
             cancel_callback();
         });
     }
-
-    $('#content_container').addClass('blur_elem');
+    if (general)
+        $('#content_container').addClass('blur_elem');
     $(overlay).fadeIn(500);
     if (second)
         shake($('#pop_up_message'));
@@ -152,13 +152,13 @@ function avatar_uploader(e) {
                     document.querySelector('.change_avatar').src = data.new_avatar;
                 }
                 else
-                    show_pop_up('Echec !'); 
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
             },
             cache: false,
             contentType: false,
@@ -192,13 +192,13 @@ function annonceVisibility(element,e) {
                     else
                         element.querySelector('div').className = "";
                 else 
-                    show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
             },
         });
     });
@@ -223,14 +223,14 @@ function deleteAnnonce(element,e) {
                         document.getElementById('annonce_items_container').innerHTML = "<span id='no_annonce'>Pas de nouvelles annonces </span>";
                 }
                 else {
-                    show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
                 }
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
             },
         });
     });
@@ -332,14 +332,14 @@ function send_create_annonce(data_to_send, title, content){
                 },'html');
             }
             else {
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
             }
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            show_pop_up('Echec !');
+            setTimeout(()=>{show_pop_up('Echec !');},400);
         },
     });
 }
@@ -531,6 +531,8 @@ function leave_image_overlay(elem, e) {
         $('#image_show_large').hide();
     if (document.getElementById('note_image_overlay'))
         $('#note_image_overlay').hide();
+    if (document.getElementById('student_consult_center'))
+        $('#student_consult_center').hide();
 
 }
 
@@ -806,16 +808,17 @@ function send_copies_data_request (data){
             }
             else
                 if (data.error)
-                    show_pop_up(data.error);
+                    setTimeout(()=>{show_pop_up(data.error);},400);
+                    
                 else
-                    show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
                 
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            show_pop_up('Echec !');
+            setTimeout(()=>{show_pop_up('Echec !');},400);
         },
     });
 }
@@ -841,13 +844,13 @@ function send_delete_request(data_to_send, type) {
                 copies_selection_status = false;
             }
             else
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            show_pop_up('Echec !');
+            setTimeout(()=>{show_pop_up('Echec !');},400);
         },
     });
 }
@@ -1043,21 +1046,23 @@ function send_notes_data_request (data) {
         data: data,
         success: function (response) {
             data = JSON.parse(response);
-            if (data.success)
-                if (data.type == 'submit') {
-                    $('#notes_area').html(data.html);
-                    show_pop_up('les notes ne sont plus modifiables');
-                }
+            setTimeout(() => {
+                if (data.success)
+                    if (data.type == 'submit') {
+                        $('#notes_area').html(data.html);
+                        show_pop_up('les notes ne sont plus modifiables');
+                    }
+                    else
+                        $('#notes_area').html(data.html);
                 else
-                    $('#notes_area').html(data.html);
-            else
-                show_pop_up('Echec !');
+                    show_pop_up('Echec !');
+            }, 400);
         },
         complete: function (){
             $('#main_loader_overlay').fadeOut();
         },
         error: function (xhr, textStatus, thrownError){
-            show_pop_up('Echec !');
+            setTimeout(()=>{show_pop_up('Echec !');},400);
         },
     });
 }
@@ -1081,7 +1086,7 @@ function upload_correction(element,e){
 
 function start_correction_upload() {
     if (!upload_correction_req) {
-        ajax_data = new FormData(document.getElementById('upload_form'));
+        var ajax_data = new FormData(document.getElementById('upload_form'));
         ajax_data.append('type','upload');
         ajax_data.append('module_name',module_to_upload_to);
         if (droppedFiles)
@@ -1164,20 +1169,20 @@ function delete_correction(elem, e) {
                     $('#notes_area').html(data.html);
                 }
                 else
-                    show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
             },
         });
     });
 }
 
 function demande_modification_right(elem, e) {
-    show_pop_up('Voulez-vous envoyer une demande au chef de departement ?', () => {
+    show_pop_up('Voulez-vous envoyer une demande au chef de departement ?','confirm', () => {
         $('#main_loader_overlay').fadeIn();
         $.ajax({
             url: `${location.origin}/notes/`,
@@ -1189,15 +1194,15 @@ function demande_modification_right(elem, e) {
             success: function (response) {
                 data = JSON.parse(response);
                 if (data.success)
-                    show_pop_up('Une demande a été envoyée au responsable de la filière, vous recevrez une notification, si cette dernière est acceptée');
-            else
-                show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Une demande a été envoyée au responsable de la filière, vous recevrez une notification, si cette dernière est acceptée');},400);
+                else
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
             },
             complete: function (){
                 $('#main_loader_overlay').fadeOut();
             },
             error: function (xhr, textStatus, thrownError){
-                show_pop_up('Echec !');
+                setTimeout(()=>{show_pop_up('Echec !');},400);
             },
         });
     });
@@ -1221,20 +1226,22 @@ function afficher_module(elem,e){
                 },
                 success: function (response) {
                     data = JSON.parse(response);
-                    if (data.success){
-                        show_pop_up(`les notes du module ${data.module} ont été affichées`);
-                        $(elem.parentElement).slideUp().remove();
-                        if (document.querySelectorAll('.affichage_item_large').length == 0)
-                            document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
-                    }
-                    else
-                        show_pop_up('Echec !');
+                    setTimeout(()=>{
+                        if (data.success){
+                            show_pop_up(`les notes du module ${data.module} ont été affichées`);
+                            $(elem.parentElement).slideUp().remove();
+                            if (document.querySelectorAll('.affichage_item_large').length == 0)
+                                document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
+                        }
+                        else
+                            show_pop_up('Echec !');
+                    },400);
                 },
                 complete: function (){
                     $('#main_loader_overlay').fadeOut();
                 },
                 error: function (xhr, textStatus, thrownError){
-                    show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
                 },
             });
         }, () => {}, last = true, second = true);
@@ -1256,20 +1263,22 @@ function enable_module_modification(elem,e) {
                 },
                 success: function (response) {
                     data = JSON.parse(response);
-                    if (data.success){
-                        show_pop_up(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
-                        $(elem.parentElement).slideUp().remove();
-                        if (document.querySelectorAll('.affichage_item_large').length == 0)
-                            document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
-                    }
-                    else
-                        show_pop_up('Echec !');
+                    setTimeout(()=>{
+                        if (data.success){
+                            show_pop_up(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
+                            $(elem.parentElement).slideUp().remove();
+                            if (document.querySelectorAll('.affichage_item_large').length == 0)
+                                document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
+                        }
+                        else
+                            show_pop_up('Echec !');
+                    },400);
                 },
                 complete: function (){
                     $('#main_loader_overlay').fadeOut();
                 },
                 error: function (xhr, textStatus, thrownError){
-                    show_pop_up('Echec !');
+                    setTimeout(()=>{show_pop_up('Echec !');},400);
                 },
             });
         },() => {}, last = true , second = true);
@@ -1297,8 +1306,8 @@ function filter_affichage(e) {
 
 function access_personnel_profile(elem, e){
     e.stopPropagation();
-    user_id = elem.querySelector('.personnel_user_id').innerHTML;
-    user_type = elem.querySelector('.personnel_user_type').innerHTML;
+    var user_id = elem.querySelector('.personnel_user_id').innerHTML;
+    var user_type = elem.querySelector('.personnel_user_type').innerHTML;
     $('#main_loader_overlay').fadeIn();
     $('#content_container').load(`${location.origin}/${user_type}/${user_id} #content_container > *`,()=> {
         $('#main_loader_overlay').fadeOut();
@@ -1328,7 +1337,194 @@ function filter_users(e) {
 ////////////////////// SAVING ENABLING ///////////////////
 function enable_saving(e) {
     e.stopPropagation();
-    console.log('here')
     $('.data_save_btn').removeClass('hide');
     $('.data_submit_btn').addClass('hide');
+}
+
+///////////////////// STUDENT NOTES ///////////////////////
+function toggle_std_center(elem, e) {
+    e.stopPropagation();
+    // clearing old data
+    var all_tabs = document.querySelectorAll('.std_center_content');
+    for (let t = 0; t < all_tabs.length; t++)
+        all_tabs[t].innerHTML = "";  
+    // resetting general info
+    document.getElementById('std_center_module_id').innerHTML = "";
+    document.getElementById('std_center_item_year').innerHTML = "";
+    document.getElementById('std_center_item_id').innerHTML = "";
+
+    //reseting to copy
+    hide_center_element("std_center_correct");
+    hide_center_element("std_center_reclam");
+    show_center_element("std_center_copy");
+
+    //getting general info
+    document.getElementById('std_center_module_id').innerHTML = elem.parentElement.parentElement.querySelector('.notes_item_name_value').dataset.moduleId; 
+    document.getElementById('std_center_item_year').innerHTML = elem.parentElement.parentElement.dataset.itemYear; 
+    document.getElementById('std_center_item_id').innerHTML = elem.parentElement.parentElement.dataset.itemId; 
+
+    // getting copy data
+    var copy_item = elem.parentElement.parentElement.querySelector('.notes_item_image > div');
+    $(copy_item).clone().appendTo('#std_center_copy > .std_center_content');
+
+    // getting correction data
+    var correction_item = elem.parentElement.parentElement.querySelector('.notes_item_correction > div');
+    if (correction_item != null) // if correction exists
+        $(correction_item).clone().appendTo('#std_center_correct > .std_center_content');
+
+    //reclamation tab filler
+    var reclamation_item =  elem.parentElement.parentElement.querySelector('.notes_item_reclam > div');
+    $(reclamation_item).clone().appendTo('#reclam_tab');
+
+    // showing center
+    document.getElementById("student_consult_center").style.display = "block";
+}
+
+
+function hide_center_element(elem_id) {
+    document.getElementById(elem_id).style.display = "none"; //content
+    document.getElementById(elem_id + "_btn").style.background = "transparent"; //button
+}
+
+
+function show_center_element(elem_id) {
+    document.getElementById(elem_id).style.display = "block"; //content
+    document.getElementById(elem_id + "_btn").style.background = "rgba(189, 189, 189, 0.5)"; //button
+}
+
+
+function change_student_center_tab (elem, e) {
+    switch(elem.id) {
+        case "std_center_copy_btn": 
+            hide_center_element("std_center_correct");
+            hide_center_element("std_center_reclam");
+            show_center_element("std_center_copy");
+            break;
+        case "std_center_correct_btn": 
+            hide_center_element("std_center_copy");
+            hide_center_element("std_center_reclam");
+            show_center_element("std_center_correct");
+            break;
+        case "std_center_reclam_btn": 
+            hide_center_element("std_center_copy");
+            hide_center_element("std_center_correct");
+            show_center_element("std_center_reclam");
+            break;
+    }
+}
+
+
+function reclamation_manager(type) {
+    var module_id = document.getElementById('std_center_module_id').innerHTML;
+    if (module_id == "") {
+        show_pop_up('Erreur !');
+        return;
+    }
+
+    if (type == 'create')
+        create_reclamation(module_id);
+    else if (type == 'delete')
+        delete_reclamation();
+}
+
+
+function create_reclamation(module_id) {
+    var reclam_title = document.getElementById('reclam_tab').querySelector('input[name="reclamation_title"]').value;
+    var reclam_content = document.getElementById('reclam_tab').querySelector('textarea[name="reclamation_content"]').value;
+    if (reclam_title.trim().length > 5 && reclam_content.trim().length > 5)
+        show_pop_up('Voullez vous Créer une Réclamation ?',"confirm",() => {
+            show_pop_up('Êtes-vous sûr ?',"confirm",() => {
+                var student_id = document.getElementById('logged_in_user_id').innerHTML;
+                $('#main_loader_overlay').fadeIn();
+                $.ajax({
+                    url: `${location.origin}/reclamation_handler_VIEW/`,
+                    type: 'POST',
+                    data: {
+                        'type': 'create',
+                        'module_id': module_id,
+                        'student_id': student_id,
+                        'title': reclam_title,
+                        'content': reclam_content,
+                    },
+                    success: function (response) {
+                        data = JSON.parse(response);
+                        setTimeout(()=> {
+                            if (data.success){
+                                show_pop_up(`Une reclamation a été créé, elle sera réglée par l'enseignant du module`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                                update_reclamation_tab(data.html);
+                            }
+                            else
+                                show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                        }, 400);
+                    },
+                    complete: function (){
+                        $('#main_loader_overlay').fadeOut();
+                    },
+                    error: function (xhr, textStatus, thrownError){
+                        setTimeout(()=>{
+                            show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                        },400); 
+                    },
+                });
+
+            }, () => {},last = true, second = true, general = false);
+        }, () => {},last = false, second = false, general = false);
+    else 
+        shake($('#reclam_tab'));
+}
+
+
+function delete_reclamation() {
+    show_pop_up('Voullez vous Supprimer cette Réclamation ?',"confirm",() => {
+        show_pop_up('Êtes-vous sûr ?',"confirm",() => {
+            var reclam_id = document.getElementById('reclam_tab').querySelector('.reclam_id').innerHTML;
+            
+            $('#main_loader_overlay').fadeIn();
+            $.ajax({
+                url: `${location.origin}/reclamation_handler_VIEW/`,
+                type: 'POST',
+                data: {
+                    'type': 'delete',
+                    'reclam_id': reclam_id,
+                },
+                success: function (response) {
+                    data = JSON.parse(response);
+                    setTimeout(() => {
+                        if (data.success){
+                            show_pop_up(`La réclamation a été supprimé !`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                            update_reclamation_tab(data.html);
+                        }
+                        else
+                            show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                    }, 400);
+                },
+                complete: function (){
+                    $('#main_loader_overlay').fadeOut();
+                },
+                error: function (xhr, textStatus, thrownError){
+                    setTimeout(() => {
+                        show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                    }, 400);
+                },
+            });
+
+        }, () => {},last = true, second = true, general = false);
+    }, () => {},last = false, second = false, general = false);
+}
+
+function update_reclamation_tab(data){
+    var current_item_id = document.getElementById('std_center_item_id').innerHTML;
+    var current_item_year =  document.getElementById('std_center_item_year').innerHTML;
+
+    //updating main content 
+    var reclamation_item =  document.querySelector(`.notes_item_small[data-item-year='${current_item_year}'][data-item-id='${current_item_id}'] > .notes_item_reclam > div`);
+    reclamation_item.innerHTML = data;
+
+    //updating tab content from main content
+    $('#reclam_tab').slideUp(400);
+    setTimeout(()=>{
+        document.getElementById('reclam_tab').innerHTML = "";
+        $(reclamation_item).clone().appendTo('#reclam_tab');
+        $('#reclam_tab').slideDown();
+    }, 400);
 }

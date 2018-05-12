@@ -24,3 +24,7 @@ def image_center_crop(img_object):
         return img
 
         
+def scheduled_operation():
+    print('Hello World')
+    return True
+    ## will check for annonces here

@@ -372,7 +372,9 @@ def PopulateAnnonce():
             gen_date = dt.strptime(fake.date(),'%Y-%M-%d').date()
             gen_time = dt.strptime(fake.time(),'%H:%M:%S').time()
             # obj = Annonce(id_annonce = gen_id, sujet_annonce = gen_sujet, description_annonce = gen_description, date_annonce = gen_date, heure_annonce = gen_time, afficher_annonce = False, id_module = module)
-            obj = Annonce(sujet_annonce = gen_sujet, description_annonce = gen_description, date_annonce = gen_date, heure_annonce = gen_time, afficher_annonce = False, id_module = module)
+            obj = Annonce(sujet_annonce = gen_sujet, description_annonce = gen_description, date_annonce = gen_date, heure_annonce = gen_time, afficher_annonce = False)
+            obj.save()
+            obj.id_module.add(module);
             obj.save()
             nbOfEntries += 1 
             sys.stdout.write('\r[16/{}]Annonce : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))

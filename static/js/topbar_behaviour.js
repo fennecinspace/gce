@@ -437,7 +437,7 @@ function pages_handler() {
     
     if (user_type == 'tech') {
         document.getElementById("upload_entry").addEventListener('click', function () {
-            alert('upload');
+            show_pop_up('upload');
             responsive_menu_hider();
         });
 
@@ -459,7 +459,7 @@ function pages_handler() {
         });
 
         document.getElementById("messenger_entry").addEventListener('click', function () {
-            alert('messenger');
+            show_pop_up('messenger');
             responsive_menu_hider();
         });
     }
@@ -476,14 +476,14 @@ function pages_handler() {
 
     if (user_type == 'ensg') {
         document.getElementById("error_entry").addEventListener('click', function () {
-            alert('error');
+            show_pop_up('error');
             responsive_menu_hider();
         });
     }
 
     if (user_type == 'ensg' || user_type == 'chef') {
         document.getElementById("consult_entry").addEventListener('click', function () {
-            alert('consult');
+            show_pop_up('consult');
             responsive_menu_hider();
         });
     }

@@ -1,0 +1,22 @@
+<div>
+    {% if entry.reclamation  %}
+        <div class="reclam_id hide">{{ entry.reclamation.id }}</div>
+        <div class="reclam_tab_label">Sujet :</div>
+        <input type="text" class="reclam_tab_item" value="{{ entry.reclamation.sujet_reclamation }}" disabled>
+        <div class="reclam_tab_label">Description :</div>
+        <textarea type="text" class="reclam_tab_item" disabled>{{ entry.reclamation.description_reclamation }}</textarea>
+        <div class="reclam_lower_section">
+            <div class="reclam_tab_item reclam_tab_bool">{% if entry.reclamation.regler_reclamation == False %}<span style="color: red;"> &#10006;</span>{% else %}<span style="color: green;"> &#10004;</span>{% endif %} Réglé</div>
+            <div class="reclam_tab_item reclam_tab_bool">{% if entry.reclamation.approver_reclamation == False %}<span style="color: red;"> &#10006;</span>{% else %}<span style="color: green;"> &#10004;</span>{% endif %} Apprové</div>
+            <div onclick="reclamation_manager('delete');" class="default_button_small reclam_tab_button">Annuler</div>
+        </div>
+    {% else %}
+        <div class="reclam_tab_label">Sujet :</div>
+        <input type="text" class="reclam_tab_item" name="reclamation_title">
+        <div class="reclam_tab_label">Description :</div>
+        <textarea type="text" class="reclam_tab_item" name="reclamation_content"></textarea>
+        <div class="reclam_lower_section">
+            <div onclick="reclamation_manager('create');" class="default_button_small reclam_tab_button">Réclamer</div>
+        </div>
+    {% endif %}
+</div>
