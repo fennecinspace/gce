@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
-from gce_app.views import MainView, ProfileView, AnnonceView , SaisirView, NotesView, AffichageView, UsersView
+from gce_app.views import MainView, ProfileView, AnnonceView , SaisirView, NotesView, AffichageView, UsersView, ReclamationView
 ## ajax only views
 from gce_app.views import notification_state_changer, search_suggestion_feeder, search_result_feeder, reclamation_handler
 ## scheduled_operation
@@ -15,6 +15,8 @@ urlpatterns = [
     path('notes/', login_required(NotesView.as_view()), name='notes'),
     path('affichages/', login_required(AffichageView.as_view()), name='affichage'),
     path('personnels/', login_required(UsersView.as_view()), name='personnels'),
+    path('reclamations/', login_required(ReclamationView.as_view()), name='reclamations'),
+
     ## ajax only
     path('notification_state_changer_VIEW/', notification_state_changer, name='notification_state_changer'),
     path('search_suggestions_VIEW/', search_suggestion_feeder, name='search_suggestion_feeder'),

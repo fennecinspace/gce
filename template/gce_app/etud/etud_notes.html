@@ -46,7 +46,7 @@
                                     <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
                                     <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
                                 {% endif %}
-                            </div>
+                            </div> 
                         </div>
                         <div class="notes_item_correction hide">
                             <div data-list-length = '{{ entry.correction|length }}'>
@@ -60,7 +60,25 @@
                             </div>
                         </div>  
                         <div class="notes_item_reclam hide">
-                            {% include 'gce_app/etud/reclam_content.html' %}
+                            <div>
+                                {% if year.active %}
+                                <div class="notes_item_reclam_new">
+                                    <div class="default_title reclam_title">Créer une Réclamations :</div>
+                                    <div class="reclam_tab_label">Sujet :</div>
+                                    <input type="text" class="reclam_tab_item" name="reclamation_title">
+                                    <div class="reclam_tab_label">Description :</div>
+                                    <textarea type="text" class="reclam_tab_item" name="reclamation_content"></textarea>
+                                    <div class="reclam_lower_section">
+                                        <div onclick="reclamation_manager('create',this,event);" class="default_button_small reclam_tab_button">Réclamer</div>
+                                    </div>
+                                    {% else %}
+                                        <div>Copie Archivée, Vous ne pouvez plus réclamer</div>
+                                    {% endif %}
+                                </div>
+                                <div class="notes_item_reclam_old">
+                                    {% include 'gce_app/etud/reclam_content.html' %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 {% endfor %} 

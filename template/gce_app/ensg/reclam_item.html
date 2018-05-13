@@ -1,0 +1,37 @@
+<div class="notes_item_small reclam_ensg_item">
+    <div class="notes_item_id">{{ entry.files.0.id_version.id_copie.id }}</div>
+    <div class="notes_item_info">
+        <img class="notes_item_info_avatar" src="{{ entry.files.0.emplacement_fichier.url }}" onclick="mark_image_viewer(this, event)">
+        <div class="notes_item_info_text">
+            <div class="notes_item_info_name">
+                <label class="notes_item_name_label">Etudiant :</label>
+                <div class="notes_item_name_value" data-student-id = "{{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur }}">{{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.files.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}</div>
+            </div>
+            <div class="notes_item_info_mark">
+                <label class="notes_item_mark_label">Note :</label>
+                <input oninput='enable_saving(event);' class="notes_item_mark_value" placeholder="Note" value="{{ entry.files.0.id_version.note_version }}">
+            </div>
+        </div>
+    </div>
+    <div class="reclam_ensg_info">
+        <div class="reclam_ensg_info_item">
+            <div class="reclam_ensg_info_label">Sujet :</div>
+            <div class="reclam_ensg_info_value">{{ entry.reclamation.sujet_reclamation }}</div>
+        </div>
+        <div class="reclam_ensg_info_item">
+            <div class="reclam_ensg_info_label">Description :</div>
+            <div class="reclam_ensg_info_value">{{ entry.reclamation.description_reclamation }}</div>
+        </div>
+    </div>
+    <div class="notes_item_image">
+        <div data-list-length = '{{ entry.files|length }}'>
+            {% for file in entry.files %}
+                <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+            {% endfor %}
+            {% if entry.files|length > 1 %}
+                <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+            {% endif %}
+        </div>
+    </div>
+</div>

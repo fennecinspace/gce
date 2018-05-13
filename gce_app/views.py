@@ -571,6 +571,7 @@ def get_affichable_modules(logged_in_user):
 ## AJAX RECLAMATION HANDLER 
 @login_required
 def reclamation_handler(req):
+    ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
     if req.method == 'POST' and req.is_ajax():
         try:
             if req.POST.get('type') == 'create':
@@ -578,15 +579,16 @@ def reclamation_handler(req):
                 content = req.POST.get('content')
                 student = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = req.POST.get('student_id'))[0])[0]
                 module = Module.objects.filter(id = req.POST.get('module_id'))[0]
-                new_reclamation = Reclamation(sujet_reclamation = sujet, description_reclamation = content, id_etudiant = student, id_module = module)
+                new_reclamation = Reclamation(sujet_reclamation = sujet, description_reclamation = content, id_etudiant = student, id_module = module, annee_reclamation = ANNEE_UNIV)
                 new_reclamation.save()
                 context_to_use = {'entry': {
-                    'reclamation': new_reclamation,
+                    'reclamations': [new_reclamation],
+                    'year':{'active':True},
                 }}
             
             if req.POST.get('type') == 'delete':
                 Reclamation.objects.filter(id = req.POST.get('reclam_id')).delete()
-                context_to_use = None
+                context_to_use = {'year':{'active':True}}
             data = {'success': True, 'html': render_to_string('gce_app/etud/reclam_content.html', context = context_to_use)}
         except Exception as e:
             print(e)
@@ -922,13 +924,13 @@ class NotesView(TemplateView, BaseContextMixin):
                     module_correction = Correction.objects.filter(Q(annee_correction = year) & Q(id_module = version.id_copie.id_module))[0]
                     module_reclamation = Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = version.id_copie.id_module)).order_by('-id')
                     if len(module_reclamation) > 0:
-                        module_reclamation = module_reclamation[0]
+                        module_reclamation = module_reclamation
                     else:
                         module_reclamation = None
                     modules_data += [{
                         'files':list(copy_files),
                         'correction': list(FichierCorrection.objects.filter(id_correction = module_correction).order_by('-id')),
-                        'reclamation': module_reclamation,
+                        'reclamations': module_reclamation,
                     }]
                 results[year] = modules_data
             context['results'] = results
@@ -1025,7 +1027,6 @@ class AffichageView(TemplateView, BaseContextMixin):
                         copy.save()
                 if req.POST.get('type') == 'grant_access':
                     for copy in module_copies:
-                        print('here')
                         copy.modifiable = True
                         copy.save()
                 data = {'success': True, 'module': module.titre_module}
@@ -1048,6 +1049,12 @@ class AffichageView(TemplateView, BaseContextMixin):
 class UsersView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/chef/chef_personnels.html'
 
+    def post(self, req, *args, **kwargs):
+        if self.request.POST.get('logout'):
+            logout(req)
+            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        return HttpResponse(req)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         filiere = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = context['loggedin_user'])[0])[0]
@@ -1061,3 +1068,55 @@ class UsersView(TemplateView, BaseContextMixin):
             return self.render_to_response(context)
         else:
             return HttpResponse("<h2>404</h2>")
+
+class ReclamationView(TemplateView, BaseContextMixin):
+    template_name = 'gce_app/ensg/ensg_reclam.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(get_ensg_reclamations(context['loggedin_user']))
+
+        return context
+
+    def post(self, req, *args, **kwargs):
+        if self.request.POST.get('logout'):
+            logout(req)
+            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        return HttpResponse(req)
+
+    def get(self, req, *args, **kwargs):
+        context = self.get_context_data()
+        if context['loggedin_user'].type_utilisateur == 'ensg':
+            return self.render_to_response(context)
+        else:
+            return HttpResponse("<h2>404</h2>")
+
+def get_ensg_reclamations(ensg):
+    ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
+    user_modules = Enseignant.objects.filter(id_enseignant = ensg)[0].modules.all()
+    reclamations_done = Reclamation.objects.filter(Q(annee_reclamation = ANNEE_UNIV) & Q(id_module__in = user_modules) & Q(regler_reclamation = True))
+    reclamations_waiting = Reclamation.objects.filter(Q(annee_reclamation = ANNEE_UNIV) & Q(id_module__in = user_modules) & Q(regler_reclamation = False))
+    entries_done = []
+    entries_waiting = []
+
+    
+    for reclam in reclamations_done:
+        version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)))[0]
+        files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
+        entries_done += [{
+            'reclamation': reclam,
+            'files': files,
+        }]
+    
+    for reclam in reclamations_waiting:
+        version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)))[0]
+        files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
+        entries_waiting += [{
+            'reclamation': reclam,
+            'files': files,
+        }]
+
+    return {
+        'entries_waiting': entries_waiting,
+        'entries_done': entries_done,
+    }

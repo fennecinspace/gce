@@ -270,6 +270,7 @@ class Reclamation(models.Model):
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     regler_reclamation = models.BooleanField(db_column='regler_Reclamation', default=False)
     approver_reclamation = models.BooleanField(db_column='approver_Reclamation', default=False)
+    annee_reclamation =  models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Reclamation', blank=True, null=True)
     
     class Meta:
         db_table = 'Reclamation'

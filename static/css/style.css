@@ -591,12 +591,12 @@
     /* transform: translateZ(0); */
 }
 
-#home_container, #profile_container, #annonce_container, #saisir_container, #notes_container, #affichage_container, #personnels_container {
+#home_container, #profile_container, #annonce_container, #saisir_container, #notes_container, #affichage_container, #personnels_container, #reclam_container {
     max-width: 1000px;
     margin: 0 auto;
 }
 
-#annonce_container, #profile_container, #saisir_container, #notes_container, #affichage_container, #personnels_container {
+#annonce_container, #profile_container, #saisir_container, #notes_container, #affichage_container, #personnels_container, #reclam_container {
     padding: 1.5em 1em 0em 1em;
     user-select: none;
 }
@@ -1768,6 +1768,10 @@
     cursor: pointer;
 }
 
+#std_center_reclam {
+    overflow: auto;
+}
+
 #std_center_correct, #std_center_reclam {
     display: none;
 }
@@ -1802,8 +1806,8 @@
 #reclam_tab > div {
     background: rgba(218, 218, 218, .37);
     background: rgba(0, 0, 0, .8);
-    border-radius: 8px;
-    padding: 1em;
+    border-radius: 15px;
+    padding: 1em 1em .4em 1em;
 }
 
 .reclam_tab_label {
@@ -1836,7 +1840,7 @@
 
 .reclam_lower_section {
     position: relative;
-    height: 30px;
+    height: 42px;
 }
 
 .reclam_tab_bool > span {
@@ -1861,6 +1865,25 @@
 
 textarea.reclam_tab_item {
     height: 100px;
+}
+
+.reclam_title {
+    background: rgba(117, 117,117);
+    color: #000000;
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.old_reclam_item {
+    border-radius: 5px;
+    border: 2px dashed rgb(255, 255, 255, .3);
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.reclam_second_title {
+    margin-top: 15px;
 }
 /* #endregion NOTES ETUD */
 
@@ -1922,6 +1945,45 @@ textarea.reclam_tab_item {
     animation-duration:  1.5s;
 }
 /* #endregion personnels */
+
+
+/* #region RECLAMATION ENSG */
+.reclam_ensg_item {
+    height: auto;
+    padding-bottom: .5em;
+}
+
+.reclam_ensg_info {
+    padding: .4em .6em .6em .6em;
+    margin: 1em 0 .2em 0;
+    border-radius: 10px;
+    border: 1px dashed rgb(0, 0, 0, .5); 
+}
+
+.reclam_ensg_info_item {
+    margin-top: .8em;
+}
+
+.reclam_ensg_info_item:first-child {
+    margin-top: 0;
+}
+
+.reclam_ensg_info_label {
+    color: rgb(0, 0, 0, 1);
+    padding-bottom: .2em;
+}
+
+.reclam_ensg_info_value  {
+    border-radius: 5px;
+    padding: 5px;
+    border: transparent;
+    color: rgba(255, 255, 255, 1);
+    width: 80%;
+    font-weight: 400;
+    background: rgb(0, 0, 0, .8);
+    word-wrap: break-word;
+}
+/* #endregion */
 /* #endregion CONTENT */
 
 
