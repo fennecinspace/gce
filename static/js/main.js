@@ -1216,8 +1216,8 @@ function demande_modification_right(elem, e) {
 //////////////// AFFICHAGE ////////////////
 function afficher_module(elem,e){
     e.stopPropagation();
-    show_pop_up('Confirmer l\'affichage', () => {
-        show_pop_up('Êtes-vous sûr ?', () => {
+    show_pop_up('Confirmer l\'affichage', 'confirm', () => {
+        show_pop_up('Êtes-vous sûr ?', 'confirm', () => {
             var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
             $.ajax({
