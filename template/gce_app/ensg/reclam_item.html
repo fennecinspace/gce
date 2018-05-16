@@ -9,20 +9,41 @@
             </div>
             <div class="notes_item_info_mark">
                 <label class="notes_item_mark_label">Note :</label>
-                <input oninput='enable_saving(event);' class="notes_item_mark_value" placeholder="Note" value="{{ entry.files.0.id_version.note_version }}">
+                {% if not entry.reclamation.regler_reclamation %}
+                    <input oninput="mark_as_corrected(this);" data-state="original" data-original-note="{{ entry.files.0.id_version.note_version }}" class="notes_item_mark_value" placeholder="Note" value="{{ entry.files.0.id_version.note_version }}">
+                {% else %}
+                    <input class="notes_item_mark_value" placeholder="Note" value="{{ entry.reclamation.note_reclamation }}" disabled>
+                {% endif %}
             </div>
         </div>
     </div>
     <div class="reclam_ensg_info">
+        <div class="reclam_item_id hide">{{ entry.reclamation.id }}</div>
+        <div class="reclam_ensg_info_item reclam_ensg_info_item_first">
+            <div class="reclam_ensg_info_label">Module :</div>
+            <div class="reclam_ensg_info_value">{{ entry.reclamation.id_module.titre_module|lower|title }}</div>
+        </div>
         <div class="reclam_ensg_info_item">
             <div class="reclam_ensg_info_label">Sujet :</div>
-            <div class="reclam_ensg_info_value">{{ entry.reclamation.sujet_reclamation }}</div>
+            <div class="reclam_ensg_info_value">{{ entry.reclamation.sujet_reclamation|lower|title }}</div>
         </div>
         <div class="reclam_ensg_info_item">
             <div class="reclam_ensg_info_label">Description :</div>
             <div class="reclam_ensg_info_value">{{ entry.reclamation.description_reclamation }}</div>
         </div>
+        {% if entry.reclamation.regler_reclamation  %}
+            <div class="reclam_ensg_info_item">
+                <div class="reclam_ensg_info_label">Approuvée :</div>
+                <div class="reclam_ensg_info_value">{% if entry.reclamation.approuver_reclamation %}Oui{% else %}Non{% endif %}</div>
+            </div>
+        {% endif %}
     </div>
+    {% if not entry.reclamation.regler_reclamation  %}
+        <div class="reclam_buttons_area">
+            <div class="default_button reclam_button_left" onclick="handle_reclamation(this, event, 'refuse')">Rejeter</div>
+            <div class="default_button reclam_button_right" onclick="handle_reclamation(this, event, 'accept')">Approuver</div>
+        </div>
+    {% endif %}
     <div class="notes_item_image">
         <div data-list-length = '{{ entry.files|length }}'>
             {% for file in entry.files %}

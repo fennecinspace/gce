@@ -437,7 +437,10 @@ function pages_handler() {
     
     if (user_type == 'tech') {
         document.getElementById("upload_entry").addEventListener('click', function () {
-            show_pop_up('upload');
+            $('#main_loader_overlay').fadeIn();
+            $('#content_container').load(`${location.origin}/rectifications #content_container > *`,()=> {
+                $('#main_loader_overlay').fadeOut();
+            });
             responsive_menu_hider();
         });
 
@@ -476,6 +479,7 @@ function pages_handler() {
 
     if (user_type == 'ensg') {
         document.getElementById("error_entry").addEventListener('click', function () {
+            $('#main_loader_overlay').fadeIn();
             $('#content_container').load(`${location.origin}/reclamations #content_container > *`,()=> {
                 $('#main_loader_overlay').fadeOut();
             });

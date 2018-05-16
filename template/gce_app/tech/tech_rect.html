@@ -1,0 +1,48 @@
+{% extends 'gce_app/common/base_page.html' %}
+{% block base_extender %}
+<div id="rect_container">
+    {% if entries %}
+        <div id="rect_area">
+            {% for entry in entries %}
+                <div class="rect_item">
+                    <img class="rect_item_img" onclick="rect_image_viewer(this, event)" src="{{ entry.0.emplacement_fichier.url }}">
+                    <div class="rect_item_info">
+                        <div data-copie-id = "{{ entry.0.id_version.id_copie.id }}" class="copie_id hide"></div>
+                        <div class="version_id hide">{{ entry.0.id_version.id }}</div>
+                        <div class="rect_item_label">Module :</div>
+                        <div data-id-module="{{ entry.0.id_module.id }}" class="rect_item_value">{{ entry.0.id_module.titre_module|lower|title }}</div>
+                        <div class="rect_item_label">Etudiant :</div>
+                        <div data-id-etudiant="{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant }}" class="rect_item_value">{{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}</div>
+                        <div class="rect_item_label">Note :</div>
+                        <div data-note="{{ entry.0.id_version.note_version }}" class="rect_item_value">{{ entry.0.id_version.note_version }}</div>
+                    </div>
+                    {% if 'default/' in entry.0.emplacement_fichier.url %}
+                        <div onclick="rect_upload(this,event);" class="rect_btn rect_item_upload"><div class="delete_entry_text rect_hint">Téléverser<div></div></div></div>
+                        <form id="upload_form" class='hide' enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ upload_form }}
+                        </form>
+                    {% else %}
+                        <div onclick="rect_reset_accept(this,event,'reset');" class="rect_btn rect_item_reset"><div class="delete_entry_text rect_hint">Réinitialiser<div></div></div></div>
+                        <div onclick="rect_reset_accept(this,event,'accept');" class="rect_btn rect_item_confirm"><div class="delete_entry_text rect_hint">Enregistrer<div></div></div></div>
+                    {% endif %}
+                    <div class="notes_item_image">
+                        <div data-list-length = '{{ entry|length }}'>
+                            {% for file in entry %}
+                                <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+                            {% endfor %}
+                            {% if entry|length > 1 %}
+                                <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                                <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="note_image_overlay" class="notes_item_image"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
+    {% else %}
+        <div class="saisir_item_small" id="fin_de_verification_note">Pas de Copies à Réctifier</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,25 +1,29 @@
 {% extends 'gce_app/common/base_page.html' %}
 {% block base_extender %}
 <div id="reclam_container">
-    <div id="reclam_area">
-    {% if entries_waiting %}
-        <div id="reclamations_waiting">
-            <div class="default_title annee_title">En attente</div>
-            {% for entry in entries_waiting %}
-                {% include 'gce_app/ensg/reclam_item.html' %}
-            {% endfor %}
+    {% if entries_waiting or entries_done %}
+        <div id="reclam_area">
+        {% if entries_waiting %}
+            <div id="reclamations_waiting">
+                <div class="default_title annee_title">En Attente</div>
+                {% for entry in entries_waiting %}
+                    {% include 'gce_app/ensg/reclam_item.html' %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if entries_done %}
+            <div id="reclamations_done">
+                <div class="default_title annee_title">Réglées</div>
+                {% for entry in entries_done %}
+                    {% include 'gce_app/ensg/reclam_item.html' %}
+                {% endfor %}
+            </div>
+        {% endif %}
         </div>
+        <div id="image_show_large"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
+        <div id="note_image_overlay" class="notes_item_image"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
+    {% else %}
+        <div class="saisir_item_small" id="fin_de_verification_note">Pas de Réclamation a Afficher</div>
     {% endif %}
-    {% if entries_done %}
-        <div id="reclamations_done">
-            <div class="default_title annee_title">Réglé</div>
-            {% for entry in entries_done %}
-                {% include 'gce_app/ensg/reclam_item.html' %}
-            {% endfor %}
-        </div>
-    {% endif %}
-    </div>
-    <div id="image_show_large"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
-    <div id="note_image_overlay" class="notes_item_image"><div onclick="leave_image_overlay(this,event);">&#10006;</div></div>
 </div>
 {% endblock %}

@@ -65,7 +65,7 @@ def CreateUtilisateur(user_type, counter, gen_avatar):
 ########################
 ## defining Populators
 def PopulateUtilisateur(nbEtud = 200, nbEnsen = 10, nbTech = 5, nbChef = 6): # i use try and except to solve the unique fields issue 
-    default_avatar = os.path.join('avatars','default_avatar.png')
+    default_avatar = os.path.join('default','default_avatar.png')
     nbOfUsersToCreate = nbEtud + nbEnsen + nbTech + nbChef
     nbOfUsers = 0
     sys.stdout.write('[01/{}]Utilisateur-User : {}/{}'.format(NBTABLES,nbOfUsers,nbOfUsersToCreate))
@@ -353,8 +353,8 @@ def PopulateModule(nbMod = 20):
             gen_id = IDS[12] + str(nbOfEntries)
             gen_titre = random.choice(['Math','Chemie','Physics','Algorithms','AI','Medecine']) + " " + random.choice(['initiation','advanced','amateur']) + " " + str(nbOfEntries)
             # obj = Module(id_module = gen_id, titre_module = gen_titre, finsaisie_module = False, id_specialite = speciality)
-            
-            obj = Module(titre_module = gen_titre, finsaisie_module = random.choice([True,False]), id_specialite = speciality)
+            # obj = Module(titre_module = gen_titre, finsaisie_module = random.choice([True,False]), id_specialite = speciality)
+            obj = Module(titre_module = gen_titre, finsaisie_module = False, id_specialite = speciality)
             obj.save()
             nbOfEntries += 1
             sys.stdout.write('\r[15/{}]Module : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate)) 

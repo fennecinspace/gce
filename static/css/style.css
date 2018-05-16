@@ -363,7 +363,7 @@
 #notification_numbers {
     height: 20px;
     width: 20px;
-    background-color: rgba(255, 0, 0, 0.808);
+    background-color: rgba(255, 0, 0, 1);
     line-height: 20px;
     text-align: center;
     border-radius: 50%;
@@ -591,12 +591,12 @@
     /* transform: translateZ(0); */
 }
 
-#home_container, #profile_container, #annonce_container, #saisir_container, #notes_container, #affichage_container, #personnels_container, #reclam_container {
+#home_container, #profile_container, #annonce_container, #saisir_container, #notes_container, #affichage_container, #personnels_container, #rect_container, #reclam_container {
     max-width: 1000px;
     margin: 0 auto;
 }
 
-#annonce_container, #profile_container, #saisir_container, #notes_container, #affichage_container, #personnels_container, #reclam_container {
+#annonce_container, #profile_container, #saisir_container, #notes_container, #affichage_container, #personnels_container, #rect_container, #reclam_container {
     padding: 1.5em 1em 0em 1em;
     user-select: none;
 }
@@ -1558,7 +1558,8 @@
     animation-name: go_down;
     animation-duration: 1s;
     font-size: 1.5em;
-    line-height: .8em;
+    line-height: 1.2em;
+    border-radius: 15px;
 }
 
 .notes_item_small {
@@ -1610,12 +1611,13 @@
     object-fit: cover;
     border-radius: 10px;
     cursor: pointer;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.548);
-
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.301);
+    background: #ffffff;
+    /* border: 2px dashed black; */
 }
 
 .notes_item_info_avatar:hover {
-    box-shadow: none;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
 
 .notes_item_info_text {
@@ -1804,27 +1806,29 @@
 }
 
 #reclam_tab > div {
-    background: rgba(218, 218, 218, .37);
-    background: rgba(0, 0, 0, .8);
+    background: rgba(255, 255, 255, 0.541);
     border-radius: 15px;
-    padding: 1em 1em .4em 1em;
+    padding: .7em .7em .2em .7em;
 }
 
 .reclam_tab_label {
-    font-weight: bold;
-}
-
-.reclam_tab_item, .reclam_tab_label {
-    border-radius: 5px;
-    color: white;
-    margin-bottom: .5em;
     width: 100%;
+    font-family: Roboto-Bold;
+    color: black;
+    padding: 0.2em;
 }
 
 .reclam_tab_item {
+    width: 100%;
+    margin-bottom: .4em;
     border-radius: 5px;
-    background: rgba(0, 0, 0, .8);
-    background: rgba(218, 218, 218, .37);
+}
+
+
+.reclam_tab_item {
+    border-radius: 5px;
+    color: white;
+    background: rgba(0, 0, 0, .85);
     padding: .4em;
     word-wrap: break-word;
     border: transparent;
@@ -1845,10 +1849,10 @@
 
 .reclam_tab_bool > span {
     position: absolute;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 20px;
-    top: 5px;
-    left: 5px;
+    top: 7px;
+    left: 8px;
     text-shadow: 0px 0px 5px #000000;
 }
 
@@ -1856,11 +1860,11 @@
     padding: .6em;
     position: absolute;
     right: 0em;
-    background-color: rgba(119, 21, 21, 0.445); 
+    background-color: rgba(0, 0, 0, 0.719); 
 }
 
 .reclam_tab_button:hover {
-    background-color: rgba(185, 8, 8, 0.445); 
+    background-color: rgb(0, 0, 0); 
 }
 
 textarea.reclam_tab_item {
@@ -1868,22 +1872,29 @@ textarea.reclam_tab_item {
 }
 
 .reclam_title {
-    background: rgba(117, 117,117);
-    color: #000000;
+    background: rgb(0, 0, 0);
+    color: #ffffff;
     width: 100%;
     margin-bottom: 15px;
-    border-radius: 5px;
+    border-radius: 10px;
 }
 
 .old_reclam_item {
     border-radius: 5px;
-    border: 2px dashed rgb(255, 255, 255, .3);
+    border: 2px dashed rgba(0, 0, 0, .8);
     padding: 5px;
     margin-bottom: 10px;
 }
 
 .reclam_second_title {
     margin-top: 15px;
+}
+
+.copie_is_archived {
+    color: #000000;
+    font-weight: bold;
+    height: 30px;
+    font-size: 20px;
 }
 /* #endregion NOTES ETUD */
 
@@ -1948,6 +1959,15 @@ textarea.reclam_tab_item {
 
 
 /* #region RECLAMATION ENSG */
+#reclam_area {
+    animation-name: go_up;
+    animation-duration: 1s;
+}
+
+#reclamations_done, #reclamations_waiting {
+    margin-bottom: 25px;
+}
+
 .reclam_ensg_item {
     height: auto;
     padding-bottom: .5em;
@@ -1964,7 +1984,7 @@ textarea.reclam_tab_item {
     margin-top: .8em;
 }
 
-.reclam_ensg_info_item:first-child {
+.reclam_ensg_info_item_first {
     margin-top: 0;
 }
 
@@ -1977,13 +1997,156 @@ textarea.reclam_tab_item {
     border-radius: 5px;
     padding: 5px;
     border: transparent;
-    color: rgba(255, 255, 255, 1);
-    width: 80%;
+    color: rgba(0, 0, 0, 1);
+    width: 100%;
     font-weight: 400;
-    background: rgb(0, 0, 0, .8);
+    background: rgba(126, 126, 126, 0.4);
     word-wrap: break-word;
 }
+
+.reclam_buttons_area {
+    height: 38px;
+    position: relative;
+}
+
+.reclam_button_left, .reclam_button_right {
+    position: absolute;
+    top:0;
+    margin: .2em 0;
+    font-size: 15px;
+    padding: 7px;
+}
+
+.reclam_button_left {
+    left: 0;
+}
+
+.reclam_button_right {
+    right: 0;
+}
+
+.reclam_button_left:hover, .reclam_button_right:hover {
+    animation: none;
+}
 /* #endregion */
+
+/* #region TECH_RECTIFICATIONS */
+.rect_item {
+    position: relative;
+    display: block;
+    background: rgba(218, 218, 218, .37);
+    /* height: 50px; */
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 15px;
+    padding: .4em;
+    height: 159px;
+    margin-bottom: 20px;
+}
+
+.rect_item_img {
+    margin-top: .2em;
+    margin-left: .2em;
+    background: rgb(255, 255, 255);
+    width: 140px;
+    border-radius: 15px;
+    border: 2px dashed rgba(0, 0, 0, .7);
+    object-fit: cover;
+    height: 140px;
+}
+
+.rect_item_img:hover {
+    border: 2px solid rgba(0, 0, 0, .7);
+    cursor: pointer;
+}
+
+.rect_item_info {
+    position: absolute;
+    top: .7em;
+    left: 10em;
+    width: calc(100% - 180px - 3em)
+}
+
+.rect_btn {
+    width: 3em;
+    position: absolute;
+    right: .6em;
+    background-color: rgba(148, 148, 148, 0.27);
+    border: 2px dashed rgba(0, 0, 0, .8);
+}
+
+.rect_item_upload {
+    height: calc(100% - 1.2em);
+    top: .6em;
+    background: url('../images/menu_upload.svg') no-repeat center 48%/40px;
+    border-radius: 12px;
+}
+
+.rect_btn:hover {
+    border: 2px solid rgba(0, 0, 0, .8);
+    cursor: pointer;
+}
+
+.rect_item_reset, .rect_item_confirm {
+    height: calc(50% - .5em);
+}
+
+
+.rect_item_reset {
+    top: .6em;
+    border-radius: 12px 12px 0 0;
+    background: url('../images/reset.svg') no-repeat center 48%/40px;
+    border-bottom: 2px dashed transparent; 
+}
+
+.rect_item_confirm {
+    top: calc(50%);
+    border-radius: 0 0 12px 12px ;
+    background: url('../images/accept_doc.svg') no-repeat 0% 48%/40px;
+}
+
+.rect_item_reset:hover + .rect_item_confirm {
+    border-top: 2px dashed transparent;
+}
+
+.rect_hint {
+    background: rgba(0, 0, 0, 1);
+    top: 50%;
+    transform: translateY(-50%); 
+    position: absolute;
+    right: calc(100% + 10px);
+}
+
+.rect_hint > div {
+    z-index: -1;
+    transform: rotateZ(45deg);
+    position: absolute;
+    top: 8px; 
+    right: -5px;
+    background: rgba(0, 0, 0, 1);
+    height: 12px;
+    width: 12px;
+}
+
+.rect_btn:hover .rect_hint {
+    display: block;
+}
+
+.rect_item_label, .rect_item_value {
+    font-weight: bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.rect_item_value {
+    padding: .2em;
+    border-radius: 6px;
+    background: rgb(0, 0, 0, .8);
+    color: white;
+    margin-bottom: .2em; 
+}
+/* #endregion TECH_RECTIFICATIONS */
 /* #endregion CONTENT */
 
 
@@ -2273,7 +2436,7 @@ textarea.reclam_tab_item {
 
 /* #region icons */
 #televerser_icon {
-    background-image: url('../images/menu_upload.png');
+    background-image: url('../images/menu_upload.svg');
 }
 
 #saisir_icon {
@@ -2496,14 +2659,43 @@ textarea.reclam_tab_item {
         width: calc(100% - 4em);
     }
 
+    #std_center_reclam {
+        /* overflow: hidden; */
+    }
+
     #reclam_tab {
         padding: 0;
-        height: 100%;
+       height: 100%;
     }
       
     #reclam_tab > div {
         border-radius: 0;
-        height: 100%;
+        min-height: 100%;
+    }
+
+    .rect_item {
+        height: 315px;
+    }
+
+    .rect_item_info {
+        top: 170px;
+        width: 90%;
+        left: 0.8em;
+    }
+
+    .rect_btn {
+        width: calc(100% - 180px);
+        height: 133px;
+    }
+
+    .rect_item_confirm {
+        background-position: 50%;
+        top: 79px;
+    }
+
+    .rect_item_reset, .rect_item_confirm {
+        height: calc(142px / 2);
+        
     }
 }
 /* #endregion MEDIA QUERIES */

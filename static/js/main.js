@@ -72,7 +72,9 @@ function show_pop_up(content, type = 'alert', ok_callback = function(){}, cancel
     if (type == 'confirm') {
         overlay.querySelector('#pop_up_message_cancel').style.display = 'block';
         overlay.querySelector('#pop_up_message_cancel').addEventListener('click',function cancel_fct() {
-            overlay.querySelector('#pop_up_message_cancel').style.display = 'none';
+            setTimeout(() => {
+                overlay.querySelector('#pop_up_message_cancel').style.display = 'none';
+            }, 400);
             $(overlay).fadeOut();
             $('#content_container').removeClass('blur_elem');
             cancel_callback();
@@ -88,7 +90,10 @@ function show_pop_up(content, type = 'alert', ok_callback = function(){}, cancel
 
 /////////////////// HOME MENU /////////////////////
 function load_televerser(e) {
-    show_pop_up('not yet !');
+    $('#main_loader_overlay').fadeIn();
+    $('#content_container').load(`${location.origin}/rectifications #content_container > *`,()=> {
+        $('#main_loader_overlay').fadeOut();
+    });
 }
 function load_saisir(e) {
     $('#main_loader_overlay').fadeIn();
@@ -109,6 +114,7 @@ function load_resultats(e) {
     });
 }
 function load_reclamations(e) {
+    console.log('hello')
     $('#main_loader_overlay').fadeIn();
     $('#content_container').load(`${location.origin}/reclamations #content_container > *`,()=> {
         $('#main_loader_overlay').fadeOut();
@@ -1002,6 +1008,12 @@ function mark_image_viewer(elem, e) {
     $('#note_image_overlay').show();
 }
 
+function rect_image_viewer(elem, e) {
+    $('#note_image_overlay').html('<div onclick="leave_image_overlay(this,event);">&#10006;</div>');
+    item = elem.parentElement.querySelector('.notes_item_image > div');
+    $(item).clone().prependTo('#note_image_overlay');
+    $('#note_image_overlay').show();
+}
 
 function send_notes_data(elem, e, final) {
     e.stopPropagation();
@@ -1436,12 +1448,12 @@ function create_reclamation(module_id) {
     var reclam_title = document.getElementById('reclam_tab').querySelector('input[name="reclamation_title"]').value;
     var reclam_content = document.getElementById('reclam_tab').querySelector('textarea[name="reclamation_content"]').value;
     if (reclam_title.trim().length > 5 && reclam_content.trim().length > 5)
-        show_pop_up('Voullez vous Créer une Réclamation ?',"confirm",() => {
+        show_pop_up('Voulez vous Créer une Réclamation ?',"confirm",() => {
             show_pop_up('Êtes-vous sûr ?',"confirm",() => {
                 var student_id = document.getElementById('logged_in_user_id').innerHTML;
                 $('#main_loader_overlay').fadeIn();
                 $.ajax({
-                    url: `${location.origin}/reclamation_handler_VIEW/`,
+                    url: `${location.origin}/etud_reclamation_handler_VIEW/`,
                     type: 'POST',
                     data: {
                         'type': 'create',
@@ -1479,13 +1491,13 @@ function create_reclamation(module_id) {
 
 
 function delete_reclamation(elem) {
-    show_pop_up('Voullez vous Supprimer cette Réclamation ?',"confirm",() => {
+    show_pop_up('Voulez vous Supprimer cette Réclamation ?',"confirm",() => {
         show_pop_up('Êtes-vous sûr ?',"confirm",() => {
             var reclam_id = elem.parentElement.parentElement.querySelector('.reclam_id').innerHTML;
             
             $('#main_loader_overlay').fadeIn();
             $.ajax({
-                url: `${location.origin}/reclamation_handler_VIEW/`,
+                url: `${location.origin}/etud_reclamation_handler_VIEW/`,
                 type: 'POST',
                 data: {
                     'type': 'delete',
@@ -1567,3 +1579,274 @@ function update_reclamation_tab(data, type, elem = null){
 
 
 /////////////////// ENSG RECLAM //////////////////////
+function mark_as_corrected(elem) {
+    elem.dataset.state = "corrected";
+}
+
+function handle_reclamation(elem, e, type){
+    e.stopPropagation();
+    var value = validate_reclam_ensg(elem, type);
+    if (value == 'invalid'){
+        return;
+    }
+
+    var message;
+    if (type == 'accept')
+        message = 'Voulez vous corriger cette note ?';
+    else if (type == 'refuse')
+        message = 'Voulez vous rejeter cette réclamation ?';
+
+
+    // if everything is valid send request on user permission 
+    show_pop_up(message,"confirm",() => {
+        show_pop_up('Êtes-vous sûr ?',"confirm",() => {
+            var copie_id = elem.parentElement.parentElement.querySelector('.notes_item_id').innerHTML;
+            var reclam_id = elem.parentElement.parentElement.querySelector('.reclam_item_id').innerHTML;
+
+            $('#main_loader_overlay').fadeIn();
+            $.ajax({
+                url: `${location.origin}/ensg_reclamation_handler_VIEW/`,
+                type: 'POST',
+                data: {
+                    'type': type,
+                    'reclam_id': reclam_id,
+                    'copie_id': copie_id,
+                    'note': value,
+                },
+                success: function (response) {
+                    data = JSON.parse(response);
+                    setTimeout(() => {
+                        if (data.success){
+                            if (type == 'accept')
+                                show_pop_up(`La réglamation a été approuvée, n'oblier pas de corrigé la copie, et de demander au technicien de la téléverser !`);
+                            else 
+                                show_pop_up(`La réglamation a été rejetée`);
+                            update_ensg_reclamation_page(elem, value, type);
+                        }
+                        else
+                            show_pop_up('Echec !');
+                    }, 400);
+                },
+                complete: function (){
+                    $('#main_loader_overlay').fadeOut();
+                },
+                error: function (xhr, textStatus, thrownError){
+                    setTimeout(() => {
+                        show_pop_up('Echec !');
+                    }, 400);
+                },
+            });
+
+        }, () => {},last = true, second = true);
+    }, () => {},last = false, second = false);
+}
+
+function validate_reclam_ensg(elem, type) {
+    var note_input = elem.parentElement.parentElement.querySelector('.notes_item_info_mark > input');
+    if (type == 'accept'){
+        if (note_input.dataset.state == "original") {
+            show_pop_up("Corriger la note avant de l'envoyer au technicien pour qu'il téléverse la nouvelle copie");
+            return 'invalid';
+        }
+        if (isNaN(parseFloat(note_input.value)) || parseFloat(note_input.value) > 20 || parseFloat(note_input.value) < 0) {
+            show_pop_up("Note Invalide");
+            return 'invalid';
+        }
+        return parseFloat(note_input.value);
+    }
+    else if (type == 'refuse'){
+        if (isNaN(parseFloat(note_input.dataset.originalNote)) || parseFloat(note_input.dataset.originalNote) > 20 || parseFloat(note_input.dataset.originalNote) < 0)
+            return 'invalid';
+        return parseFloat(note_input.dataset.originalNote);
+    }
+}
+
+
+function update_ensg_reclamation_page(elem, note, type) {
+    var reclam_area = document.getElementById('reclam_area');
+    var reclam_waiting_container = elem.parentElement.parentElement.parentElement;
+    var reclam_item =  $(elem.parentElement.parentElement).clone()[0];
+
+    $(elem.parentElement.parentElement).slideUp();
+    setTimeout(() => {
+        // deleting waiting entry
+        elem.parentElement.parentElement.remove();
+        
+        // setting updated note
+        reclam_item.querySelector('.notes_item_info_mark > input').value = note;
+
+        // deleting buttons 
+        reclam_item.querySelector('.reclam_buttons_area').remove();
+        
+        var statut;
+        if (type == 'accept')
+            statut = 'Oui';
+        else if (type == 'refuse')
+            statut = 'Non';
+        var approved_status = $(`
+            <div class="reclam_ensg_info_item">
+                <div class="reclam_ensg_info_label">Approuvée :</div>
+                <div class="reclam_ensg_info_value">${statut}</div>
+            </div>
+            `)[0];
+        reclam_item.querySelector('.reclam_ensg_info').appendChild(approved_status);
+
+        if (reclam_area.querySelector('#reclamations_done') == null) {
+            // creating new done area
+            var new_reclamations_done_area = document.createElement('div');
+            new_reclamations_done_area.id = "reclamations_done";
+            new_reclamations_done_area.appendChild($('<div class="default_title annee_title">Réglées</div>')[0]);
+            new_reclamations_done_area.appendChild(reclam_item);
+            new_reclamations_done_area.className = "hide";
+            //inserting area after waiting section
+            document.getElementById('reclamations_waiting').insertAdjacentElement('afterend',new_reclamations_done_area);
+            $(new_reclamations_done_area).slideDown();
+        }
+        else  {
+            $(reclam_item).addClass('hide');
+            reclam_area.querySelector('#reclamations_done > .default_title').insertAdjacentElement('afterend',reclam_item);
+            $(reclam_item).slideDown();
+        }
+
+        if (reclam_waiting_container.querySelectorAll('.reclam_ensg_item').length == 0)
+            $(reclam_waiting_container.querySelector('.default_title.annee_title')).slideUp();
+    }, 400);
+}
+
+//////////////// TECH RECTIFICATION /////////////
+var upload_rect_req = null;
+
+function rect_upload(elem, e) {
+    e.stopPropagation();
+    $('#upload_input').trigger('click');
+}
+
+function upload_rect(elem,e) {
+    e.stopPropagation();
+    show_pop_up('Téléverser ?','confirm',() => {
+        var version_id = elem.parentElement.parentElement.querySelector(".version_id").innerHTML;
+        var module_id = elem.parentElement.parentElement.querySelector(".rect_item_value[data-id-module]").dataset.idModule;
+        
+        if (!upload_rect_req) {
+            ajax_data = new FormData(document.getElementById('upload_form'));
+            ajax_data.append("version_id", version_id);
+            ajax_data.append("module_id", module_id);
+            ajax_data.append("type", "upload");
+
+            upload_rect_req = $.ajax({
+                url: `${location.origin}/rectifications/`,
+                type: 'POST',
+                data: ajax_data,
+                dataType: 'json',
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    data = JSON.parse(response);
+                    if (data.success){
+                        update_rect_item(elem ,"upload");
+                    }
+                    else
+                        show_pop_up('Echec !');
+                    upload_rect_req = null;
+                },
+                complete: function (){
+                },
+                error: function (xhr, textStatus, thrownError){
+                    show_pop_up('Echec !');
+                },
+                xhr: function () {
+                    var jqXHR = new window.XMLHttpRequest();
+                    jqXHR.upload.addEventListener( "progress", function ( e ) {
+                        if (e.lengthComputable) {
+                            // var percentComplete = Math.round( (e.loaded * 100) / e.total );
+                            // document.getElementById('progress_percent').innerHTML = percentComplete + "%";
+                            // document.getElementById('progress_bar_status').style.width = percentComplete + '%';
+                        }
+                    });
+                    return jqXHR;
+                },
+                beforeSend: function() {
+                    upload_in_progress = true;
+                }
+            });
+        }
+        else {
+            show_pop_up('un autre upload est en cours');
+        }
+    });
+}
+
+
+function rect_reset_accept(elem, e, type) {
+    e.stopPropagation();
+    var version_id = elem.parentElement.querySelector(".version_id").innerHTML;
+    var module_id = elem.parentElement.querySelector(".rect_item_value[data-id-module]").dataset.idModule;
+    var message;
+    
+    if (type == 'accept')
+        message = 'Voulez vous confirmer cette réctification';
+    else if (type == 'reset')
+        message = 'Réinitialiser pour téléverser de nouveaux fichiers ?';
+    
+    show_pop_up(message ,'confirm',() => {
+        show_pop_up("Êtes-vous sûr ?" ,'confirm',() => {
+            $('#main_loader_overlay').fadeIn();
+            $.ajax({
+                url: `${location.origin}/rectifications/`,
+                type: 'POST',
+                data: {
+                    'type': type,
+                    'version_id': version_id,
+                    'module_id': module_id,
+                },
+                success: function (response) {
+                    data = JSON.parse(response);
+                    setTimeout(() => {
+                        if (data.success){
+                            if (type == 'accept'){
+                                show_pop_up(`Réctification réglée !`);
+                                $(elem.parentElement).slideUp();
+                                setTimeout(() => {
+                                    elem.parentElement.remove();
+                                    if (document.querySelectorAll('.rect_item').length == 0)
+                                        document.getElementById('rect_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Copies à Réctifier</div>';
+                                },450);
+                            }
+
+                            else if (type == 'reset') {
+                                show_pop_up(`Vous pouvez téléverser une nouvelle copie !`);
+                                update_rect_item(elem, "reset");
+                            }
+                        }
+                        else
+                            show_pop_up('Echec !');
+                    }, 400);
+                },
+                complete: function (){
+                    $('#main_loader_overlay').fadeOut();
+                },
+                error: function (xhr, textStatus, thrownError){
+                    setTimeout(() => {
+                        show_pop_up('Echec !');
+                    }, 400);
+                },
+            });
+        },() => {}, last = true, second = true);
+    },() => {}, last = false, second = false);
+}
+
+function update_rect_item(elem, type) {
+    if (type == 'upload')
+        elem = elem.parentElement;
+    var rect_item = elem.parentElement;
+    $.get(`${location.origin}/rectifications/`, function(new_rect_page) {
+        var updated_item = $(new_rect_page).find(`div[data-copie-id="${rect_item.querySelector('div[data-copie-id]').dataset.copieId}"]`)[0].parentElement.parentElement;
+        $(rect_item).slideUp();
+        setTimeout(() => {
+            rect_item.innerHTML = "";
+            rect_item.innerHTML = updated_item.innerHTML;
+            $(rect_item).slideDown();
+        }, 800);
+    },'html');
+}

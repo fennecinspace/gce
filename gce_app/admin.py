@@ -68,7 +68,7 @@ class AnnonceAdmin(admin.ModelAdmin):
 admin.site.register(Annonce, AnnonceAdmin)
 
 class CopieAdmin(admin.ModelAdmin):
-    list_display = ('annee_copie', 'afficher_copie', 'modifiable', 'id_module', 'id_etudiant',)
+    list_display = ('annee_copie', 'afficher_copie', 'date_affichage', 'modifiable', 'id_module', 'id_etudiant', 'rectifier',)
 admin.site.register(Copie, CopieAdmin)
 
 class NotificationAdmin(admin.ModelAdmin):
@@ -80,7 +80,7 @@ class DiscussionAdministrativeAdmin(admin.ModelAdmin):
 admin.site.register(DiscussionAdministrative, DiscussionAdministrativeAdmin)
 
 class ReclamationAdmin(admin.ModelAdmin):
-    list_display = ('sujet_reclamation', 'regler_reclamation', 'description_reclamation', 'id_etudiant', 'id_module',)
+    list_display = ('sujet_reclamation', 'description_reclamation', 'id_etudiant', 'id_module', 'regler_reclamation', 'approuver_reclamation', 'annee_reclamation', 'note_reclamation',)
 admin.site.register(Reclamation, ReclamationAdmin)
 
 class DiscussionReclamationAdmin(admin.ModelAdmin):

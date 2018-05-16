@@ -28,3 +28,13 @@ class correction_file_upload_form(forms.ModelForm):
     class Meta():
         model = FichierCorrection
         fields = ['emplacement_fichier']
+
+
+class rect_file_upload_form(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['emplacement_fichier'].widget.attrs.update({'onchange': 'upload_rect(this,event);', 'id': 'upload_input', 'multiple': 'true', 'accept': 'image/jpeg'})
+    
+    class Meta():
+        model = FichierCopie
+        fields = ['emplacement_fichier']

@@ -46,14 +46,14 @@ class Utilisateur(models.Model):
     info_utilisateur = models.OneToOneField(User,models.CASCADE)
     type_utilisateur = models.CharField(db_column='type_Utilisateur', max_length=255, null=True, choices = user_choices)
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100, unique=True, blank=True, editable=False)
-    avatar_utilisateur = models.FileField(db_column='Avatar', default = 'avatars/default_avatar.png', upload_to = avatars_file_path)
+    avatar_utilisateur = models.FileField(db_column='Avatar', default = 'default/default_avatar.png', upload_to = avatars_file_path)
 
     def save(self,*args, **kwargs):
         # creating user id
         if self.id_utilisateur == '':
             self.id_utilisateur = self.type_utilisateur + str(self.info_utilisateur.id)
         # cropping avatar to a square
-        if self.avatar_utilisateur != 'avatars/default_avatar.png': # checking that this is not a user creation
+        if self.avatar_utilisateur != 'default/default_avatar.png': # checking that this is not a user creation
             cropped_user_img = image_center_crop(self.avatar_utilisateur)
             cropped_user_img_io = BytesIO()
             cropped_user_img.save(cropped_user_img_io, format='JPEG')
@@ -218,6 +218,7 @@ class Copie(models.Model):
     modifiable = models.BooleanField(db_column='Modifiable', default=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
+    rectifier = models.BooleanField(db_column='Rectifier', default=False)
 
     class Meta:
         db_table = 'Copie'
@@ -228,6 +229,7 @@ class VersionCopie(models.Model):
     numero_version = models.IntegerField(db_column='numero_Version', blank=True, null=True)
     note_version = models.FloatField(db_column='note_Version', blank=True, null=True)
     id_copie = models.ForeignKey('Copie', models.CASCADE , db_column='id_Copie', blank=True, null=True)
+    temp_version =  models.BooleanField(db_column='Rectifier', default=False)
 
     class Meta:
         db_table = 'VersionCopie'
@@ -268,9 +270,12 @@ class Reclamation(models.Model):
     description_reclamation = models.CharField(db_column='Description_Reclamation', max_length=10000, blank=True, null=True)
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
-    regler_reclamation = models.BooleanField(db_column='regler_Reclamation', default=False)
-    approver_reclamation = models.BooleanField(db_column='approver_Reclamation', default=False)
     annee_reclamation =  models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Reclamation', blank=True, null=True)
+    regler_reclamation = models.BooleanField(db_column='regler_Reclamation', default=False)
+    approuver_reclamation = models.BooleanField(db_column='approuver_Reclamation', default=False)
+    note_reclamation = models.FloatField(db_column='note_Reclamation', blank=True, null=True)
+    old_files = models.ManyToManyField("FichierCopie", related_name="old_files", blank = True)
+    new_files = models.ManyToManyField("FichierCopie", related_name="new_files", blank = True)
     
     class Meta:
         db_table = 'Reclamation'
