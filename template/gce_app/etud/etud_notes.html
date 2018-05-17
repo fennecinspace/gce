@@ -17,12 +17,16 @@
             <div id="std_center_module_id" class="std_center_content hide"></div>
             <div id="std_center_item_year" class="std_center_content hide"></div>
             <div id="std_center_item_id" class="std_center_content hide"></div>
+            <div id="std_center_version_id" class="std_center_content hide"></div>
         </div>
         <div id="std_notes_area">
+            {% if not exists_unupdated_copies %}
+            <div id="exists_unupdated_copies" class="saisir_item_small"><span>Important :</span> Il existe des notes corrigées, mais non affichées. Il seront affichées quand leurs copies corrigées sont téléversées</div>
+            {% endif %}
             {% for year, versions in results.items %}
                 <div class="default_title annee_title">{{ year.annee_univ }}</div>
                 {% for entry in versions %}
-                    <div class="notes_item_small" data-item-year="{{ year.annee_univ }}" data-item-id="{{ forloop.counter0 }}">
+                    <div class="notes_item_small" data-version-id="{{ entry.files.0.id_version.id }}" data-item-year="{{ year.annee_univ }}" data-item-id="{{ forloop.counter0 }}">
                         <div class="notes_item_id">{{ entry.files.0.id_version.id }}</div>
                         <div class="notes_item_info">
                             <img class="notes_item_info_avatar" src="{{ entry.files.0.emplacement_fichier.url }}" onclick="toggle_std_center(this, event)">
@@ -62,19 +66,20 @@
                         <div class="notes_item_reclam hide">
                             <div>
                                 {% if year.active %}
-                                <div class="notes_item_reclam_new">
-                                    <div class="default_title reclam_title">Créer une Réclamations :</div>
-                                    <div class="reclam_tab_label">Sujet :</div>
-                                    <input type="text" class="reclam_tab_item" name="reclamation_title">
-                                    <div class="reclam_tab_label">Description :</div>
-                                    <textarea type="text" class="reclam_tab_item" name="reclamation_content"></textarea>
-                                    <div class="reclam_lower_section">
-                                        <div onclick="reclamation_manager('create',this,event);" class="default_button_small reclam_tab_button">Réclamer</div>
+                                    <div class="notes_item_reclam_new {% if entry.nb_unprocessed_reclams != 0 %}hide{% endif %}">
+                                        <div class="default_title reclam_title">Créer une Réclamations :</div>
+                                        <div class="reclam_tab_label">Sujet :</div>
+                                        <input type="text" class="reclam_tab_item" name="reclamation_title">
+                                        <div class="reclam_tab_label">Description :</div>
+                                        <textarea type="text" class="reclam_tab_item" name="reclamation_content"></textarea>
+                                        <div class="reclam_lower_section">
+                                            <div onclick="reclamation_manager('create',this,event);" class="default_button_small reclam_tab_button">Réclamer</div>
+                                        </div>
                                     </div>
-                                    {% else %}
-                                        <div class="copie_is_archived">Copie Archivée, Vous ne pouvez plus réclamer</div>
-                                    {% endif %}
-                                </div>
+                                    <div class="copie_is_archived {% if entry.nb_unprocessed_reclams == 0 %}hide{% endif %}">Vous pouvez présenter une nouvelle réclamation , après que vos réclamations précédentes sont réglées</div>
+                                {% else %}
+                                    <div class="copie_is_archived">Copie Archivée, Vous ne pouvez plus réclamer</div>
+                                {% endif %}
                                 <div class="notes_item_reclam_old">
                                     {% include 'gce_app/etud/reclam_content.html' %}
                                 </div>

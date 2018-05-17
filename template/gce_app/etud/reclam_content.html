@@ -10,12 +10,12 @@
             <div type="text" class="reclam_tab_item">{{ reclamation.description_reclamation }}</div>
             {% if reclamation.approuver_reclamation %}
                 <div class="reclam_tab_label">Nouvelle Note :</div>
-                <div type="text" class="reclam_tab_item">{{ reclamation.note_reclamation }}</div>
+                <div type="text" class="reclam_tab_item">{{ reclamation.new_files.all.0.id_version.note_version }}</div>
             {% endif %}
             <div class="reclam_tab_label">Statut :</div>
             <div class="reclam_lower_section">
-                <div class="reclam_tab_item reclam_tab_bool">{% if not reclamation.regler_reclamation %}<span style="color: red;"> &#10006;</span>{% else %}<span style="color: green;"> &#10004;</span>{% endif %} Réglée</div>
-                <div class="reclam_tab_item reclam_tab_bool">{% if not reclamation.approuver_reclamation %}<span style="color: red;"> &#10006;</span>{% else %}<span style="color: green;"> &#10004;</span>{% endif %} Approvée</div>
+                <div class="reclam_tab_item reclam_tab_bool">{% if not reclamation.regler_reclamation %}<span style="color: #f24444;"> &#10006;</span>{% else %}<span style="color: #5fe93d;"> &#10004;</span>{% endif %} Réglée</div>
+                <div class="reclam_tab_item reclam_tab_bool">{% if not reclamation.approuver_reclamation %}<span style="color: #f24444;"> &#10006;</span>{% else %}<span style="color: #5fe93d;"> &#10004;</span>{% endif %} Approvée</div>
                 {% if not reclamation.regler_reclamation %}
                     <div onclick="reclamation_manager('delete',this,event);" class="default_button_small reclam_tab_button">Annuler</div>
                 {% endif %}

@@ -2,6 +2,9 @@
 {% block base_extender %}
 <div id="reclam_container">
     {% if entries_waiting or entries_done %}
+        <div class="saisir_item_small" id="saisir_search_module">
+            <input autocomplete="off" name="search_module" oninput="filter_reclamations(event, this);" placeholder="Trouver une Reclamation" type="text">
+        </div>
         <div id="reclam_area">
         {% if entries_waiting %}
             <div id="reclamations_waiting">

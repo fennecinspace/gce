@@ -114,7 +114,6 @@ function load_resultats(e) {
     });
 }
 function load_reclamations(e) {
-    console.log('hello')
     $('#main_loader_overlay').fadeIn();
     $('#content_container').load(`${location.origin}/reclamations #content_container > *`,()=> {
         $('#main_loader_overlay').fadeOut();
@@ -1001,19 +1000,13 @@ function leave_notes_area(e) {
 }
 
 
-function mark_image_viewer(elem, e) {
+function mark_image_viewer(elem, e , container_name = '.notes_item_image') {
     $('#note_image_overlay').html('<div onclick="leave_image_overlay(this,event);">&#10006;</div>');
-    item = elem.parentElement.parentElement.querySelector('.notes_item_image > div');
+    item = elem.parentElement.parentElement.querySelector(container_name + ' > div');
     $(item).clone().prependTo('#note_image_overlay');
     $('#note_image_overlay').show();
 }
 
-function rect_image_viewer(elem, e) {
-    $('#note_image_overlay').html('<div onclick="leave_image_overlay(this,event);">&#10006;</div>');
-    item = elem.parentElement.querySelector('.notes_item_image > div');
-    $(item).clone().prependTo('#note_image_overlay');
-    $('#note_image_overlay').show();
-}
 
 function send_notes_data(elem, e, final) {
     e.stopPropagation();
@@ -1367,6 +1360,7 @@ function toggle_std_center(elem, e) {
     document.getElementById('std_center_module_id').innerHTML = "";
     document.getElementById('std_center_item_year').innerHTML = "";
     document.getElementById('std_center_item_id').innerHTML = "";
+    document.getElementById('std_center_version_id').innerHTML = "";
 
     //reseting to copy
     hide_center_element("std_center_correct");
@@ -1376,7 +1370,8 @@ function toggle_std_center(elem, e) {
     //getting general info
     document.getElementById('std_center_module_id').innerHTML = elem.parentElement.parentElement.querySelector('.notes_item_name_value').dataset.moduleId; 
     document.getElementById('std_center_item_year').innerHTML = elem.parentElement.parentElement.dataset.itemYear; 
-    document.getElementById('std_center_item_id').innerHTML = elem.parentElement.parentElement.dataset.itemId; 
+    document.getElementById('std_center_item_id').innerHTML = elem.parentElement.parentElement.dataset.itemId;
+    document.getElementById('std_center_version_id').innerHTML = elem.parentElement.parentElement.dataset.versionId;
 
     // getting copy data
     var copy_item = elem.parentElement.parentElement.querySelector('.notes_item_image > div');
@@ -1432,19 +1427,21 @@ function change_student_center_tab (elem, e) {
 function reclamation_manager(type, elem, e) {
     e.stopPropagation();
     var module_id = document.getElementById('std_center_module_id').innerHTML;
+    var version_id = document.getElementById('std_center_version_id').innerHTML;
+
     if (module_id == "") {
         show_pop_up('Erreur !');
         return;
     }
 
     if (type == 'create')
-        create_reclamation(module_id);
+        create_reclamation(module_id, version_id);
     else if (type == 'delete')
         delete_reclamation(elem);
 }
 
 
-function create_reclamation(module_id) {
+function create_reclamation(module_id, version_id) {
     var reclam_title = document.getElementById('reclam_tab').querySelector('input[name="reclamation_title"]').value;
     var reclam_content = document.getElementById('reclam_tab').querySelector('textarea[name="reclamation_content"]').value;
     if (reclam_title.trim().length > 5 && reclam_content.trim().length > 5)
@@ -1458,6 +1455,7 @@ function create_reclamation(module_id) {
                     data: {
                         'type': 'create',
                         'module_id': module_id,
+                        'version_id': version_id,
                         'student_id': student_id,
                         'title': reclam_title,
                         'content': reclam_content,
@@ -1466,8 +1464,15 @@ function create_reclamation(module_id) {
                         data = JSON.parse(response);
                         setTimeout(()=> {
                             if (data.success){
-                                show_pop_up(`Une reclamation a été créé, elle sera réglée par l'enseignant du module`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
-                                update_reclamation_tab(data.html,'create');
+                                if (data.error) {
+                                    show_pop_up(`Il existe des réclamations pas encore réglées !`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                                }
+                                else  {
+                                    show_pop_up(`Une reclamation a été créé, elle sera réglée par l'enseignant du module`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                                    update_reclamation_tab(data.html,'create');
+                                    $(document.querySelector('#reclam_tab .notes_item_reclam_new')).slideUp();
+                                    $(document.querySelector('#reclam_tab .copie_is_archived')).slideDown();
+                                }
                             }
                             else
                                 show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
@@ -1509,6 +1514,8 @@ function delete_reclamation(elem) {
                         if (data.success){
                             show_pop_up(`La réclamation a été supprimé !`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
                             update_reclamation_tab(data.html,'delete', elem.parentElement.parentElement);
+                            $(document.querySelector('#reclam_tab .notes_item_reclam_new')).slideDown();
+                            $(document.querySelector('#reclam_tab .copie_is_archived')).slideUp();
                         }
                         else
                             show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
@@ -1581,6 +1588,14 @@ function update_reclamation_tab(data, type, elem = null){
 /////////////////// ENSG RECLAM //////////////////////
 function mark_as_corrected(elem) {
     elem.dataset.state = "corrected";
+}
+
+
+function reclam_image_viewer(elem, e , container_name) {
+    $('#note_image_overlay').html('<div onclick="leave_image_overlay(this,event);">&#10006;</div>');
+    item = elem.parentElement.parentElement.parentElement.parentElement.querySelector(container_name + ' > div');
+    $(item).clone().prependTo('#note_image_overlay');
+    $('#note_image_overlay').show();
 }
 
 function handle_reclamation(elem, e, type){
@@ -1662,55 +1677,81 @@ function validate_reclam_ensg(elem, type) {
 }
 
 
+// function update_ensg_reclamation_page(elem, note, type) {
+//     var reclam_area = document.getElementById('reclam_area');
+//     var reclam_item =  $(elem.parentElement.parentElement).clone()[0];
+
+//     $(elem.parentElement.parentElement).slideUp();
+//     setTimeout(() => {
+//         // deleting waiting entry
+//         elem.parentElement.parentElement.remove();
+        
+//         // setting updated note
+//         reclam_item.querySelector('.notes_item_info_mark > input').value = note;
+
+//         // deleting buttons 
+//         reclam_item.querySelector('.reclam_buttons_area').remove();
+        
+//         var statut;
+//         if (type == 'accept')
+//             statut = 'Oui';
+//         else if (type == 'refuse')
+//             statut = 'Non';
+//         var approved_status = $(`
+//             <div class="reclam_ensg_info_item">
+//                 <div class="reclam_ensg_info_label">Approuvée :</div>
+//                 <div class="reclam_ensg_info_value">${statut}</div>
+//             </div>
+//             `)[0];
+//         reclam_item.querySelector('.reclam_ensg_info').appendChild(approved_status);
+
+//         if (reclam_area.querySelector('#reclamations_done') == null) {
+//             // creating new done area
+//             var new_reclamations_done_area = document.createElement('div');
+//             new_reclamations_done_area.id = "reclamations_done";
+//             new_reclamations_done_area.appendChild($('<div class="default_title annee_title">Réglées</div>')[0]);
+//             new_reclamations_done_area.appendChild(reclam_item);
+//             new_reclamations_done_area.className = "hide";
+//             //inserting area after waiting section
+//             document.getElementById('reclamations_waiting').insertAdjacentElement('afterend',new_reclamations_done_area);
+//             $(new_reclamations_done_area).slideDown();
+//         }
+//         else  {
+//             $(reclam_item).addClass('hide');
+//             reclam_area.querySelector('#reclamations_done > .default_title').insertAdjacentElement('afterend',reclam_item);
+//             $(reclam_item).slideDown();
+//         }
+
+//         if (reclam_waiting_container.querySelectorAll('.reclam_ensg_item').length == 0)
+//             $(reclam_waiting_container.querySelector('.default_title.annee_title')).slideUp();
+//     }, 400);
+// }
+
 function update_ensg_reclamation_page(elem, note, type) {
     var reclam_area = document.getElementById('reclam_area');
-    var reclam_waiting_container = elem.parentElement.parentElement.parentElement;
-    var reclam_item =  $(elem.parentElement.parentElement).clone()[0];
+    var reclam_item =  elem.parentElement.parentElement;
+    var relam_item_id = reclam_item.querySelector(".reclam_item_id").dataset.reclamId;
 
-    $(elem.parentElement.parentElement).slideUp();
+    $(reclam_item).slideUp();
     setTimeout(() => {
-        // deleting waiting entry
-        elem.parentElement.parentElement.remove();
-        
-        // setting updated note
-        reclam_item.querySelector('.notes_item_info_mark > input').value = note;
-
-        // deleting buttons 
-        reclam_item.querySelector('.reclam_buttons_area').remove();
-        
-        var statut;
-        if (type == 'accept')
-            statut = 'Oui';
-        else if (type == 'refuse')
-            statut = 'Non';
-        var approved_status = $(`
-            <div class="reclam_ensg_info_item">
-                <div class="reclam_ensg_info_label">Approuvée :</div>
-                <div class="reclam_ensg_info_value">${statut}</div>
-            </div>
-            `)[0];
-        reclam_item.querySelector('.reclam_ensg_info').appendChild(approved_status);
-
-        if (reclam_area.querySelector('#reclamations_done') == null) {
-            // creating new done area
-            var new_reclamations_done_area = document.createElement('div');
-            new_reclamations_done_area.id = "reclamations_done";
-            new_reclamations_done_area.appendChild($('<div class="default_title annee_title">Réglées</div>')[0]);
-            new_reclamations_done_area.appendChild(reclam_item);
-            new_reclamations_done_area.className = "hide";
-            //inserting area after waiting section
-            document.getElementById('reclamations_waiting').insertAdjacentElement('afterend',new_reclamations_done_area);
-            $(new_reclamations_done_area).slideDown();
-        }
-        else  {
-            $(reclam_item).addClass('hide');
-            reclam_area.querySelector('#reclamations_done > .default_title').insertAdjacentElement('afterend',reclam_item);
-            $(reclam_item).slideDown();
-        }
-
-        if (reclam_waiting_container.querySelectorAll('.reclam_ensg_item').length == 0)
-            $(reclam_waiting_container.querySelector('.default_title.annee_title')).slideUp();
-    }, 400);
+        reclam_item.remove();
+        $.get(`${location.origin}/reclamations/`, function(new_reclam_page) {
+            if (reclam_area.querySelector('#reclamations_done') == null) {
+                var new_done_area = $(new_reclam_page).find('#reclamations_done')[0];
+                $(new_done_area).addClass("hide");
+                reclam_area.querySelector('#reclamations_waiting').insertAdjacentElement('afterend', new_done_area);
+                $(new_done_area).slideDown();
+            }
+            else {
+                var new_reclam_item = $(new_reclam_page).find(`[data-reclam-id="${relam_item_id}"]`)[0].parentElement.parentElement;
+                $(new_reclam_item).addClass("hide");
+                reclam_area.querySelector('#reclamations_done > .default_title').insertAdjacentElement('afterend',new_reclam_item);
+                $(new_reclam_item).slideDown();
+            }
+        },'html');
+        if (reclam_area.querySelectorAll('#reclamations_waiting .reclam_ensg_item').length == 0)
+            $(reclam_area.querySelector('#reclamations_waiting .default_title.annee_title')).slideUp();
+    }, 450);
 }
 
 //////////////// TECH RECTIFICATION /////////////
@@ -1849,4 +1890,86 @@ function update_rect_item(elem, type) {
             $(rect_item).slideDown();
         }, 800);
     },'html');
+}
+
+function rect_image_viewer(elem, e) {
+    $('#note_image_overlay').html('<div onclick="leave_image_overlay(this,event);">&#10006;</div>');
+    item = elem.parentElement.querySelector('.notes_item_image > div');
+    $(item).clone().prependTo('#note_image_overlay');
+    $('#note_image_overlay').show();
+}
+
+function filter_reclamations(e, elem) {
+    e.stopPropagation();
+    var filter_value = elem.value.trim().toLowerCase();
+    var all_reclams = $('.reclam_ensg_item');
+
+    if (filter_value.length == 0)
+        for (var i = 0; i < all_reclams.length; i++)
+            all_reclams.eq(i).slideDown();
+    else 
+        for (var x = 0; x < all_reclams.length; x++){
+            if (is_reclam_item_in(all_reclams[x] , filter_value))
+                all_reclams.eq(x).slideDown(); 
+            else
+                all_reclams.eq(x).slideUp(); 
+        }
+}
+
+function is_reclam_item_in(item, filter) {
+    var student_name = item.querySelector('.reclam_ensg_info_student').innerHTML.trim().toLowerCase();
+    var module_name = item.querySelector('.reclam_ensg_info_module').innerHTML.trim().toLowerCase();
+    var sujet = item.querySelector('.reclam_ensg_info_sujet').innerHTML.trim().toLowerCase();
+    var disc = item.querySelector('.reclam_ensg_info_disc').innerHTML.trim().toLowerCase();
+    var new_note = -1, old_note = -1;
+    if (item.querySelector('.reclam_new_note_entry') != null && item.querySelector('.reclam_new_note_entry') != null) {
+        new_note = item.querySelector('.reclam_new_note_entry').innerHTML;
+        old_note = item.querySelector('.reclam_old_note_entry').innerHTML;
+    }
+    else 
+        old_note = item.querySelector('.reclam_old_note_entry').value;
+    
+    // matching by character
+    if (student_name.includes(filter) || 
+        module_name.includes(filter) ||
+        sujet.includes(filter) ||
+        disc.includes(filter) ||
+        String(old_note).includes(filter) ||
+        String(new_note).includes(filter))
+        return true;
+    
+    var approv = "non";
+    var affich = "non";
+    if (item.querySelector('.reclam_ensg_info_approv') != null)
+        approv = item.querySelector('.reclam_ensg_info_approv').innerHTML.toLowerCase();
+    if (item.querySelector('.reclam_ensg_info_affich') != null)
+        affich = item.querySelector('.reclam_ensg_info_affich').innerHTML.toLowerCase(); 
+
+    // special search
+    if ((filter == "ap:oui" && approv == "oui") || 
+        (filter == "ap:non" && approv == "non") ||
+        (filter == "re:oui" && affich == "oui") ||
+        (filter == "re:non" && affich == "non"))
+        return true;
+
+    return false;
+}
+
+
+
+function filter_users(e) {
+;
+    
+    if (filter_value.length == 0)
+        for (var i = 0; i < all_users.length; i++)
+            all_users.eq(i).slideDown();
+    else
+        for (var x = 0; x < all_users.length; x++){
+            var last_name = all_users[x].querySelector('.personnel_user_lastname').innerHTML.trim().toLowerCase();
+            var first_name = all_users[x].querySelector('.personnel_user_firstname').innerHTML.trim().toLowerCase();
+            if (first_name.includes(filter_value) || last_name.includes(filter_value) || (last_name + " " + first_name).includes(filter_value) || (first_name + " " + last_name).includes(filter_value))
+                all_users.eq(x).slideDown(); 
+            else
+                all_users.eq(x).slideUp(); 
+        }
 }

@@ -273,7 +273,6 @@ class Reclamation(models.Model):
     annee_reclamation =  models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Reclamation', blank=True, null=True)
     regler_reclamation = models.BooleanField(db_column='regler_Reclamation', default=False)
     approuver_reclamation = models.BooleanField(db_column='approuver_Reclamation', default=False)
-    note_reclamation = models.FloatField(db_column='note_Reclamation', blank=True, null=True)
     old_files = models.ManyToManyField("FichierCopie", related_name="old_files", blank = True)
     new_files = models.ManyToManyField("FichierCopie", related_name="new_files", blank = True)
     

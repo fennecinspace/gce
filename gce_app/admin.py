@@ -80,7 +80,7 @@ class DiscussionAdministrativeAdmin(admin.ModelAdmin):
 admin.site.register(DiscussionAdministrative, DiscussionAdministrativeAdmin)
 
 class ReclamationAdmin(admin.ModelAdmin):
-    list_display = ('sujet_reclamation', 'description_reclamation', 'id_etudiant', 'id_module', 'regler_reclamation', 'approuver_reclamation', 'annee_reclamation', 'note_reclamation',)
+    list_display = ('sujet_reclamation', 'description_reclamation', 'id_etudiant', 'id_module', 'regler_reclamation', 'approuver_reclamation', 'annee_reclamation',)
 admin.site.register(Reclamation, ReclamationAdmin)
 
 class DiscussionReclamationAdmin(admin.ModelAdmin):

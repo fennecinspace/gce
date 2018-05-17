@@ -1,58 +1,99 @@
 <div class="notes_item_small reclam_ensg_item">
-    <div class="notes_item_id">{{ entry.files.0.id_version.id_copie.id }}</div>
+    <div class="notes_item_id">{{ entry.old_files.all.0.id_version.id_copie.id }}</div>
     <div class="notes_item_info">
-        <img class="notes_item_info_avatar" src="{{ entry.files.0.emplacement_fichier.url }}" onclick="mark_image_viewer(this, event)">
-        <div class="notes_item_info_text">
-            <div class="notes_item_info_name">
-                <label class="notes_item_name_label">Etudiant :</label>
-                <div class="notes_item_name_value" data-student-id = "{{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur }}">{{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.files.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.files.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}</div>
+        {% if entry.approuver_reclamation %}
+            <div class="reclam_info_double_container">
+                <div class="reclam_info_double_container_1">
+                    <img class="notes_item_info_avatar" src="{{ entry.old_files.all.0.emplacement_fichier.url }}" onclick="reclam_image_viewer(this, event, '.reclam_item_image_old')">
+                    <div class="reclam_item_info_name">
+                        <label class="notes_item_name_label">Ancienne Note :</label>
+                        <div class="notes_item_name_value reclam_old_note_entry">{{ entry.old_files.all.0.id_version.note_version }}</div>
+                    </div>
+                </div>
+                <div class="reclam_info_double_container_2">
+                    <img class="notes_item_info_avatar" src="{{ entry.new_files.all.0.emplacement_fichier.url }}" onclick="reclam_image_viewer(this, event, '.reclam_item_image_new')">
+                    <div class="reclam_item_info_name">
+                        <label class="notes_item_name_label">Nouvelle Note :</label>
+                        <div class="notes_item_name_value reclam_new_note_entry">{{ entry.new_files.all.0.id_version.note_version }}</div>
+                    </div>
+                </div>
             </div>
-            <div class="notes_item_info_mark">
-                <label class="notes_item_mark_label">Note :</label>
-                {% if not entry.reclamation.regler_reclamation %}
-                    <input oninput="mark_as_corrected(this);" data-state="original" data-original-note="{{ entry.files.0.id_version.note_version }}" class="notes_item_mark_value" placeholder="Note" value="{{ entry.files.0.id_version.note_version }}">
-                {% else %}
-                    <input class="notes_item_mark_value" placeholder="Note" value="{{ entry.reclamation.note_reclamation }}" disabled>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="reclam_ensg_info">
-        <div class="reclam_item_id hide">{{ entry.reclamation.id }}</div>
-        <div class="reclam_ensg_info_item reclam_ensg_info_item_first">
-            <div class="reclam_ensg_info_label">Module :</div>
-            <div class="reclam_ensg_info_value">{{ entry.reclamation.id_module.titre_module|lower|title }}</div>
-        </div>
-        <div class="reclam_ensg_info_item">
-            <div class="reclam_ensg_info_label">Sujet :</div>
-            <div class="reclam_ensg_info_value">{{ entry.reclamation.sujet_reclamation|lower|title }}</div>
-        </div>
-        <div class="reclam_ensg_info_item">
-            <div class="reclam_ensg_info_label">Description :</div>
-            <div class="reclam_ensg_info_value">{{ entry.reclamation.description_reclamation }}</div>
-        </div>
-        {% if entry.reclamation.regler_reclamation  %}
-            <div class="reclam_ensg_info_item">
-                <div class="reclam_ensg_info_label">Approuvée :</div>
-                <div class="reclam_ensg_info_value">{% if entry.reclamation.approuver_reclamation %}Oui{% else %}Non{% endif %}</div>
+        {% else %}
+            <img class="notes_item_info_avatar" src="{{ entry.old_files.all.0.emplacement_fichier.url }}" onclick="mark_image_viewer(this, event, '.reclam_item_image_old')">
+            <div class="notes_item_info_text reclam_info_text">
+                <div class="notes_item_info_name">
+                    <label class="notes_item_name_label">Etudiant :</label>
+                    <div class="notes_item_name_value" data-student-id = "{{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur }}">{{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}</div>
+                </div>
+                <div class="notes_item_info_mark">
+                    <label class="notes_item_mark_label">Note :</label>                   
+                    <input class="notes_item_mark_value reclam_old_note_entry" oninput="mark_as_corrected(this);" data-state="original" data-original-note="{{ entry.old_files.all.0.id_version.note_version }}" value="{{ entry.old_files.all.0.id_version.note_version }}" {% if entry.regler_reclamation %}disabled{% endif %}>
+                </div>
             </div>
         {% endif %}
     </div>
-    {% if not entry.reclamation.regler_reclamation  %}
+    <div class="reclam_ensg_info">
+        <div data-reclam-id="{{ entry.id }}" class="reclam_item_id hide">{{ entry.id }}</div>
+        <div class="reclam_ensg_info_item {% if not entry.approuver_reclamation %}hide{% else %} reclam_ensg_info_item_first{% endif %}">
+            <div class="reclam_ensg_info_label">Etudiant :</div>
+            <div class="reclam_ensg_info_value reclam_ensg_info_student">{{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }} - G{{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_groupe.numero }} - {{ entry.old_files.all.0.id_version.id_copie.id_etudiant.id_etudiant.id_utilisateur|title }}</div>
+        </div>
+        <div class="reclam_ensg_info_item {% if not entry.approuver_reclamation %}reclam_ensg_info_item_first{% endif %}">
+            <div class="reclam_ensg_info_label">Module :</div>
+            <div class="reclam_ensg_info_value reclam_ensg_info_module">{{ entry.id_module.titre_module|lower|title }}</div>
+        </div>
+        <div class="reclam_ensg_info_item">
+            <div class="reclam_ensg_info_label">Sujet :</div>
+            <div class="reclam_ensg_info_value reclam_ensg_info_sujet">{{ entry.sujet_reclamation|lower|title }}</div>
+        </div>
+        <div class="reclam_ensg_info_item">
+            <div class="reclam_ensg_info_label">Description :</div>
+            <div class="reclam_ensg_info_value reclam_ensg_info_disc">{{ entry.description_reclamation }}</div>
+        </div>
+        {% if entry.regler_reclamation  %}
+        <div class="reclam_ensg_info_bool">
+            <div class="reclam_ensg_info_item">
+                <div class="reclam_ensg_info_label">Approuvée :</div>
+                <div class="reclam_ensg_info_value reclam_ensg_info_approv">{% if entry.approuver_reclamation %}Oui{% else %}Non{% endif %}</div>
+            </div>
+            <div class="reclam_ensg_info_item">
+                <div class="reclam_ensg_info_label">Réctification Affichée :</div>
+                <div class="reclam_ensg_info_value reclam_ensg_info_affich">{% if not entry.new_files.all.0.id_version.temp_version %}Oui{% else %}Non{% endif %}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% if not entry.regler_reclamation  %}
         <div class="reclam_buttons_area">
             <div class="default_button reclam_button_left" onclick="handle_reclamation(this, event, 'refuse')">Rejeter</div>
             <div class="default_button reclam_button_right" onclick="handle_reclamation(this, event, 'accept')">Approuver</div>
         </div>
     {% endif %}
-    <div class="notes_item_image">
-        <div data-list-length = '{{ entry.files|length }}'>
-            {% for file in entry.files %}
-                <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
-            {% endfor %}
-            {% if entry.files|length > 1 %}
-                <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
-                <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
-            {% endif %}
+    {% if entry.old_files.all|length > 0  %}
+        <div class="reclam_item_image_old hide">
+            <div data-list-length = '{{ entry.old_files.all|length }}'>
+                {% for file in entry.old_files.all %}
+                    <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+                {% endfor %}
+                {% if entry.old_files.all|length > 1 %}
+                    <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                    <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    {% endif %}
+    {% if entry.new_files.all|length > 0  %}
+        <div class="reclam_item_image_new hide">
+            <div data-list-length = '{{ entry.new_files.all|length }}'>
+                {% for file in entry.new_files.all %}
+                    <img src="{{ file.emplacement_fichier.url }}" class="{% if forloop.counter0 != 0 %}hide{% endif %}" data-index-number = "{{ forloop.counter0 }}">
+                {% endfor %}
+                {% if entry.new_files.all|length > 1 %}
+                    <div class="next_image next_image_large" onclick="next_image(this, event);"><div></div><div></div></div>
+                    <div class="previous_image previous_image_large" onclick="previous_image(this, event);"><div></div><div></div></div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
 </div>

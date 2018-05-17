@@ -567,28 +567,28 @@ def get_ensg_reclamations(ensg):
     user_modules = Enseignant.objects.filter(id_enseignant = ensg)[0].modules.all()
     reclamations_done = Reclamation.objects.filter(Q(annee_reclamation = ANNEE_UNIV) & Q(id_module__in = user_modules) & Q(regler_reclamation = True)).order_by('-id')
     reclamations_waiting = Reclamation.objects.filter(Q(annee_reclamation = ANNEE_UNIV) & Q(id_module__in = user_modules) & Q(regler_reclamation = False)).order_by('id')
-    entries_done = []
-    entries_waiting = []
-    
-    for reclam in reclamations_done:
-        version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)), True)[0]
-        files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
-        entries_done += [{
-            'reclamation': reclam,
-            'files': files,
-        }]
-    
-    for reclam in reclamations_waiting:
-        version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)), True)[0]
-        files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
-        entries_waiting += [{
-            'reclamation': reclam,
-            'files': files,
-        }]
 
+    ## when using this change all entry. to entry.reclamation. in template
+    # entries_done = []
+    # entries_waiting = []
+    
+    # for reclam in reclamations_done:
+    #     version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)), True)[0]
+    #     files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
+    #     entries_done += [{
+    #         'reclamation': reclam,
+    #     }]
+    
+    # for reclam in reclamations_waiting:
+    #     version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)), True)[0]
+    #     files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
+    #     entries_waiting += [{
+    #         'reclamation': reclam,
+    #     }]
+    
     return {
-        'entries_waiting': entries_waiting,
-        'entries_done': entries_done,
+        'entries_waiting': reclamations_waiting,
+        'entries_done': reclamations_done,
     }
 
 
@@ -602,22 +602,23 @@ def ensg_reclamation_handler(req):
     if req.method == 'POST' and req.is_ajax():
         try:
             reclamation = Reclamation.objects.filter(id = req.POST.get('reclam_id'))[0]
+            copie_to_modify = Copie.objects.filter(id = req.POST.get('copie_id'))[0]
+            old_version = get_final_versions([copie_to_modify])[0]
 
             if req.POST.get('type') == 'accept':
                 reclamation.approuver_reclamation = True
-                copie_to_modify = Copie.objects.filter(id = req.POST.get('copie_id'))[0]
-                old_version = get_final_versions([copie_to_modify])[0]
+                
                 new_version = VersionCopie(numero_version = old_version.numero_version + 1, note_version = float(req.POST.get('note')), id_copie = copie_to_modify, temp_version = True)
                 new_version.save()
                 filler_file = FichierCopie(id_version = new_version, id_module = reclamation.id_module, emplacement_fichier = "default/file_filler.png")
                 filler_file.save()
                 copie_to_modify.rectifier = True
                 copie_to_modify.save()
+                reclamation.new_files.add(filler_file)
                 
             if req.POST.get('type') == 'refuse':
                 reclamation.approuver_reclamation = False
-
-            reclamation.note_reclamation = float(req.POST.get('note'))
+            
             reclamation.regler_reclamation = True
             reclamation.save()
             data = {'success': True}
@@ -639,16 +640,22 @@ def etud_reclamation_handler(req):
     if req.method == 'POST' and req.is_ajax():
         try:
             if req.POST.get('type') == 'create':
-                sujet = req.POST.get('title')
-                content = req.POST.get('content')
-                student = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = req.POST.get('student_id'))[0])[0]
                 module = Module.objects.filter(id = req.POST.get('module_id'))[0]
-                new_reclamation = Reclamation(sujet_reclamation = sujet, description_reclamation = content, id_etudiant = student, id_module = module, annee_reclamation = ANNEE_UNIV)
-                new_reclamation.save()
-                context_to_use = {'entry': {
-                    'reclamations': [new_reclamation],
-                    'year':{'active':True},
-                }}
+                student = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(id_utilisateur = req.POST.get('student_id'))[0])[0]
+                nb_unprocessed_reclams = len(Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = module) & Q(regler_reclamation = False)))
+                current_version = VersionCopie.objects.filter(id = req.POST.get('version_id'))[0]
+                if nb_unprocessed_reclams == 0:
+                    sujet = req.POST.get('title')
+                    content = req.POST.get('content')
+                    new_reclamation = Reclamation(sujet_reclamation = sujet, description_reclamation = content, id_etudiant = student, id_module = module, annee_reclamation = ANNEE_UNIV)
+                    new_reclamation.save()
+                    new_reclamation.old_files.add(*list(FichierCopie.objects.filter(id_version = current_version)))
+                    context_to_use = {'entry': {
+                        'reclamations': [new_reclamation],
+                        'year':{'active':True},
+                    }}
+                else:
+                    return JsonResponse(json.dumps({'success': True, 'error' : True}), safe = False)  
             
             if req.POST.get('type') == 'delete':
                 Reclamation.objects.filter(id = req.POST.get('reclam_id')).delete()
@@ -939,6 +946,7 @@ class SaisirView(TemplateView, BaseContextMixin):
                 context = get_copy_entries(module_name, False)
                 context.update(get_saisir_students(module_name, True))
                 context.update(get_saisir_students(module_name, False))
+               
                 ## get new files not yet asigned
                 context['new_files'] = FichierCopie.objects.filter(Q(id_version = None) & Q(id_module = Module.objects.filter(titre_module = module_name)[0])).order_by('-id')
                 context['stats'] = get_saisir_stats(context)
@@ -978,7 +986,7 @@ class NotesView(TemplateView, BaseContextMixin):
             for module in user_modules:
                 if len(Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))) > 0:
                     context['modules'] += [module]
-            # print(Enseignant.objects.filter(id_enseignant = context['loggedin_user'])[0].modules.all()[0].titre_module)
+
             context['upload_form'] = correction_file_upload_form
         
         elif context['loggedin_user'].type_utilisateur == 'etud':
@@ -993,17 +1001,28 @@ class NotesView(TemplateView, BaseContextMixin):
                     copy_files = FichierCopie.objects.filter(id_version = version)
                     module_correction = Correction.objects.filter(Q(annee_correction = year) & Q(id_module = version.id_copie.id_module))[0]
                     module_reclamation = Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = version.id_copie.id_module)).order_by('-id')
-                    if len(module_reclamation) > 0:
-                        module_reclamation = module_reclamation
-                    else:
-                        module_reclamation = None
+                    nb_unprocessed_reclams = len(Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = version.id_copie.id_module) & Q(regler_reclamation = False) ))
+                    # if len(module_reclamation) <= 0:
+                    #     module_reclamation = module_reclamation
+                    # else:
+                    #     module_reclamation = None
                     modules_data += [{
                         'files':list(copy_files),
                         'correction': list(FichierCorrection.objects.filter(id_correction = module_correction).order_by('-id')),
                         'reclamations': module_reclamation,
+                        'nb_unprocessed_reclams': nb_unprocessed_reclams,
                     }]
                 results[year] = modules_data
             context['results'] = results
+            
+            ## checking if unupdated copies with updated notes exist
+            copies = Copie.objects.filter(id_etudiant = student)
+            copy_files = get_final_versions(copies)
+            all_copy_files = get_final_versions(copies, True)
+            if all_copy_files == copy_files:
+                context['exists_unupdated_copies'] = True
+            else:
+                context['exists_unupdated_copies'] = False
         
         return context
 
@@ -1185,11 +1204,15 @@ class RectificationsView(TemplateView, BaseContextMixin):
         if req.is_ajax():
             try:
                 current_version = VersionCopie.objects.filter(id = req.POST.get('version_id'))[0]
+                current_files = FichierCopie.objects.filter(id_version = current_version)
+                reclamation = Reclamation.objects.filter(new_files__in = current_files)[0]
+
                 if req.POST.get('type') == 'upload':
                     ## removing filler file
-                    FichierCopie.objects.filter(id_version = current_version).delete()
+                    current_files.delete()
                     ## saving new files
                     files = req.FILES.getlist('emplacement_fichier')
+                    accepted_files = []
                     for file_to_save in files:
                         req.FILES['emplacement_fichier'] = file_to_save
                         form = rect_file_upload_form(req.POST, req.FILES)
@@ -1198,22 +1221,31 @@ class RectificationsView(TemplateView, BaseContextMixin):
                             obj.id_module = Module.objects.filter(id = req.POST.get('module_id'))[0]
                             obj.id_version = current_version
                             obj.save()
+                            accepted_files += [obj]
+                    ## archiving new files in reclamation
+                    reclamation.new_files.clear()
+                    reclamation.new_files.add(*accepted_files)
+
                 if req.POST.get('type') == 'reset':
                     ## removing temp files
-                    files_to_delete = FichierCopie.objects.filter(id_version = current_version)
-                    for file in files_to_delete:
+                    for file in current_files:
                         if "default/" not in file.emplacement_fichier.url:
                             file.emplacement_fichier.delete()
-                    files_to_delete.delete()
+                    current_files.delete()
                     ## creating filler file
                     filler_file = FichierCopie(id_version = current_version, id_module = current_version.id_copie.id_module, emplacement_fichier = "default/file_filler.png")
                     filler_file.save()
+                    ## archiving new files in reclamation
+                    reclamation.new_files.clear()
+                    reclamation.new_files.add(filler_file)
+
 
                 if req.POST.get('type') == 'accept':
                     current_version.temp_version = False
                     current_version.save()
                     current_version.id_copie.rectifier = False
                     current_version.id_copie.save()
+                    
                 data = {'success': True}
                 
             except Exception as e:

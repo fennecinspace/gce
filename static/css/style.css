@@ -611,6 +611,7 @@
 }
 /* #endregion containers*/
 
+
 /* #region home */
 .home_item {
     width: 90%;
@@ -648,6 +649,7 @@
     margin-bottom: .1em;
 }
 /* #endregion home */
+
 
 /* #region profile */
 #left_profile_section {
@@ -814,6 +816,7 @@
     border-left: none;
 }
 /* #endregion profile */
+
 
 /* #region Annonce */
 #annonce_add_button {
@@ -1036,6 +1039,7 @@
     top: 0px;
 }
 /* #endregion Annonce */
+
 
 /* #region SAISIR */
 #fin_de_saisie, #upload_correction_button {
@@ -1552,6 +1556,7 @@
 }
 /* #endregion SAISIR */
 
+
 /* #region NOTES ENSG */
 #fin_de_verification_note {
     text-align: center;
@@ -1714,6 +1719,7 @@
     right: 1em;
 }
 /* #endregion NOTES ENSG */
+
 
 /* #region NOTES ETUD */
 .annee_title {
@@ -1891,14 +1897,27 @@ textarea.reclam_tab_item {
 }
 
 .copie_is_archived {
-    color: #000000;
+    color: #ffffff;
     font-weight: bold;
-    height: 30px;
+    /* height: 30px; */
     font-size: 20px;
+    text-align: center;
+    border-radius: 10px;
+    background-color: black;
+    padding: 1em;
+}
+
+#exists_unupdated_copies {
+    border-radius: 25px;
+}
+
+#exists_unupdated_copies > span {
+    color: red;
 }
 /* #endregion NOTES ETUD */
 
-/* #region Affichage*/
+
+/* #region Affichage */
 .affichage_item_info span {
     font-weight: 400; 
 }
@@ -1926,6 +1945,7 @@ textarea.reclam_tab_item {
     width: calc(100% - 4.8em);
 }
 /* #endregion Affichage */
+
 
 /* #region personnels */
 .personnel_user_item {
@@ -1970,7 +1990,12 @@ textarea.reclam_tab_item {
 
 .reclam_ensg_item {
     height: auto;
-    padding-bottom: .5em;
+    padding-bottom: .7em;
+    padding-top: .8em;
+}
+
+.reclam_info_text {
+    height: 53px;
 }
 
 .reclam_ensg_info {
@@ -1991,6 +2016,9 @@ textarea.reclam_tab_item {
 .reclam_ensg_info_label {
     color: rgb(0, 0, 0, 1);
     padding-bottom: .2em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .reclam_ensg_info_value  {
@@ -2028,7 +2056,44 @@ textarea.reclam_tab_item {
 .reclam_button_left:hover, .reclam_button_right:hover {
     animation: none;
 }
+
+.reclam_info_double_container {
+    position: relative;
+    width: 100%;
+    height: 50px;
+}
+
+.reclam_item_info_name {
+    width: calc(100% - 80px);
+    position: absolute;
+    top: 3px;
+    left: 60px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 100%;
+}
+
+.reclam_info_double_container > div {
+    position: absolute; 
+    top: 0;
+    width: 50%;
+}
+
+.reclam_info_double_container_1 {
+    left: 0;
+}
+
+.reclam_info_double_container_2 {
+    left: 50%;
+}
+
+.reclam_ensg_info_bool > .reclam_ensg_info_item {
+    width: 49.5%;
+    display: inline-block;
+}
 /* #endregion */
+
 
 /* #region TECH_RECTIFICATIONS */
 .rect_item {
@@ -2628,6 +2693,11 @@ textarea.reclam_tab_item {
     .affichage_item_info {
         width: 100%;
     }
+
+    .reclam_ensg_info_bool > .reclam_ensg_info_item {
+        width: 100%;
+        display: block;
+    }
 }
 
 @media only screen and (max-width: 499px) { 
@@ -2657,10 +2727,6 @@ textarea.reclam_tab_item {
     .std_center_content {
         margin: 1em 2em 1em 2em;
         width: calc(100% - 4em);
-    }
-
-    #std_center_reclam {
-        /* overflow: hidden; */
     }
 
     #reclam_tab {
@@ -2696,6 +2762,16 @@ textarea.reclam_tab_item {
     .rect_item_reset, .rect_item_confirm {
         height: calc(142px / 2);
         
+    }
+
+    .reclam_info_double_container {
+        height: 100px;
+    }
+    
+    .reclam_item_info_name {
+        width: 95%;
+        position: relative;
+        left: 0;
     }
 }
 /* #endregion MEDIA QUERIES */
@@ -2813,10 +2889,3 @@ textarea.reclam_tab_item {
     .select_all > span {padding-left: 1px;}
 }
 /* #endregion MOZILLA COMPATIBILITY */
-
-
-/* #region EXTRA */
-.no_right_margin {
-    margin-right: 0; 
-}
-/* #endregion EXTRA*/
