@@ -9,8 +9,13 @@
             <div class="reclam_tab_label">Description :</div>
             <div type="text" class="reclam_tab_item">{{ reclamation.description_reclamation }}</div>
             {% if reclamation.approuver_reclamation %}
+                <div class="reclam_tab_label">Ancienne Note :</div>
+                <div type="text" class="reclam_tab_item">{{ reclamation.old_files.all.0.id_version.note_version }}</div>
                 <div class="reclam_tab_label">Nouvelle Note :</div>
                 <div type="text" class="reclam_tab_item">{{ reclamation.new_files.all.0.id_version.note_version }}</div>
+            {% else %}
+                <div class="reclam_tab_label">Note :</div>
+                <div type="text" class="reclam_tab_item">{{ reclamation.old_files.all.0.id_version.note_version }}</div>
             {% endif %}
             <div class="reclam_tab_label">Statut :</div>
             <div class="reclam_lower_section">

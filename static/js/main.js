@@ -1954,22 +1954,3 @@ function is_reclam_item_in(item, filter) {
 
     return false;
 }
-
-
-
-function filter_users(e) {
-;
-    
-    if (filter_value.length == 0)
-        for (var i = 0; i < all_users.length; i++)
-            all_users.eq(i).slideDown();
-    else
-        for (var x = 0; x < all_users.length; x++){
-            var last_name = all_users[x].querySelector('.personnel_user_lastname').innerHTML.trim().toLowerCase();
-            var first_name = all_users[x].querySelector('.personnel_user_firstname').innerHTML.trim().toLowerCase();
-            if (first_name.includes(filter_value) || last_name.includes(filter_value) || (last_name + " " + first_name).includes(filter_value) || (first_name + " " + last_name).includes(filter_value))
-                all_users.eq(x).slideDown(); 
-            else
-                all_users.eq(x).slideUp(); 
-        }
-}

@@ -43,10 +43,10 @@ def avatars_file_path(instance, filename):
 ## MODELS
 class Utilisateur(models.Model):
     user_choices = (('etud','Etudiant'),('ensg','Enseignant'),('tech','Technicien'),('chef','Chef Departement'))
-    info_utilisateur = models.OneToOneField(User,models.CASCADE)
     type_utilisateur = models.CharField(db_column='type_Utilisateur', max_length=255, null=True, choices = user_choices)
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100, unique=True, blank=True, editable=False)
     avatar_utilisateur = models.FileField(db_column='Avatar', default = 'default/default_avatar.png', upload_to = avatars_file_path)
+    info_utilisateur = models.OneToOneField(User,models.CASCADE)
 
     def save(self,*args, **kwargs):
         # creating user id
@@ -212,13 +212,14 @@ class Annonce(models.Model):
 
 class Copie(models.Model):
     # id_copie = models.CharField(db_column='id_Copie', primary_key=True, max_length=100)
-    annee_copie = models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
+    rectifier = models.BooleanField(db_column='Rectifier', default=False)
     afficher_copie = models.BooleanField(db_column='afficher_Copie', default=False)
     date_affichage = models.DateField(db_column='date_Affichage', blank=True, null=True)
     modifiable = models.BooleanField(db_column='Modifiable', default=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
-    rectifier = models.BooleanField(db_column='Rectifier', default=False)
+    annee_copie = models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
+
 
     class Meta:
         db_table = 'Copie'
@@ -229,7 +230,7 @@ class VersionCopie(models.Model):
     numero_version = models.IntegerField(db_column='numero_Version', blank=True, null=True)
     note_version = models.FloatField(db_column='note_Version', blank=True, null=True)
     id_copie = models.ForeignKey('Copie', models.CASCADE , db_column='id_Copie', blank=True, null=True)
-    temp_version =  models.BooleanField(db_column='Rectifier', default=False)
+    temp_version =  models.BooleanField(db_column='temp_Version', default=False)
 
     class Meta:
         db_table = 'VersionCopie'

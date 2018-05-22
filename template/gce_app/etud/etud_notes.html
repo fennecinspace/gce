@@ -21,7 +21,7 @@
         </div>
         <div id="std_notes_area">
             {% if not exists_unupdated_copies %}
-            <div id="exists_unupdated_copies" class="saisir_item_small"><span>Important :</span> Il existe des notes corrigées, mais non affichées. Il seront affichées quand leurs copies corrigées sont téléversées</div>
+            <div id="exists_unupdated_copies" class="saisir_item_small"><span>Important :</span> Il existe des notes corrigées, mais non affichées. elles le  seront dès que les copies corrigées seront téléversées</div>
             {% endif %}
             {% for year, versions in results.items %}
                 <div class="default_title annee_title">{{ year.annee_univ }}</div>

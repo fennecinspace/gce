@@ -25,6 +25,20 @@ from datetime import datetime
 import os
 
 
+### Notify User - Create Notification  
+def create_notification(user, title, content, type):
+    if type == "save":
+        icon = 'images/notifications/save_notification.png'
+
+    notif = Notification (
+        sujet_notification = title,
+        description_notification = content,
+        icon_notification = icon,
+        id_utilisateur = user
+    )
+    notif.save()
+
+
 ## returns the user's data
 def get_user_data(u_obj):
     user_id = u_obj.pk
@@ -1073,15 +1087,13 @@ class NotesView(TemplateView, BaseContextMixin):
         return self.render_to_response(context)
 
 def demande_access_right_ensg_notes(module_name):
-    print(Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement.info_utilisateur.username)
-    user_to_notify = Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement
-    notif = Notification(
-        sujet_notification = 'Demande de Droit de Modification',
-        description_notification = 'l\'enseignant du module ' + module_name +' demande le droit de modification avant l\'affichage',
-        icon_notification = 'images/notifications/save_notification.png',
-        id_utilisateur = user_to_notify
+    create_notification (
+        user = Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement,
+        title = 'Demande de Droit de Modification',
+        content = 'l\'enseignant du module ' + module_name +' demande le droit de modification avant l\'affichage', 
+        type = "save"
     )
-    notif.save()
+
 
 def get_can_ask_for_right(versions):
     for files in versions:
