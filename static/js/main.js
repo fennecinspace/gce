@@ -1322,6 +1322,7 @@ function access_personnel_profile(elem, e){
     });
 }
 
+
 function filter_users(e) {
     e.stopPropagation();
     var filter_value = e.target.value.trim().toLowerCase();

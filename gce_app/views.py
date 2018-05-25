@@ -105,7 +105,7 @@ def get_student_notes(student):
 
 def get_student_data(student):
     modules = Module.objects.filter(id_specialite = Specialite.objects.filter(id = (Section.objects.filter(id = Groupe.objects.filter(id = student.id_groupe.id)[0].id_section.id)[0].id_specialite.id))[0])
-    teachers = Enseignant.objects.filter(modules__in = modules)
+    teachers = Enseignant.objects.filter(modules__in = modules).distinct()
     notes = get_student_notes(student) # gettings final versions of copies categorized by school year
     marks = {k: notes[k] for k in sorted(notes,reverse=True)} # sorting from newest school year to oldest
     return {
@@ -582,24 +582,6 @@ def get_ensg_reclamations(ensg):
     reclamations_done = Reclamation.objects.filter(Q(annee_reclamation = ANNEE_UNIV) & Q(id_module__in = user_modules) & Q(regler_reclamation = True)).order_by('-id')
     reclamations_waiting = Reclamation.objects.filter(Q(annee_reclamation = ANNEE_UNIV) & Q(id_module__in = user_modules) & Q(regler_reclamation = False)).order_by('id')
 
-    ## when using this change all entry. to entry.reclamation. in template
-    # entries_done = []
-    # entries_waiting = []
-    
-    # for reclam in reclamations_done:
-    #     version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)), True)[0]
-    #     files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
-    #     entries_done += [{
-    #         'reclamation': reclam,
-    #     }]
-    
-    # for reclam in reclamations_waiting:
-    #     version = get_final_versions(Copie.objects.filter(Q(id_module = reclam.id_module) & Q(annee_copie = ANNEE_UNIV) & Q(id_etudiant = reclam.id_etudiant)), True)[0]
-    #     files = list(FichierCopie.objects.filter(id_version = version).order_by('id'))
-    #     entries_waiting += [{
-    #         'reclamation': reclam,
-    #     }]
-    
     return {
         'entries_waiting': reclamations_waiting,
         'entries_done': reclamations_done,
