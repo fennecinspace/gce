@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Слой_1" x="0px" y="0px" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
+<linearGradient id="SVGID_1__43597" gradientUnits="userSpaceOnUse" x1="17" y1="9.5" x2="17" y2="24.5021" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#6DC7FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#E6ABFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<circle style="" cx="17" cy="17" r="7" stroke="none" fill="url(&quot;#SVGID_1__43597&quot;)" stroke-width="1px"></circle>
+<linearGradient id="SVGID_2__43597" gradientUnits="userSpaceOnUse" x1="34" y1="3.5" x2="34" y2="59.5006" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#1A6DFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#C822FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<rect x="33" y="22" style="" width="2" height="16" stroke="none" fill="url(&quot;#SVGID_2__43597&quot;)" stroke-width="1px"></rect>
+<linearGradient id="SVGID_3__43597" gradientUnits="userSpaceOnUse" x1="34" y1="3.5" x2="34" y2="59.5" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#1A6DFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#C822FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<circle style="" cx="34" cy="44" r="2" stroke="none" fill="url(&quot;#SVGID_3__43597&quot;)" stroke-width="1px"></circle>
+<linearGradient id="SVGID_4__43597" gradientUnits="userSpaceOnUse" x1="32" y1="3.5" x2="32" y2="59.5006" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#1A6DFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#C822FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<path style="" d="M34,10c-2.62,0-5.187,0.418-7.637,1.24C24.367,7.987,20.854,6,17,6C10.935,6,6,10.935,6,17  c0,3.86,1.992,7.376,5.254,9.372C10.422,28.845,10,31.406,10,34c0,13.233,10.767,24,24,24s24-10.767,24-24S47.233,10,34,10z M34,56  c-12.131,0-22-9.869-22-22c0-2.637,0.477-5.239,1.415-7.735l0.315-0.838l-0.798-0.406C9.891,23.474,8,20.4,8,17c0-4.963,4.037-9,9-9  c3.396,0,6.468,1.887,8.016,4.923l0.487,0.777l0.845-0.333C28.792,12.46,31.366,12,34,12c12.131,0,22,9.869,22,22S46.131,56,34,56z" stroke="none" fill="url(&quot;#SVGID_4__43597&quot;)" stroke-width="1px"></path>
+<linearGradient id="SVGID_5__43597" gradientUnits="userSpaceOnUse" x1="34" y1="3.5" x2="34" y2="59.5006" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#1A6DFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#C822FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<path style="" d="M34,14c-2.545,0-5.024,0.472-7.369,1.401l0.736,1.859C29.477,16.424,31.708,16,34,16  c9.925,0,18,8.075,18,18s-8.075,18-18,18s-18-8.075-18-18c0-2.291,0.424-4.522,1.261-6.632l-1.859-0.736  C14.472,28.977,14,31.455,14,34c0,11.028,8.972,20,20,20s20-8.972,20-20S45.028,14,34,14z" stroke="none" fill="url(&quot;#SVGID_5__43597&quot;)" stroke-width="1px"></path>
+</svg>

@@ -28,7 +28,9 @@ import os
 ### Notify User - Create Notification  
 def create_notification(user, title, content, type):
     if type == "save":
-        icon = 'images/notifications/save_notification.png'
+        icon = 'images/notifications/save_notification.svg'
+    if type == "mail":
+        icon = 'images/notifications/email_notification.svg'
 
     notif = Notification (
         sujet_notification = title,

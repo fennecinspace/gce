@@ -96,6 +96,9 @@ def PopulateStruct():
     chef = ChefDepartement(id_chef_departement = usr)
     chef.save()
 
+    anneee = AnneeUniv(active = True, annee_univ = "2017-2018")
+    anneee.save()
+
     print("\nStarted Populating Structure...", end = "")
     #UNIVERSITE
     uni = Universite(nom = "Université de Mostaganem")

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" version="1.1">
+<g id="surface1" stroke="none" fill="#ffffff" stroke-width="1px">
+<path style="" d="M 39 39 L 5 39 L 5 5 L 34 5 L 39 10 Z " stroke="none" fill="#f44336" stroke-width="1px"></path>
+<path style="" d="M 36 36 C 36 36.554688 35.554688 37 35 37 L 9 37 C 8.445313 37 8 36.554688 8 36 L 8 22 C 8 21.445313 8.445313 21 9 21 L 35 21 C 35.554688 21 36 21.445313 36 22 Z " stroke="none" fill="#ffffff" stroke-width="1px"></path>
+<path style="" d="M 12 28 L 32 28 L 32 30 L 12 30 Z " stroke="none" fill="#cfd8dc" stroke-width="1px"></path>
+<path style="" d="M 12 24 L 32 24 L 32 26 L 12 26 Z " stroke="none" fill="#cfd8dc" stroke-width="1px"></path>
+<path style="" d="M 12 32 L 32 32 L 32 34 L 12 34 Z " stroke="none" fill="#cfd8dc" stroke-width="1px"></path>
+<path style="" d="M 8 5 L 8 14 C 8 15.105469 8.894531 16 10 16 L 23 16 C 24.105469 16 25 15.105469 25 14 L 25 5 Z " stroke="none" fill="#c62828" stroke-width="1px"></path>
+<path style="" d="M 14 5 L 14 14 C 14 15.105469 14.894531 16 16 16 L 29 16 C 30.105469 16 31 15.105469 31 14 L 31 5 Z " stroke="none" fill="#b0bec5" stroke-width="1px"></path>
+<path style="" d="M 23 7 L 27 7 L 27 14 L 23 14 Z " stroke="none" fill="#263238" stroke-width="1px"></path>
+<path style="" d="M 39.859375 42.679688 L 42.675781 39.859375 C 43.105469 39.429688 43.105469 38.730469 42.675781 38.304688 L 41.347656 36.976563 L 36.972656 41.351563 L 38.300781 42.679688 C 38.730469 43.105469 39.429688 43.105469 39.859375 42.679688 " stroke="none" fill="#e57373" stroke-width="1px"></path>
+<path style="" d="M 29.847656 25.472656 L 39.160156 34.785156 L 34.785156 39.160156 L 25.46875 29.847656 Z " stroke="none" fill="#ff9800" stroke-width="1px"></path>
+<path style="" d="M 36.972656 41.351563 L 34.785156 39.164063 L 39.160156 34.785156 L 41.347656 36.972656 Z " stroke="none" fill="#b0bec5" stroke-width="1px"></path>
+<path style="" d="M 29.847656 25.472656 L 24 24 L 25.472656 29.847656 Z " stroke="none" fill="#ffc107" stroke-width="1px"></path>
+<path style="" d="M 26.957031 24.742188 L 24 24 L 24.742188 26.957031 Z " stroke="none" fill="#37474f" stroke-width="1px"></path>
+</g>
+</svg>

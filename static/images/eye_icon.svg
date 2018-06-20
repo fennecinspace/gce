@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Слой_1" x="0px" y="0px" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
+<linearGradient id="SVGID_1__43965" gradientUnits="userSpaceOnUse" x1="32" y1="11.6665" x2="32" y2="53.0217" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#1A6DFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#C822FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<path style="" d="M32,51C11.114,51,3.155,32.572,3.077,32.387c-0.103-0.248-0.103-0.525,0-0.773  C3.155,31.428,11.114,13,32,13s28.845,18.428,28.923,18.613c0.103,0.248,0.103,0.525,0,0.773C60.845,32.572,52.886,51,32,51z   M5.1,31.999C6.34,34.564,14.115,49,32,49c17.919,0,25.664-14.431,26.9-16.999C57.66,29.436,49.885,15,32,15  C14.081,15,6.336,29.431,5.1,31.999z" stroke="none" fill="url(&quot;#SVGID_1__43965&quot;)" stroke-width="1px"></path>
+<linearGradient id="SVGID_2__43965" gradientUnits="userSpaceOnUse" x1="32" y1="11.6665" x2="32" y2="53.0217" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#1A6DFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#C822FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<path style="" d="M32,44c-6.617,0-12-5.383-12-12s5.383-12,12-12s12,5.383,12,12S38.617,44,32,44z M32,22  c-5.514,0-10,4.486-10,10s4.486,10,10,10s10-4.486,10-10S37.514,22,32,22z" stroke="none" fill="url(&quot;#SVGID_2__43965&quot;)" stroke-width="1px"></path>
+<linearGradient id="SVGID_3__43965" gradientUnits="userSpaceOnUse" x1="32" y1="26.75" x2="32" y2="37.6315" spreadMethod="reflect" stroke="none" fill="#000000" stroke-width="1px">
+	<stop offset="0" style="stop-color:#6DC7FF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+	<stop offset="1" style="stop-color:#E6ABFF" stroke="none" fill="#000000" stroke-width="1px"></stop>
+</linearGradient>
+<path style="" d="M37,32c0,2.76-2.24,5-5,5s-5-2.24-5-5s2.24-5,5-5c0.24,0,0.49,0.02,0.72,0.06  C32.27,27.58,32,28.26,32,29c0,1.66,1.34,3,3,3c0.74,0,1.42-0.27,1.94-0.72C36.98,31.51,37,31.76,37,32z" stroke="none" fill="url(&quot;#SVGID_3__43965&quot;)" stroke-width="1px"></path>
+</svg>

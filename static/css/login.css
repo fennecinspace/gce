@@ -1,5 +1,5 @@
 #login_area {
-    background: url('../images/login_pic.png') no-repeat center 3em;
+    background: url('../images/login_pic.svg') no-repeat center 3em;
     background-size: 8em;
 	width: 20em;
 	height: 22em;
@@ -27,11 +27,11 @@ form {
 }
 
 .login_input[type="password"] { /* password icon */ 
-	background-image: url(../images/passwordIndicator.png);
+	background-image: url(../images/passwordIndicator.svg);
 }
 
 .login_input[type="text"] { /* username icon */ 
-	background-image: url(../images/usernameIndicator.png);
+	background-image: url(../images/usernameIndicator.svg);
 }
 
 .login_input { /*style input & password  */ 
