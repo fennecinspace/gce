@@ -45,7 +45,7 @@ class Utilisateur(models.Model):
     user_choices = (('etud','Etudiant'),('ensg','Enseignant'),('tech','Technicien'),('chef','Chef Departement'))
     type_utilisateur = models.CharField(db_column='type_Utilisateur', max_length=255, null=True, choices = user_choices)
     id_utilisateur = models.CharField(db_column='id_Utilisateur', primary_key=True, max_length=100, unique=True, blank=True, editable=False)
-    avatar_utilisateur = models.FileField(db_column='Avatar', default = 'default/default_avatar.png', upload_to = avatars_file_path)
+    avatar_utilisateur = models.FileField(db_column='Avatar', default = 'default/default_avatar.png', upload_to = avatars_file_path, max_length = 10000)
     info_utilisateur = models.OneToOneField(User,models.CASCADE)
 
     def save(self,*args, **kwargs):
@@ -224,7 +224,7 @@ class VersionCopie(models.Model):
 
 
 class FichierCopie(models.Model):
-    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to = copies_file_path)
+    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to = copies_file_path, max_length = 10000)
     id_version = models.ForeignKey('VersionCopie', models.SET_NULL, db_column='id_Version', blank=True, null=True)
     id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module', blank=True, null=True)
 
@@ -242,7 +242,7 @@ class Correction(models.Model):
 
 
 class FichierCorrection(models.Model):
-    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to=corrections_file_path)
+    emplacement_fichier = models.FileField(db_column='emplacement_Fichier', blank=True, null=True, upload_to=corrections_file_path, max_length = 10000)
     id_correction = models.ForeignKey('Correction', models.CASCADE, db_column='id_Correction', blank=True, null=True)
 
     class Meta:
