@@ -1,6 +1,6 @@
 <div>
     {% if entry.reclamations  %}
-        <div class="default_title reclam_title reclam_second_title">Réclamations :</div>
+        <div class="default_title reclam_title">Réclamation :</div>
         {% for reclamation in entry.reclamations %}
         <div class="old_reclam_item">
             <div class="reclam_id hide">{{ reclamation.id }}</div>
@@ -18,11 +18,16 @@
                 <div type="text" class="reclam_tab_item">{{ reclamation.old_files.all.0.id_version.note_version }}</div>
             {% endif %}
             <div class="reclam_tab_label">Statut :</div>
-            <div class="reclam_lower_section">
-                <div class="reclam_tab_item reclam_tab_bool">{% if not reclamation.regler_reclamation %}<span style="color: #f24444;"> &#10006;</span>{% else %}<span style="color: #5fe93d;"> &#10004;</span>{% endif %} Réglée</div>
-                <div class="reclam_tab_item reclam_tab_bool">{% if not reclamation.approuver_reclamation %}<span style="color: #f24444;"> &#10006;</span>{% else %}<span style="color: #5fe93d;"> &#10004;</span>{% endif %} Approvée</div>
-                {% if not reclamation.regler_reclamation %}
-                    <div onclick="reclamation_manager('delete',this,event);" class="default_button_small reclam_tab_button">Annuler</div>
+            <div class="reclam_lower_section reclam_item_lower_section">
+                {% if reclamation.regler_reclamation %}
+                    {% if reclamation.approuver_reclamation %}
+                        <div class="reclam_tab_item reclam_tab_bool"><span style="color: #5fe93d;"> &#10004;</span> Approuvée</div>
+                    {% else %}
+                        <div class="reclam_tab_item reclam_tab_bool"><span style="color: #f24444;"> &#10006;</span> Rejetée</div>
+                    {% endif %}
+                {% else %}
+                    <div class="reclam_tab_item reclam_tab_bool"><span style="color: #f24444;"> &#10006;</span> Traitement En Cours</div>
+                    <div onclick="reclamation_manager('delete',this,event);" class="default_button_small reclam_tab_button reclam_tab_annuler">Annuler</div>
                 {% endif %}
             </div>
         </div>

@@ -1854,6 +1854,10 @@
     height: 42px;
 }
 
+.reclam_item_lower_section {
+    height: 30px;
+}
+
 .reclam_tab_bool > span {
     position: absolute;
     font-size: 16px;
@@ -1872,6 +1876,10 @@
 
 .reclam_tab_button:hover {
     background-color: rgb(0, 0, 0); 
+}
+
+.reclam_tab_annuler {
+    bottom: 0;
 }
 
 textarea.reclam_tab_item {
@@ -1893,14 +1901,10 @@ textarea.reclam_tab_item {
     margin-bottom: 10px;
 }
 
-.reclam_second_title {
-    margin-top: 15px;
-}
-
 .copie_is_archived {
     color: #ffffff;
     font-weight: bold;
-    /* height: 30px; */
+    margin-bottom: 10px;
     font-size: 20px;
     text-align: center;
     border-radius: 10px;
