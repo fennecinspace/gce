@@ -66,23 +66,20 @@
                         <div class="notes_item_reclam hide">
                             <div>
                                 {% if year.active %}
-                                    <div class="notes_item_reclam_new {% if entry.nb_unprocessed_reclams != 0 %}hide{% endif %}">
-                                        <div class="default_title reclam_title">Créer une Réclamations :</div>
-                                        <div class="reclam_tab_label">Sujet :</div>
-                                        <input type="text" class="reclam_tab_item" name="reclamation_title">
-                                        <div class="reclam_tab_label">Description :</div>
-                                        <textarea type="text" class="reclam_tab_item" name="reclamation_content"></textarea>
-                                        <div class="reclam_lower_section">
-                                            <div onclick="reclamation_manager('create',this,event);" class="default_button_small reclam_tab_button">Réclamer</div>
+                                    {% if entry.reclamations|length == 0 %}
+                                        {% include 'gce_app/etud/reclam_form.html' %}
+                                    {% else %}
+                                        <div class="copie_is_archived">Vous avez deja Reclamé</div>
+                                        <div class="notes_item_reclam_old">
+                                            {% include 'gce_app/etud/reclam_content.html' %}
                                         </div>
-                                    </div>
-                                    <div class="copie_is_archived {% if entry.nb_unprocessed_reclams == 0 %}hide{% endif %}">Vous pouvez présenter une nouvelle réclamation , après que vos réclamations précédentes sont réglées</div>
+                                    {% endif %}
                                 {% else %}
                                     <div class="copie_is_archived">Copie Archivée, Vous ne pouvez plus réclamer</div>
+                                    <div class="notes_item_reclam_old">
+                                        {% include 'gce_app/etud/reclam_content.html' %}
+                                    </div>
                                 {% endif %}
-                                <div class="notes_item_reclam_old">
-                                    {% include 'gce_app/etud/reclam_content.html' %}
-                                </div>
                             </div>
                         </div>
                     </div>

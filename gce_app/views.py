@@ -652,14 +652,15 @@ def etud_reclamation_handler(req):
                         'reclamations': [new_reclamation],
                         'year':{'active':True},
                     }}
+                    html_to_use = render_to_string('gce_app/etud/reclam_content.html', context = context_to_use)
                 else:
                     return JsonResponse(json.dumps({'success': True, 'error' : True}), safe = False)  
             
             if req.POST.get('type') == 'delete':
                 Reclamation.objects.filter(id = req.POST.get('reclam_id')).delete()
-                context_to_use = {'year':{'active':True}}
+                html_to_use = render_to_string('gce_app/etud/reclam_form.html', context = None)
             
-            data = {'success': True, 'html': render_to_string('gce_app/etud/reclam_content.html', context = context_to_use)}
+            data = {'success': True, 'html': html_to_use}
         
         except Exception as e:
             print(e)

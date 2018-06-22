@@ -1468,11 +1468,11 @@ function create_reclamation(module_id, version_id) {
                                 if (data.error) {
                                     show_pop_up(`Il existe des réclamations pas encore réglées !`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
                                 }
-                                else  {
-                                    show_pop_up(`Une reclamation a été créé, elle sera réglée par l'enseignant du module`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                                else {
                                     update_reclamation_tab(data.html,'create');
-                                    $(document.querySelector('#reclam_tab .notes_item_reclam_new')).slideUp();
-                                    $(document.querySelector('#reclam_tab .copie_is_archived')).slideDown();
+                                    setTimeout(()=> {
+                                        show_pop_up(`Une reclamation a été créé, elle sera réglée par l'enseignant du module`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                                    },800);
                                 }
                             }
                             else
@@ -1513,10 +1513,10 @@ function delete_reclamation(elem) {
                     data = JSON.parse(response);
                     setTimeout(() => {
                         if (data.success){
-                            show_pop_up(`La réclamation a été supprimé !`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
-                            update_reclamation_tab(data.html,'delete', elem.parentElement.parentElement);
-                            $(document.querySelector('#reclam_tab .notes_item_reclam_new')).slideDown();
-                            $(document.querySelector('#reclam_tab .copie_is_archived')).slideUp();
+                            update_reclamation_tab(data.html,'delete');
+                            setTimeout(()=> {
+                                show_pop_up(`La réclamation a été supprimé !`, 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
+                            },800);
                         }
                         else
                             show_pop_up('Echec !', 'alert', ()=>{}, ()=>{}, last= true, second = false, general = false);
@@ -1537,52 +1537,30 @@ function delete_reclamation(elem) {
 }
 
 function update_reclamation_tab(data, type, elem = null){
-    /*
-        updating tab first
-        then pasting tab on to main content
-    */
-    var old_reclams_section = document.querySelector('#reclam_tab > div .notes_item_reclam_old > div');
+    $(document.querySelector('#reclam_tab > div')).slideUp();
 
-    if (type == 'create'){
-        if (old_reclams_section.querySelectorAll('.old_reclam_item').length == 0){
-            var parent = old_reclams_section.parentElement;
-            $(parent).hide();
-            parent.innerHTML = data;
-            $(parent).slideDown();
-        }
-        else {
-            var relcams_title = old_reclams_section.querySelector('.reclam_second_title');
-            new_old_item = $(data).find('.old_reclam_item')[0];
-            $(new_old_item).addClass('hide');
-            relcams_title.insertAdjacentElement('afterend', new_old_item);
-            $(new_old_item).slideDown();
-        }
+    // UPDATING MAIN CONTENT
+    var current_item_id = document.getElementById('std_center_item_id').innerHTML;
+    var current_item_year =  document.getElementById('std_center_item_year').innerHTML;
+    var tmp_query = `.notes_item_small[data-item-year='${current_item_year}'][data-item-id='${current_item_id}'] .notes_item_reclam > div`;
+    var main_reclamation_item = document.querySelector(tmp_query);
+    if (type == "create"){
+        var notes_item_reclam_old = document.createElement('div');
+        notes_item_reclam_old.innerHTML = '<div class="copie_is_archived">Vous avez deja Reclamé</div>';
+        notes_item_reclam_old.appendChild($(data)[0]);
+        main_reclamation_item.innerHTML = notes_item_reclam_old.innerHTML;
     }
-    else if (type == 'delete'){
-        $(elem).slideUp(400);
-        setTimeout(() => {
-            elem.remove();
-            console.log(old_reclams_section.querySelector('.old_reclam_item'));
-            if (old_reclams_section.querySelectorAll('.old_reclam_item').length == 0){
-                $(old_reclams_section.querySelector('.reclam_second_title')).slideUp();
-                setTimeout(()=> {
-                    old_reclams_section.querySelector('.reclam_second_title').remove();
-                },400);
-            }
-        }, 400);
+    else if (type == "delete"){
+        main_reclamation_item.innerHTML = data;
     }
 
-    // updating main content
-    setTimeout(()=>{
-        
-        var current_item_id = document.getElementById('std_center_item_id').innerHTML;
-        var current_item_year =  document.getElementById('std_center_item_year').innerHTML;
-        var tmp_query = `.notes_item_small[data-item-year='${current_item_year}'][data-item-id='${current_item_id}'] .notes_item_reclam_old`;
-        var main_reclamation_item =  document.querySelector(tmp_query);
-        var tab_reclams_section = document.querySelector('#reclam_tab > div .notes_item_reclam_old');
-        main_reclamation_item.innerHTML = tab_reclams_section.innerHTML;
-    
-    },1000);
+    // UPDATING TAB CONTENT FROM MAIN CONTENT
+    setTimeout(()=> {
+        document.getElementById("reclam_tab").innerHTML = "";
+        $(main_reclamation_item).clone().hide().appendTo('#reclam_tab');
+        $(document.querySelector('#reclam_tab > div')).slideDown();
+    },500);
+   
 }
 
 
