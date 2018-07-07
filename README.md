@@ -24,7 +24,7 @@ clonner le repo
 
     git clone git@gitlab.com:pfe-l3/gce.git
 
-faire un build  
+faire un build
 
     cd ToGceProjectFolder/
     docker-compose build
@@ -42,3 +42,7 @@ utilisé 2 Console(Terminal) pour lancé 2 serveurs au meme temps:<br>
         docker-compose up
 
 laisse les 2 serveurs en marche, et chaque fois que tu sauvgarde un docment css, js, ou html, la page recharge automatiquement
+
+## phpLDAPadmin login informations:
+user: cn=admin,dc=openldap
+pass: admin
