@@ -22,15 +22,19 @@ from gce_app.forms import avatar_upload_form, copies_file_upload_form, correctio
 ## extra 
 from django.conf import settings
 from datetime import datetime
-import os
+import os, logging
 
 
 ### Notify User - Create Notification  
-def create_notification(user, title, content, type):
+def create_notification(user, title, content, type = "default"):
+    if type == "default":
+        icon = "images/notifications/default_notification.svg"
     if type == "save":
-        icon = 'images/notifications/save_notification.svg'
+        icon = "images/notifications/save_notification.svg"
     if type == "mail":
-        icon = 'images/notifications/email_notification.svg'
+        icon = "images/notifications/email_notification.svg"
+    if type == "new_notes":
+        icon = "images/notifications/new_notes_notification.svg"
 
     notif = Notification (
         sujet_notification = title,
@@ -38,7 +42,9 @@ def create_notification(user, title, content, type):
         icon_notification = icon,
         id_utilisateur = user
     )
+    
     notif.save()
+    return notif
 
 
 ## returns the user's data
@@ -370,7 +376,7 @@ def create_new_copie_entry(module_name, student_id, files_ids):
         }
 
     except Exception as e:
-        print(e)
+        logging.exception(e)
         copie.delete()
 
 ### save button backend
@@ -428,7 +434,7 @@ def save_saisir_data(req, module_name):
                 copy_to_modify.save()
 
             except Exception as e:
-                print(e)
+                logging.exception(e)
                 # restoring data
                 version_to_modify.note_version = old_note
                 version_to_modify.save()
@@ -474,6 +480,8 @@ def submit_saisir_data(req, module_name):
     module_to_submit.finsaisie_module = True
     module_to_submit.save() ## will not be able to see module in saisir after this !
 
+    return 'done'
+
 
 
 def get_saisir_stats(context):
@@ -509,7 +517,7 @@ def create_module_correction(req,module_name): ## gets all uploaded files and sa
                 obj.id_correction = correction_obj
                 obj.save()
     except Exception as e:
-        print(e)
+        logging.exception(e)
         correction_obj.delete()
 
 def delete_module_correction(req):
@@ -547,22 +555,25 @@ def save_notes_module(req, module_name):
                     version_to_modify.note_version = float(entry['mark'])
                     version_to_modify.save()
             except Exception as e:
-                print(e)
+                logging.exception(e)
                 version_to_modify.note_version = old_note
                 version_to_modify.save()
 
 def submit_notes_module(req, module_name):
     correction = json.loads(req.POST.get('correction'))
+    affichage = Affichage(id_module = Module.objects.filter(titre_module = module_name)[0])
+    affichage.save()
     if correction:
         all_copy_files = get_copy_entries(module_name, True)['entries']
         for files in all_copy_files:
             try:
                 files[0].id_version.id_copie.modifiable = False
                 files[0].id_version.id_copie.save()
+                affichage.copies.add(files[0].id_version)
             except Exception as e:
-                print(e)
-                files[0].id_version.id_copie.modifiable = True
-                files[0].id_version.id_copie.save()
+                logging.exception(e)
+
+
 
 
 def get_affichable_modules(logged_in_user):
@@ -577,6 +588,11 @@ def get_affichable_modules(logged_in_user):
 
     return affichable_modules
 
+def get_chef_affichages(logged_in_user):
+    all_user_modules = Module.objects.filter(Q(id_specialite__in = Specialite.objects.filter(id_parcours__in = Parcours.objects.filter(id_filiere__in = Filiere.objects.filter(id_chef_departement = ChefDepartement.objects.filter(id_chef_departement = logged_in_user)[0])))) & Q(finsaisie_module = True))
+    affichages = Affichage.objects.filter(id_module__in = all_user_modules)
+    return affichages
+
 
 def get_ensg_reclamations(ensg):
     ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
@@ -590,6 +606,33 @@ def get_ensg_reclamations(ensg):
     }
 
 
+def demande_access_right_ensg_notes(module_name):
+    try:
+        notif = create_notification (
+                    user = Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement,
+                    title = 'Demande de Droit de Modification',
+                    content = 'l\'enseignant du module ' + module_name +' demande le droit de modification avant l\'affichage', 
+                    type = "save"
+                )
+        return notif
+    
+    except Exception as e:
+        logging.exception(e)    
+
+
+
+def get_can_ask_for_right(versions):
+    for files in versions:
+        for file in files:
+            if file.id_version.id_copie.afficher_copie == True:
+                return False
+    return True
+    
+
+def do_logout(req):
+    logout(req)
+    return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+
 #######################################################
 ###################### VIEWS ##########################
 #######################################################
@@ -602,10 +645,10 @@ def ensg_reclamation_handler(req):
             reclamation = Reclamation.objects.filter(id = req.POST.get('reclam_id'))[0]
             copie_to_modify = Copie.objects.filter(id = req.POST.get('copie_id'))[0]
             old_version = get_final_versions([copie_to_modify])[0]
-
+            
             if req.POST.get('type') == 'accept':
                 reclamation.approuver_reclamation = True
-                
+                reclam_stat = 'approuvée'
                 new_version = VersionCopie(numero_version = old_version.numero_version + 1, note_version = float(req.POST.get('note')), id_copie = copie_to_modify, temp_version = True)
                 new_version.save()
                 filler_file = FichierCopie(id_version = new_version, id_module = reclamation.id_module, emplacement_fichier = "default/file_filler.png")
@@ -616,13 +659,23 @@ def ensg_reclamation_handler(req):
                 
             if req.POST.get('type') == 'refuse':
                 reclamation.approuver_reclamation = False
+                reclam_stat = 'rejetée'
             
             reclamation.regler_reclamation = True
             reclamation.save()
+            try:
+                create_notification(
+                    user = reclamation.id_etudiant.id_etudiant, 
+                    title = 'Reclamation Traitée',
+                    content = 'La réclamation du module ' + reclamation.id_module.titre_module + ' a étée ' + reclam_stat
+                )
+            except Exception as e:
+                logging.exception(e)
+
             data = {'success': True}
 
         except Exception as e:
-            print(e)
+            logging.exception(e)
             data = {'success': False}
             
     stringfied_data = json.dumps(data)
@@ -653,6 +706,15 @@ def etud_reclamation_handler(req):
                         'year':{'active':True},
                     }}
                     html_to_use = render_to_string('gce_app/etud/reclam_content.html', context = context_to_use)
+                    try: 
+                        create_notification(
+                            user = Enseignant.objects.filter(modules__in = [module])[0].id_enseignant,
+                            title = 'Nouvelle Réclamation',
+                            content = 'Une nouvelle réclamation du module ' + module.titre_module + ' a étée créée'
+                        )
+                    except Exception as e:
+                        logging.exception(e)
+
                 else:
                     return JsonResponse(json.dumps({'success': True, 'error' : True}), safe = False)  
             
@@ -663,7 +725,7 @@ def etud_reclamation_handler(req):
             data = {'success': True, 'html': html_to_use}
         
         except Exception as e:
-            print(e)
+            logging.exception(e)
             data = {'success': False}
             
     stringfied_data = json.dumps(data)
@@ -762,8 +824,7 @@ class MainView(TemplateView):
 
         else:   
             if req.POST.get('logout'):
-                logout(req)
-                return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+                return do_logout(req)
 
         return get_home_template(req)
 
@@ -794,15 +855,15 @@ class ProfileView(DetailView, BaseContextMixin):
 
     def post(self, req, *args, **kwargs):
         form = avatar_upload_form(req.POST, req.FILES)
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
+            
         if form.is_valid(): ## changing user avatar
             try:
                 obj = change_user_avatar(req, form)
                 data = {'success': True, 'new_avatar':obj.avatar_utilisateur.url}
             except Exception as e:
-                print(e)
+                logging.exception(e)
                 data = {'success': False}
             serialized_data = json.dumps(data)
             return JsonResponse(serialized_data, safe = False)
@@ -861,9 +922,9 @@ class AnnonceView(TemplateView, BaseContextMixin):
         return context
 
     def post(self, req, *args, **kwargs):
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
+
         if req.is_ajax():
             req_type = req.POST.get('type');
             if req_type == 'delete':
@@ -871,7 +932,7 @@ class AnnonceView(TemplateView, BaseContextMixin):
                     Annonce.objects.filter(id = req.POST.get('annonce_id'))[0].delete()
                     data = {'success': True}
                 except Exception as e:
-                    print(e)
+                    logging.exception(e)
                     data = {'success': False}
                 serialized_data = json.dumps(data)
                 return JsonResponse(serialized_data, safe = False)
@@ -882,7 +943,7 @@ class AnnonceView(TemplateView, BaseContextMixin):
                     data = {'success': True}
                     # data.update(annonce_info)
                 except Exception as e:
-                    print(e)
+                    logging.exception(e)
                     data = {'success': False}
                 serialized_data = json.dumps(data)
                 return JsonResponse(serialized_data, safe = False)
@@ -898,7 +959,7 @@ class AnnonceView(TemplateView, BaseContextMixin):
                         annonce_to_change.save()
                         data = {'success': True, 'hideCross': False}
                 except Exception as e:
-                    print(e)
+                    logging.exception(e)
                     data = {'success': False}
                 serialized_data = json.dumps(data)
                 return JsonResponse(serialized_data, safe = False)
@@ -925,9 +986,10 @@ class SaisirView(TemplateView, BaseContextMixin):
     def post(self, req, *args, **kwargs):
         global ANNEE_UNIV
         ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+
+        if req.POST.get('logout'):
+            return do_logout(req)
+
         if req.is_ajax():
             try:
                 module_name = req.POST.get('module_name')
@@ -941,6 +1003,16 @@ class SaisirView(TemplateView, BaseContextMixin):
                     res = submit_saisir_data(req, module_name)
                     if res == 'copies not saved': ## in case a copîe doesn't have a saved note
                         return JsonResponse(json.dumps({ 'success': False, 'error' : 'Sauvgarder avant d\'envoyer !'}), safe = False)      
+                    else:
+                        try:
+                            module_obj = Module.objects.filter(titre_module = module_name)[0]
+                            create_notification(
+                                user = Enseignant.objects.filter(modules__in = [module_obj])[0].id_enseignant,
+                                title = 'Fin de Saisie',
+                                content = 'Fin de saisie des notes du module ' + module_obj.titre_module + ', Vérifez les s\'il vous plaît'
+                            )
+                        except Exception as e:
+                            logging.exception(e)
 
                 context = get_copy_entries(module_name, False)
                 context.update(get_saisir_students(module_name, True))
@@ -954,7 +1026,7 @@ class SaisirView(TemplateView, BaseContextMixin):
                 data = {'success': True, 'html': html, 'type': req.POST.get('type')}
             
             except Exception as e:
-                print(e)
+                logging.exception(e)
                 data = {'success': False}
             
             serialized_data = json.dumps(data)
@@ -1001,10 +1073,7 @@ class NotesView(TemplateView, BaseContextMixin):
                     module_correction = Correction.objects.filter(Q(annee_correction = year) & Q(id_module = version.id_copie.id_module))[0]
                     module_reclamation = Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = version.id_copie.id_module)).order_by('-id')
                     nb_unprocessed_reclams = len(Reclamation.objects.filter(Q(id_etudiant = student) & Q(id_module = version.id_copie.id_module) & Q(regler_reclamation = False) ))
-                    # if len(module_reclamation) <= 0:
-                    #     module_reclamation = module_reclamation
-                    # else:
-                    #     module_reclamation = None
+
                     modules_data += [{
                         'files':list(copy_files),
                         'correction': list(FichierCorrection.objects.filter(id_correction = module_correction).order_by('-id')),
@@ -1030,13 +1099,13 @@ class NotesView(TemplateView, BaseContextMixin):
         global ANNEE_UNIV 
         ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
         
         if req.is_ajax():
             try:
                 module_name = req.POST.get('module_name')
+                
                 if req.POST.get('type') == 'upload':
                     create_module_correction(req, module_name)
                 if req.POST.get('type') == 'delete':
@@ -1045,6 +1114,14 @@ class NotesView(TemplateView, BaseContextMixin):
                     save_notes_module(req, module_name)
                 if req.POST.get('type') == 'submit':
                     submit_notes_module(req, module_name)
+                    try: 
+                        create_notification(
+                            user = Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement,
+                            title = 'Affichage Disponible',
+                            content = 'Les notes/copies du module ' + module_name + ' sont pret pour être affichées'
+                        )
+                    except Exception as e:
+                        logging.exception(e)
                 if req.POST.get('type') == 'access_right':
                     demande_access_right_ensg_notes(module_name)
                 context = get_copy_entries(module_name, True)
@@ -1053,8 +1130,9 @@ class NotesView(TemplateView, BaseContextMixin):
                 context['can_ask_for_right'] = get_can_ask_for_right(context['entries'])
                 html = render_to_string('gce_app/ensg/module_notes.html', context = context)
                 data = {'success': True, 'html': html, 'type': req.POST.get('type')}
+            
             except Exception as e:
-                print(e)
+                logging.exception(e)
                 data = {'success': False}
             serialized_data = json.dumps(data)
             return JsonResponse(serialized_data, safe = False) 
@@ -1071,54 +1149,68 @@ class NotesView(TemplateView, BaseContextMixin):
             return HttpResponse("<h2>404</h2>")
         return self.render_to_response(context)
 
-def demande_access_right_ensg_notes(module_name):
-    create_notification (
-        user = Module.objects.filter(titre_module = module_name)[0].id_specialite.id_parcours.id_filiere.id_chef_departement.id_chef_departement,
-        title = 'Demande de Droit de Modification',
-        content = 'l\'enseignant du module ' + module_name +' demande le droit de modification avant l\'affichage', 
-        type = "save"
-    )
-
-
-def get_can_ask_for_right(versions):
-    for files in versions:
-        for file in files:
-            if file.id_version.id_copie.afficher_copie == True:
-                return False
-    return True
-    
 
 class AffichageView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/chef/chef_affichage.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['entries'] = get_affichable_modules(context['loggedin_user'])
+        # context['entries'] = get_affichable_modules(context['loggedin_user'])
+        context['affichages'] = get_chef_affichages(context['loggedin_user'])
+        
         return context
 
     def post(self, req, *args, **kwargs):
         global ANNEE_UNIV
         ANNEE_UNIV = AnneeUniv.objects.filter(active = True).order_by('-id')[0]
         
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
         
         if req.is_ajax():
             try:
-                module = Module.objects.filter(id = req.POST.get('data'))[0]
-                module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))
+                # module = Module.objects.filter(id = req.POST.get('data'))[0]
+                # module_copies = Copie.objects.filter(Q(id_module = module) & Q(annee_copie = ANNEE_UNIV))
+                affichage = Affichage.objects.filter(id = req.POST.get('data'))[0]
+                
                 if req.POST.get('type') == 'show':
-                    for copy in module_copies:
+                    for version in affichage.copies.all():
+                        copy = version.id_copie
                         copy.afficher_copie = True
                         copy.save()
+                        try:
+                            create_notification(
+                                user = copy.id_etudiant.id_etudiant,
+                                title = 'Note Affichée',
+                                content = 'La note et la copie du module ' + copy.id_module.titre_module + ' ont étées affichées'
+                            )
+                        except Exception as e:
+                            logging.exception(e)
+                    affichage.afficher = True
+                    affichage.save()
+                    
+
                 if req.POST.get('type') == 'grant_access':
-                    for copy in module_copies:
+                    for version in affichage.copies.all():
+                        copy = version.id_copie
                         copy.modifiable = True
                         copy.save()
-                data = {'success': True, 'module': module.titre_module}
+                    try:
+                        create_notification(
+                            user = Enseignant.objects.filter(modules__in = [affichage.id_module])[0].id_enseignant,
+                            title = 'Droit de Modification Garantie',
+                            content = 'Les notes du module ' + copy.id_module.titre_module + ' sont modifiables'
+                        )
+                    except Exception as e:
+                        logging.exception(e)
+                        
+                    affichage.delete()
+                    
+                data = {'success': True, 'module': affichage.id_module.titre_module}
+            
             except Exception as e:
-                print(e)
+                logging.exception(e)
+
                 data = {'success': False}
             serialized_data = json.dumps(data)
             return JsonResponse(serialized_data, safe = False) 
@@ -1137,9 +1229,9 @@ class UsersView(TemplateView, BaseContextMixin):
     template_name = 'gce_app/chef/chef_personnels.html'
 
     def post(self, req, *args, **kwargs):
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
+
         return HttpResponse(req)
 
     def get_context_data(self, **kwargs):
@@ -1165,9 +1257,9 @@ class ReclamationView(TemplateView, BaseContextMixin):
         return context
 
     def post(self, req, *args, **kwargs):
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
+
         return HttpResponse(req)
 
     def get(self, req, *args, **kwargs):
@@ -1194,9 +1286,8 @@ class RectificationsView(TemplateView, BaseContextMixin):
         return context
 
     def post(self, req, *args, **kwargs):
-        if self.request.POST.get('logout'):
-            logout(req)
-            return render(req, 'gce_app/common/login.html', context = None) # return login page after logging out
+        if req.POST.get('logout'):
+            return do_logout(req)
         
         if req.is_ajax():
             try:
@@ -1242,11 +1333,19 @@ class RectificationsView(TemplateView, BaseContextMixin):
                     current_version.save()
                     current_version.id_copie.rectifier = False
                     current_version.id_copie.save()
-                    
+                    try:
+                        create_notification(
+                            user = current_version.id_copie.id_etudiant.id_etudiant,
+                            title = 'Note Affichée',
+                            content = 'La copie du module ' + current_version.id_copie.id_module.titre_module + ' a étée réctifiée'
+                        )
+                    except Exception as e:
+                        logging.exception(e)
+                        
                 data = {'success': True}
                 
             except Exception as e:
-                print(e)
+                logging.exception(e)
                 data = {'success': False}
             serialized_data = json.dumps(data)
             return JsonResponse(serialized_data, safe = False) 

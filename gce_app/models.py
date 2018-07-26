@@ -208,7 +208,6 @@ class Copie(models.Model):
     id_etudiant = models.ForeignKey('Etudiant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
     annee_copie = models.ForeignKey('AnneeUniv', models.SET_NULL, db_column='annee_Copie', blank=True, null=True)
 
-
     class Meta:
         db_table = 'Copie'
 
@@ -285,41 +284,50 @@ class AnneeUniv(models.Model):
         db_table = 'anneeUniv'
 
 
-class DiscussionAdministrative(models.Model):
-    id_chef_departement = models.ForeignKey('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
-    id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur_1', blank=True, null=True)
-
+class Affichage(models.Model):
+    id_module = models.ForeignKey('Module', models.CASCADE, db_column='id_Module_affichage', blank=True, null=True)
+    afficher = models.BooleanField(db_column='afficher_affichage', default = False)
+    copies = models.ManyToManyField('VersionCopie', blank = True)
+    
     class Meta:
-        db_table = 'Discussion_Administrative'
+        db_table = 'Affichage'
 
 
-class DiscussionReclamation(models.Model):
-    id_reclamation = models.ForeignKey('Reclamation', models.CASCADE, db_column='id_Reclamation', blank=True, null=True)
-    id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
+# class DiscussionAdministrative(models.Model):
+#     id_chef_departement = models.ForeignKey('ChefDepartement', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
+#     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur_1', blank=True, null=True)
 
-    class Meta:
-        db_table = 'Discussion_Reclamation'
-
-
-class MessagesAdministrative(models.Model):
-    contenu_message = models.CharField(db_column='contenu_Message', max_length=10000, blank=True, null=True)
-    date_message = models.DateField(db_column='date_Message', blank=True, null=True)
-    heure_message = models.TimeField(db_column='heure_Message', blank=True, null=True)
-    id_emetteur = models.CharField(db_column='id_Emetteur', max_length=100, blank=True, null=True)
-    id_recepteur = models.CharField(db_column='id_Recepteur', max_length=100, blank=True, null=True)
-    id_discussion = models.ForeignKey('DiscussionAdministrative', models.CASCADE, db_column='id_Discussion', blank=True, null=True)
-
-    class Meta:
-        db_table = 'Messages_Administrative'
+#     class Meta:
+#         db_table = 'Discussion_Administrative'
 
 
-class MessagesReclamation(models.Model):
-    contenu_message = models.CharField(db_column='contenu_Message', max_length=10000, blank=True, null=True)
-    date_message = models.DateField(db_column='date_Message', blank=True, null=True)
-    heure_message = models.TimeField(db_column='heure_Message', blank=True, null=True)
-    id_emetteur = models.CharField(db_column='id_Emetteur', max_length=100, blank=True, null=True)
-    id_recepteur = models.CharField(db_column='id_Recepteur', max_length=100, blank=True, null=True)
-    id_discussion = models.ForeignKey('DiscussionReclamation', models.CASCADE, db_column='id_Discussion', blank=True, null=True)
+# class DiscussionReclamation(models.Model):
+#     id_reclamation = models.ForeignKey('Reclamation', models.CASCADE, db_column='id_Reclamation', blank=True, null=True)
+#     id_enseignant = models.ForeignKey('Enseignant', models.CASCADE, db_column='id_Utilisateur', blank=True, null=True)
 
-    class Meta:
-        db_table = 'Messages_Reclamation'
+#     class Meta:
+#         db_table = 'Discussion_Reclamation'
+
+
+# class MessagesAdministrative(models.Model):
+#     contenu_message = models.CharField(db_column='contenu_Message', max_length=10000, blank=True, null=True)
+#     date_message = models.DateField(db_column='date_Message', blank=True, null=True)
+#     heure_message = models.TimeField(db_column='heure_Message', blank=True, null=True)
+#     id_emetteur = models.CharField(db_column='id_Emetteur', max_length=100, blank=True, null=True)
+#     id_recepteur = models.CharField(db_column='id_Recepteur', max_length=100, blank=True, null=True)
+#     id_discussion = models.ForeignKey('DiscussionAdministrative', models.CASCADE, db_column='id_Discussion', blank=True, null=True)
+
+#     class Meta:
+#         db_table = 'Messages_Administrative'
+
+
+# class MessagesReclamation(models.Model):
+#     contenu_message = models.CharField(db_column='contenu_Message', max_length=10000, blank=True, null=True)
+#     date_message = models.DateField(db_column='date_Message', blank=True, null=True)
+#     heure_message = models.TimeField(db_column='heure_Message', blank=True, null=True)
+#     id_emetteur = models.CharField(db_column='id_Emetteur', max_length=100, blank=True, null=True)
+#     id_recepteur = models.CharField(db_column='id_Recepteur', max_length=100, blank=True, null=True)
+#     id_discussion = models.ForeignKey('DiscussionReclamation', models.CASCADE, db_column='id_Discussion', blank=True, null=True)
+
+#     class Meta:
+#         db_table = 'Messages_Reclamation'

@@ -7,7 +7,7 @@
     width: 100%;
     height: 3em;
     padding: 0 10%;
-    background: rgba(0,0,0,.8);
+    background: rgba(0, 0, 0, .8);
     line-height: 3em;
     text-align: center;
     animation-duration: 1.5s;
@@ -251,7 +251,7 @@
     height: 90%;
     background: rgb(255, 255, 255);
     border-radius: 5px;
-    box-shadow: 0 10px 20px rgba(0,0,0,.19), 0 6px 6px rgba(0,0,0,.23);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .19), 0 6px 6px rgba(0, 0, 0, .23);
     transition: width 1s, height 1s;
     user-select: none;
 }
@@ -809,7 +809,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* border-top: .09em solid rgba(0,0,0,.4); */
+    /* border-top: .09em solid rgba(0, 0, 0, .4); */
 }
 
 .profile_notes_modules > div:last-child, .profile_notes_notes > div:last-child {
@@ -831,11 +831,11 @@
 #annonce_add_button > div {
     display: inline-block;
     border-radius: 10px;
-    background-color: rgba(0,0,0,.8);
+    background-color: rgba(0, 0, 0, .8);
     padding: 1em;
     font-weight: bold;
     font-size: 20px;
-    color: rgba(255,255,255,1);
+    color: rgb(255, 255, 255);
 
 }
 #annonce_add_button > div:hover, .previous_image:hover , .next_image:hover {
@@ -942,7 +942,7 @@
     border-radius: 10px;
     width: 80%;
     height: auto;
-    background-color: rgba(0,0,0,.8);
+    background-color: rgba(0, 0, 0, .8);
     padding: 1em;
     margin: 0 auto 1em auto;
     min-width: 200px;
@@ -955,7 +955,7 @@
 
 .annonce_create_label {
     font-family: Roboto-Bold;
-    color: rgba(255,255,255,1);
+    color: rgb(255, 255, 255);
     display: block;
     padding: 0 0 .5em 0.2em;
 }
@@ -1008,7 +1008,7 @@
     left: 0;
     width: 2px;
     height: 35px;
-    background: rgba(255,255,255,1);
+    background: rgb(255, 255, 255);
     transform: rotateZ(-55deg);
     transform-origin: top;
 }
@@ -1024,7 +1024,7 @@
 
 #annonce_create_item_save > div:first-child, #annonce_create_item_save > div:last-child {
     position: absolute;
-    background: rgba(255,255,255,1);
+    background: rgb(255, 255, 255);
     width: 5px;
     height: 25px;
     border-radius: 5px;
@@ -1075,7 +1075,7 @@
 
 #saisir_search_module > input {
     background-color: transparent;
-    color: rgba(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
     border: none;
     text-align: center;
     width: 100%;
@@ -1104,7 +1104,7 @@
 
 #retour > div:first-child > div:first-child, #retour > div:first-child > div:last-child {
     position: absolute;
-    background: rgb(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     width: 5px;
     height: 20px;
     border-radius: 5px;
@@ -1156,7 +1156,7 @@
     cursor: pointer;
     background-color: rgba(218, 218, 218, 0.822);
     border: 4px dashed rgb(0, 0, 0);
-    color: rgba(0, 0, 0, 1);
+    color: rgb(0, 0, 0);
 }
 
 #glisser-fichier {
@@ -1180,7 +1180,7 @@
 .upload_active_drag {
     background-color: rgba(218, 218, 218, 0.822);
     border: 4px solid rgb(0, 0, 0);
-    color: rgba(0, 0, 0, 1);
+    color: rgb(0, 0, 0);
 }
 
 #progress_percent {
@@ -1218,7 +1218,7 @@
     margin-bottom: 8px;
     font-weight: 700;
     background-color: rgba(0, 0, 0, .8);
-    color: rgba(255, 255, 255, 1)
+    color: rgb(255, 255, 255);
 }
 
 .mark_item_large {
@@ -1269,7 +1269,7 @@
 
 .next_image > div:first-child, .next_image > div:last-child, .previous_image > div:first-child, .previous_image > div:last-child {
     position: absolute;
-    background: rgb(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     width: 5px;
     height: 20px;
     border-radius: 5px;
@@ -1297,7 +1297,7 @@
 }
 
 .previous_image:hover > div , .next_image:hover > div {
-    background: rgb(0, 0, 0, 1);
+    background: rgb(0, 0, 0);
 }
 
 .mark_item_image:hover > .next_image, .mark_item_image:hover > .previous_image {
@@ -1305,8 +1305,8 @@
 }
 
 .zoomlevel {
-    background: rgb(0, 0, 0, 0.8);
-    color: rgba(255, 255, 255, 1);
+    background: rgba(0, 0, 0, 0.8);
+    color: rgb(255, 255, 255);
     display: inline-block;
     position: absolute;
     bottom: 0.3em;
@@ -1333,8 +1333,8 @@
     border-radius: 5px;
     padding: 5px;
     border: transparent;
-    background: rgb(0, 0, 0, 0.8);
-    color: rgba(255, 255, 255, 1);
+    background: rgba(0, 0, 0, 0.8);
+    color: rgb(255, 255, 255);
 }
 
 .saisir_student_name::placeholder, .saisir_student_mark::placeholder {
@@ -1363,7 +1363,7 @@
 .default_button {
     display: inline-block;
     background-color: rgba(0, 0, 0, .8);
-    color: rgba(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
     padding: 10px;
     font-size: 22px;
     border-radius: 10px; 
@@ -1371,7 +1371,7 @@
 }
 
 .default_button:hover {
-    background-color: rgba(0, 0, 0, 1);
+    background-color: rgb(0, 0, 0);
     cursor: pointer;
     animation: wobble-horizontal 1s;
 }
@@ -1379,7 +1379,7 @@
 .default_button_small {
     display: inline-block;
     background-color: rgba(0, 0, 0, .8);
-    color: rgba(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
     padding: 7px;
     font-size: 16px;
     border-radius: 8px; 
@@ -1388,7 +1388,7 @@
 }
 
 .default_button_small:hover {
-    background-color: rgba(0, 0, 0, 1);
+    background-color: rgb(0, 0, 0);
     cursor: pointer;
 }
 
@@ -1409,7 +1409,7 @@
     top: 0.25em;
     padding: 5px;
     border-radius: 5px;
-    background: rgb(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     color: white;
 }
 
@@ -1419,7 +1419,7 @@
 
 .delete_entry > div:first-child, .delete_entry >  div:last-child {
     position: absolute;
-    background: rgb(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     width: 5px;
     height: 20px;
     border-radius: 5px;
@@ -1436,7 +1436,7 @@
 }
 
 .delete_entry:hover > div:last-child, .delete_entry:hover > div:first-child, .check_item_checkbox:hover + .check_item_control  {
-    background: rgb(0, 0, 0, 1);
+    background: rgb(0, 0, 0);
 }
 
 .check_item_checkbox {
@@ -1466,7 +1466,7 @@
 
 .check_item_control:after {
     content: "\2714";
-    color: rgb(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 20px;
     line-height: 0.95em; 
 }
@@ -1476,7 +1476,7 @@
 }
 
 .check_item_checkbox:checked + .check_item_control:after {
-    color: rgb(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
 }
 
 .select_all {
@@ -1485,9 +1485,9 @@
     right: 4px;
     height: 80%;
     width: 35px;
-    border: 3px dashed rgba(255, 255, 255, 1);
+    border: 3px dashed rgb(255, 255, 255);
     border-radius: 10px;
-    color: rgba(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
     font-size: 26px;
     padding: 1px 3px;
 }
@@ -1669,13 +1669,13 @@
     border-radius: 5px;
     padding: 5px;
     border: transparent;
-    color: rgba(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
     width: 100%;
     font-weight: 400;
 }
 
 .notes_item_mark_value { 
-    background: rgb(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.8);
 }
 
 .notes_item_name_value {
@@ -1683,7 +1683,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     line-height: 1.1em;
-    background: rgb(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.8);
 }
 
 .in_image_zoom_level {
@@ -1924,34 +1924,73 @@ textarea.reclam_tab_item {
 
 
 /* #region Affichage */
+.affichage_item_large {
+    padding: .5em;
+}
+
 .affichage_item_info span {
     font-weight: 400; 
 }
 
-.affichage_module_button, .modifiable_module_button {
+.affichage_controls {
+    position: relative;
+    overflow: hidden;
+}
+
+.affichage_controls > .default_button_small {
+    margin-top: 0.2em;
+}
+
+.affichage_controls > .default_button_small:last-child {
     position: absolute;
-    transform: scale(0.7);
+    right: 0;
 }
 
-.affichage_module_button {
-    right: -.7em;
-    top: 0em;
+.affichage_controls > .default_button_small:last-child:hover {
+    background-color: rgba(255, 0, 0, 0.808);
 }
 
-.modifiable_module_button {
-    right: -1.1em;
-    top: 1.8em;
+.affichage_consult_area {
+    display:none;
 }
 
-.affichage_module_button:hover, .modifiable_module_button:hover { 
-    animation: none;
+.default_title_compact {
+    position: relative;
+    padding: 8px;
+    font-size: 1em;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    background-color: rgba(0, 0, 0, .8);
+    color: rgb(255, 255, 255);
 }
 
-.affichage_item_info {
-    width: calc(100% - 10em);
+.default_title_compact > div {
+    width: 6px;
+    height: 16px;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    position: absolute;
+    left: 10px;
 }
+
+.default_title_compact > div:first-child {
+    transform: rotate(45deg);
+    top: 5px;
+}
+
+.default_title_compact > div:last-child {
+    transform: rotate(-45deg);
+    top: 13px;
+}
+
+.default_title_compact:hover {
+    background-color: rgba(0, 0, 0, .9);
+    cursor: pointer;
+}
+
 /* #endregion Affichage */
-
 
 /* #region personnels */
 .personnel_user_item {
@@ -2008,7 +2047,7 @@ textarea.reclam_tab_item {
     padding: .4em .6em .6em .6em;
     margin: 1em 0 .2em 0;
     border-radius: 10px;
-    border: 1px dashed rgb(0, 0, 0, .5); 
+    border: 1px dashed rgba(0, 0, 0, .5); 
 }
 
 .reclam_ensg_info_item {
@@ -2020,7 +2059,7 @@ textarea.reclam_tab_item {
 }
 
 .reclam_ensg_info_label {
-    color: rgb(0, 0, 0, 1);
+    color: rgb(0, 0, 0);
     padding-bottom: .2em;
     white-space: nowrap;
     overflow: hidden;
@@ -2031,7 +2070,7 @@ textarea.reclam_tab_item {
     border-radius: 5px;
     padding: 5px;
     border: transparent;
-    color: rgba(0, 0, 0, 1);
+    color: rgb(0, 0, 0);
     width: 100%;
     font-weight: 400;
     background: rgba(126, 126, 126, 0.4);
@@ -2181,7 +2220,7 @@ textarea.reclam_tab_item {
 }
 
 .rect_hint {
-    background: rgba(0, 0, 0, 1);
+    background: rgb(0, 0, 0);
     top: 50%;
     transform: translateY(-50%); 
     position: absolute;
@@ -2194,7 +2233,7 @@ textarea.reclam_tab_item {
     position: absolute;
     top: 8px; 
     right: -5px;
-    background: rgba(0, 0, 0, 1);
+    background: rgb(0, 0, 0);
     height: 12px;
     width: 12px;
 }
@@ -2213,7 +2252,7 @@ textarea.reclam_tab_item {
 .rect_item_value {
     padding: .2em;
     border-radius: 6px;
-    background: rgb(0, 0, 0, .8);
+    background: rgba(0, 0, 0, .8);
     color: white;
     margin-bottom: .2em; 
 }
@@ -2347,7 +2386,7 @@ textarea.reclam_tab_item {
     width: 32px;
     height: 32px;
     background-color: rgba(0, 0, 0, .8);
-    color: rgba(255, 255, 255, 1);
+    color: rgb(255, 255, 255);
     margin-bottom: 0.3em;
     border-radius: 5px; 
     text-align: center;
@@ -2366,7 +2405,7 @@ textarea.reclam_tab_item {
 
 .move_controls_item:hover {
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 1);
+    background-color: rgb(0, 0, 0);
 }
 
 #go_to_bottom {
@@ -2379,7 +2418,7 @@ textarea.reclam_tab_item {
 
 #go_to_bottom > div:first-child, #go_to_bottom > div:last-child, #go_to_top > div:first-child, #go_to_top > div:last-child {
     position: absolute;
-    background: rgb(255, 255, 255, 1);
+    background: rgb(255, 255, 255);
     width: 4px;
     height: 15px;
     border-radius: 5px;
@@ -2590,7 +2629,7 @@ textarea.reclam_tab_item {
         position: absolute;
         top: 3.1em;
         left: 0;
-        background-color: rgba(0,0,0,.8);
+        background-color: rgba(0, 0, 0, .8);
         border: 1px solid rgba(88, 88, 88, .5);
         padding: 1em 1em; 
         margin: 0 20%;
@@ -2770,6 +2809,17 @@ textarea.reclam_tab_item {
         position: relative;
         left: 0;
     }
+
+    .affichage_controls > .default_button_small {
+        display: block;
+        float:left;
+        clear: both;
+    }
+    
+    .affichage_controls > .default_button_small:last-child {
+        position: relative;
+    }
+    
 }
 /* #endregion MEDIA QUERIES */
 
