@@ -6,23 +6,24 @@
             <div id='saisir_icon' onclick="load_saisir(event)" class='home_item left_home_item right_item'>Copies</div>
             <div id='televerser_icon' onclick="load_televerser(event)" class='home_item right_home_item left_item'>Réctifications</div>
         {% endif %}
-        {% if user_type != 'tech' %}
+        {% if user_type == 'etud' %}
             <div id='annonces_icon' onclick="load_annonces(event)" class='home_item left_home_item right_item'>Annonces</div>
-        {% endif %}
-        {% if user_type == 'etud' or user_type == 'ensg' %}
             <div id='resultats_icon' onclick="load_resultats(event)" class='home_item right_home_item left_item'>Notes</div>
+            <!-- <div id='messenger_icon' onclick="load_messenger(event)" class ='home_item left_home_item right_item'>Messenger</div> -->
         {% endif %}
         {% if user_type == 'ensg' %}
+            <div id='annonces_icon' onclick="load_annonces(event)" class='home_item left_home_item right_item'>Annonces</div>
+            <div id='resultats_icon' onclick="load_resultats(event)" class='home_item right_home_item left_item'>Notes</div>
             <div id='reclamations_icon' onclick="load_reclamations(event)" class='home_item left_home_item right_item'>Reclamations</div>
-            <div id='consultations_icon' onclick="load_consultations(event)" class='home_item right_home_item left_item'>Consultations</div>
+            <!-- <div id='consultations_icon' onclick="load_consultations(event)" class='home_item right_home_item left_item'>Consultations</div> -->
+            <!-- <div id='messenger_icon' onclick="load_messenger(event)" class ='home_item right_home_item left_item'>Messenger</div> -->
         {% endif %}
         {% if user_type == 'chef' %}
+            <div id='annonces_icon' onclick="load_annonces(event)" class='home_item left_home_item right_item'>Annonces</div>
             <div id='affichages_icon' onclick="load_affichages(event)" class='home_item right_home_item left_item'>Affichages</div>
-            <div id='consultations_icon' onclick="load_consultations(event)" class='home_item left_home_item right_item'>Consultations</div>
-            <div id='utilisateur_icon' onclick="load_utilisateur(event)" class='home_item right_home_item left_item'>Personnel</div>
-        {% endif %}
-        {% if user_type != 'tech' %}
-            <div id='messenger_icon' onclick="load_messenger(event)" class ='home_item left_home_item right_item'>Messenger</div>
+            <!-- <div id='consultations_icon' onclick="load_consultations(event)" class='home_item left_home_item right_item'>Consultations</div> -->
+            <div id='utilisateur_icon' onclick="load_utilisateur(event)" class='home_item left_home_item right_item'>Personnel</div>
+            <!-- <div id='messenger_icon' onclick="load_messenger(event)" class ='home_item right_home_item left_item'>Messenger</div> -->
         {% endif %}
     </div>
 {% endblock %}

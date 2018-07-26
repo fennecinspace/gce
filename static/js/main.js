@@ -1223,7 +1223,7 @@ function afficher_module(elem,e){
     e.stopPropagation();
     show_pop_up('Confirmer l\'affichage', 'confirm', () => {
         show_pop_up('Êtes-vous sûr ?', 'confirm', () => {
-            var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
+            var data_to_send = elem.parentElement.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
             $.ajax({
                 url: `${location.origin}/affichages/`,
@@ -1237,7 +1237,7 @@ function afficher_module(elem,e){
                     setTimeout(()=>{
                         if (data.success){
                             show_pop_up(`les notes du module ${data.module} ont été affichées`);
-                            $(elem.parentElement).slideUp().remove();
+                            $(elem.parentElement.parentElement).slideUp().remove();
                             if (document.querySelectorAll('.affichage_item_large').length == 0)
                                 document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
                         }
@@ -1260,7 +1260,7 @@ function enable_module_modification(elem,e) {
     e.stopPropagation();
     show_pop_up('autoriser l\'enseignant a reverifié et remodifié les notes', 'confirm', () => {
         show_pop_up('Êtes-vous sûr ?', 'confirm', () => {
-            var data_to_send = elem.parentElement.querySelector('.affichage_module_id').innerHTML;
+            var data_to_send = elem.parentElement.parentElement.querySelector('.affichage_module_id').innerHTML;
             $('#main_loader_overlay').fadeIn();
             $.ajax({
                 url: `${location.origin}/affichages/`,
@@ -1274,7 +1274,7 @@ function enable_module_modification(elem,e) {
                     setTimeout(()=>{
                         if (data.success){
                             show_pop_up(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
-                            $(elem.parentElement).slideUp().remove();
+                            $(elem.parentElement.parentElement).slideUp().remove();
                             if (document.querySelectorAll('.affichage_item_large').length == 0)
                                 document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
                         }
@@ -1340,6 +1340,22 @@ function filter_users(e) {
             else
                 all_users.eq(x).slideUp(); 
         }
+}
+
+function consultation_affichage(elem ,e , type = 'show') {
+    e.stopPropagation();
+    console.log(elem.parentElement.parentElement.parentElement);
+    var consult_area = elem.parentElement.parentElement.parentElement.querySelector(".affichage_consult");
+    var main_area = elem.parentElement.parentElement.parentElement.querySelector(".affichage_main");
+    
+    if (type == 'show') {
+        $(consult_area).slideDown();
+        $(main_area).slideUp();
+    }
+    else {
+        $(consult_area).slideUp();
+        $(main_area).slideDown();
+    }
 }
 
 

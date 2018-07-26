@@ -1,20 +1,41 @@
 {% extends 'gce_app/common/base_page.html' %}
 {% block base_extender %}
 <div id="affichage_container">
-    {% if entries %}
+    {% if affichages %}
         <div class="saisir_item_small" id="saisir_search_module">
             <input autocomplete="off" name="search_module" oninput="filter_affichage(event);" placeholder="Trouver un affichage" type="text">
         </div>
-        {% for entry in entries %}
+        {% for entry in affichages %}
             <div class="saisir_item_small affichage_item_large {% if forloop.counter0|divisibleby:2 %}left_item{% else%}right_item{% endif %}">
-                <div class="affichage_item_info">
-                    <div class="affichage_module_id">{{ entry.id }}</div>
-                    <div class="affichage_module_name">Module : <span>{{ entry.titre_module }}</span></div>
-                    <div class="affichage_module_spec">Specialite : <span>{{ entry.id_specialite.nom }}</span></div>
-                    <div class="affichage_module_parc">Parcours : <span>{{ entry.id_specialite.id_parcours.nom }}</span></div>
+                <div class="affichage_main">
+                    <div class="affichage_item_info">
+                        <div class="affichage_module_id">{{ entry.id }}</div>
+                        <div class="affichage_module_name">Module : <span>{{ entry.id_module.titre_module }}</span></div>
+                        <div class="affichage_module_spec">Specialite : <span>{{ entry.id_module.id_specialite.nom }}</span></div>
+                        <div class="affichage_module_parc">Parcours : <span>{{ entry.id_module.id_specialite.id_parcours.nom }}</span></div>
+                    </div>
+                    <div class="affichage_controls">
+                        <div class="default_button_small" onclick="consultation_affichage(this,event,'show');">Consulter</div>
+                        <div class="hide"></div>
+                        {% if not entry.afficher %}
+                            <div class="default_button_small" onclick="enable_module_modification(this,event);">Activer Modification</div>
+                            <div class="default_button_small default_button_small_afficher" onclick="afficher_module(this,event);">Afficher</div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="default_button modifiable_module_button" onclick="enable_module_modification(this,event);">Activer Modification</div>
-                <div class="default_button affichage_module_button" onclick="afficher_module(this,event);">Afficher Notes</div>
+                <div class="affichage_consult hide">
+                    <div> <!-- added this as filler for consultation_affichage function -->
+                        <div class="default_title_compact" onclick="consultation_affichage(this,event,'hide');"><div class="back_1"></div><div class="back_2"></div>{{ entry.id_module.titre_module }}</div>
+                    </div>
+                    <div class="affichage_note_items">
+                        {% for note in entry.copies.all|dictsort:"id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name" %}
+                            <div class="affichage_note_item">
+                                <div class="affichage_note_item_name">{{ note.id_copie.id_etudiant.id_etudiant.info_utilisateur.last_name|lower|title }} {{ note.id_copie.id_etudiant.id_etudiant.info_utilisateur.first_name|lower|title }}</div>
+                                <div class="affichage_note_item_mark">{{ note.note_version }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         {% endfor %}
     {% else %}

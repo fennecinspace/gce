@@ -461,10 +461,10 @@ function pages_handler() {
             responsive_menu_hider();
         });
 
-        document.getElementById("messenger_entry").addEventListener('click', function () {
-            show_pop_up('messenger');
-            responsive_menu_hider();
-        });
+        // document.getElementById("messenger_entry").addEventListener('click', function () {
+        //     show_pop_up('messenger');
+        //     responsive_menu_hider();
+        // });
     }
 
     if (user_type == 'ensg' || user_type == 'etud') {
@@ -487,12 +487,12 @@ function pages_handler() {
         });
     }
 
-    if (user_type == 'ensg' || user_type == 'chef') {
-        document.getElementById("consult_entry").addEventListener('click', function () {
-            show_pop_up('consult');
-            responsive_menu_hider();
-        });
-    }
+    // if (user_type == 'ensg' || user_type == 'chef') {
+    //     document.getElementById("consult_entry").addEventListener('click', function () {
+    //         show_pop_up('consult');
+    //         responsive_menu_hider();
+    //     });
+    // }
 
     if (user_type == 'chef') {
         document.getElementById("users_entry").addEventListener('click', function () {

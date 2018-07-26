@@ -75,25 +75,13 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ('sujet_notification', 'description_notification', 'vue_notification', 'date_notification', 'heure_notification', 'icon_notification', 'id_utilisateur',)
 admin.site.register(Notification, NotificationAdmin)
 
-class DiscussionAdministrativeAdmin(admin.ModelAdmin):
-    list_display = ('id_chef_departement', 'id_enseignant',)
-admin.site.register(DiscussionAdministrative, DiscussionAdministrativeAdmin)
-
 class ReclamationAdmin(admin.ModelAdmin):
     list_display = ('sujet_reclamation', 'description_reclamation', 'id_etudiant', 'id_module', 'regler_reclamation', 'approuver_reclamation', 'annee_reclamation',)
 admin.site.register(Reclamation, ReclamationAdmin)
 
-class DiscussionReclamationAdmin(admin.ModelAdmin):
-    list_display = ('id_reclamation', 'id_enseignant',)
-admin.site.register(DiscussionReclamation, DiscussionReclamationAdmin)
-
 class ConsultationAdmin(admin.ModelAdmin):
     list_display = ('sale_consultation', 'date_consultation', 'heure_consultation', 'afficher_consultation', 'approve_consultation', 'id_enseignant', 'id_module',)
 admin.site.register(Consultation, ConsultationAdmin)
-
-class MessagesAdministrativeAdmin(admin.ModelAdmin):
-    list_display = ('contenu_message', 'date_message', 'heure_message', 'id_emetteur', 'id_recepteur', 'id_discussion',)
-admin.site.register(MessagesAdministrative, MessagesAdministrativeAdmin)
 
 class VersionCopieAdmin(admin.ModelAdmin):
     list_display = ('numero_version', 'note_version', 'id_copie',)
@@ -110,6 +98,25 @@ admin.site.register(FichierCorrection, FichierCorrectionAdmin)
 class AnneeUnivAdmin(admin.ModelAdmin):
     list_display = ('annee_univ', 'active',)
 admin.site.register(AnneeUniv, AnneeUnivAdmin)
+
+class AffichageAdmin(admin.ModelAdmin):
+    list_display = ('id_module',)
+admin.site.register(Affichage, AffichageAdmin)
+
+
+
+
+# class DiscussionAdministrativeAdmin(admin.ModelAdmin):
+#     list_display = ('id_chef_departement', 'id_enseignant',)
+# admin.site.register(DiscussionAdministrative, DiscussionAdministrativeAdmin)
+
+# class DiscussionReclamationAdmin(admin.ModelAdmin):
+#     list_display = ('id_reclamation', 'id_enseignant',)
+# admin.site.register(DiscussionReclamation, DiscussionReclamationAdmin)
+
+# class MessagesAdministrativeAdmin(admin.ModelAdmin):
+#     list_display = ('contenu_message', 'date_message', 'heure_message', 'id_emetteur', 'id_recepteur', 'id_discussion',)
+# admin.site.register(MessagesAdministrative, MessagesAdministrativeAdmin)
 
 #admin.site.register(Appartientfiliere)
 # admin.site.register(Appartientfaculte)
