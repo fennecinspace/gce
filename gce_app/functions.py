@@ -9,7 +9,7 @@ def image_center_crop(img_object):
         img.paste(img_original, mask = img_original.split()[-1])
     else:
         img = img_original
-    print('after')
+
     # cropping to a perfect square
     width, height = img.size
     start = width/2 - height/2

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>Hello</div>
+    <button onclick="send_test(this, event)">Send</button>
+    <script>
+        var ws;
+        function init_socker_connection(){
+            ws = new WebSocket("ws:/localhost:8000");
+            ws.onopen = e => {
+                console.log('Open ', e);
+            }
+
+            ws.onmessage = e => {
+                console.log('Message ', e);
+            }
+
+            ws.onerror = e => {
+                console.log('Error ', e);
+            }
+
+            ws.onoclose = e => {
+                console.log('Close ', e);
+            }
+        }
+
+        function send_test() {
+            ws.send('{"text":"hello"}');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init_socker_connection();
+        }, false)
+        </script>
+</body>
+</html>

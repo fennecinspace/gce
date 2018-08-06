@@ -336,7 +336,6 @@ def PopulateEtudiant(nbEtud = 200):
             sys.stdout.write('\r[14/{}]Etudiant : {}/{}'.format(NBTABLES,nbOfEntries,nbOfEntriesToCreate))
         i = i + len(allStudents)//8
     if (i < len(allStudents)):
-        print('here')
         for student in allStudents[i:]:
             obj = Etudiant(id_etudiant = student, id_groupe = allGroups[len(allGroups)-1])
             obj.save()

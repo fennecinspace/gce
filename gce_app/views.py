@@ -220,7 +220,6 @@ def get_user_annonce(req, user_type):
         etud_parcours = Etudiant.objects.filter(id_etudiant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].id_groupe.id_section.id_specialite.id_parcours
         etud_filiere = etud_parcours.id_filiere
         annonces = Annonce.objects.filter(Q(Q(id_module__in = etud_modules) | Q(id_parcours = etud_parcours) | Q(id_filiere = etud_filiere)) & Q(afficher_annonce = True)).distinct().order_by('-id')
-        print(annonces)
     elif user_type == 'ensg':
         ensg_filieres = Enseignant.objects.filter(id_enseignant = Utilisateur.objects.filter(info_utilisateur = req.user)[0])[0].filieres.all()
         ensg_parcours = Parcours.objects.filter(id_filiere__in = ensg_filieres)
@@ -249,7 +248,6 @@ def create_new_annonce(req):
     if data_type == 'parcours':
         annonce.save()
         for elem in data_list:
-            print('here')
             annonce.id_parcours.add(Parcours.objects.filter(id = elem)[0])
     if data_type == 'module':
         annonce.save()
@@ -266,7 +264,6 @@ def create_new_annonce(req):
     #         'user_type': Utilisateur.objects.filter(info_utilisateur = req.user)[0].type_utilisateur,
     #     }    
     # }
-    # print('helo')
     # if annonce.id_filiere:
     #     annonce_info['filiere'] = annonce.id_filiere.nom;
     # elif annonce.id_parcours:
@@ -1360,3 +1357,17 @@ class RectificationsView(TemplateView, BaseContextMixin):
         else:
             return HttpResponse("<h2>404</h2>")
 
+
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+class test_consumer(TemplateView):
+    template_name = "gce_app/test_consumer.html"
+
+    def get (self, req, *args, **kwargs):
+        layer = get_channel_layer()
+        async_to_sync(layer.group_send)('events', {
+            'type': 'events.alarm',
+            'content': 'triggered'
+        })
+        return render(req, self.template_name, context = None)

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'gce_app',
     'livereload',
 ]
@@ -63,6 +64,7 @@ FILE_UPLOAD_HANDLERS= [
 ]
 
 ROOT_URLCONF = 'gce.urls'
+ASGI_APPLICATION = "gce.routing.application"
 
 TEMPLATES = [
     {
@@ -148,3 +150,18 @@ STATICFILES_DIRS = [
 # Media Files 
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
+
+
+### Channel Redis Host 
+redis_host = os.environ.get('REDIS_HOST', 'redis')   
+
+# Channel layer definitions
+# http://channels.readthedocs.org/en/latest/deploying.html#setting-up-a-channel-backend
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(redis_host, 6379)],
+        },
+    },
+}

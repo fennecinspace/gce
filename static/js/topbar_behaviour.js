@@ -534,4 +534,34 @@ $(document).ready(function () {
     menu_toggeler();
     pages_handler();
 
+    /* socket connection */
+    socket_connection();
+
 });
+
+
+/////////////////////////////// SOCKETS /////////////////////////////////////////
+var socket;
+function socket_connection(){
+    var endpoint;
+
+    if (location.protocol == "https:")
+        endpoint = 'wss://' + location.host;
+    else 
+        endpoint = 'ws://' + location.host;
+
+    socket = new WebSocket(endpoint);
+
+    socket.onmessage = e => {
+        console.log('Message', e);
+    }
+    socket.onopen = e => {
+        console.log('Open', e);
+    }
+    socket.onerror = e => {
+        console.log('Error', e);
+    }
+    socket.onclose = e => {
+        console.log('Close', e);
+    }
+}

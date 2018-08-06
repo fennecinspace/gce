@@ -1,6 +1,16 @@
 version: '3'
 
 services:
+  redis:
+    container_name: redis
+    image: redis:alpine3.8
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - './data/redis:/data'
+    restart: always
+    hostname: redis
+    # command: redis-cli config set stop-writes-on-bgsave-error no && redis-server
   db:
     image: postgres:10
     container_name: django_db
@@ -19,3 +29,4 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis

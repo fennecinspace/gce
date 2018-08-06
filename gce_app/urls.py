@@ -4,9 +4,11 @@ from gce_app.views import MainView, ProfileView, AnnonceView , SaisirView, Notes
 ## ajax only views
 from gce_app.views import notification_state_changer, search_suggestion_feeder, search_result_feeder, etud_reclamation_handler, ensg_reclamation_handler
 
+from gce_app.views import test_consumer
 app_name = 'gce_app'
 
 urlpatterns = [
+    path('test', test_consumer.as_view(), name="test_consumer"),
     path('', MainView.as_view(), name = 'home'),
     path('annonces/', login_required(AnnonceView.as_view()), name='annonces'),
     path('saisir/', login_required(SaisirView.as_view()), name='saisir'),
