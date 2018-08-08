@@ -2692,8 +2692,12 @@ textarea.reclam_tab_item {
         transition: padding .5s; 
     }
 
-    #profile_container, #annonce_container, #upload_area, .saisir_item_small, .notes_item_small {
+    #profile_container, #annonce_container, .saisir_item_small, .notes_item_small {
         display: inline-block;
+        width: 100%;
+    }
+
+    #upload_area {
         width: 100%;
     }
 

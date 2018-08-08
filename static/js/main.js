@@ -1236,8 +1236,11 @@ function afficher_module(elem,e){
                     data = JSON.parse(response);
                     setTimeout(()=>{
                         if (data.success){
+                            var button_afficher = elem;
+                            var button_modifier = elem.parentElement.querySelector('.default_button_small_modifier');
                             show_pop_up(`les notes du module ${data.module} ont été affichées`);
-                            $(elem.parentElement.parentElement).slideUp().remove();
+                            $(button_afficher).remove();
+                            $(button_modifier).remove();
                             if (document.querySelectorAll('.affichage_item_large').length == 0)
                                 document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
                         }
@@ -1273,10 +1276,14 @@ function enable_module_modification(elem,e) {
                     data = JSON.parse(response);
                     setTimeout(()=>{
                         if (data.success){
+                            var affichage_elem = elem.parentElement.parentElement.parentElement;
                             show_pop_up(`l'enseignant du module ${data.module} a le droit de modification, vous ne pourrez plus afficher jusqu'a qu'il renvoie les données une seconde fois`);
-                            $(elem.parentElement.parentElement).slideUp().remove();
-                            if (document.querySelectorAll('.affichage_item_large').length == 0)
-                                document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
+                            $(affichage_elem).slideUp(500);
+                            setTimeout(500,() => {
+                                $(affichage_elem).remove();
+                                if (document.querySelectorAll('.affichage_item_large').length == 0)
+                                    document.getElementById('affichage_container').innerHTML = '<div class="saisir_item_small" id="fin_de_verification_note">Pas de Note a Afficher</div>';
+                            });
                         }
                         else
                             show_pop_up('Echec !');

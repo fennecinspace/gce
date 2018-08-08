@@ -23,6 +23,23 @@ from gce_app.forms import avatar_upload_form, copies_file_upload_form, correctio
 from django.conf import settings
 from datetime import datetime
 import os, logging
+## channels
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
+
+### send message through channel layer
+def channel_layer_send_data(group_name = 'connected_users', content = {}):
+    try:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(group_name, {
+            'type': 'user.notify',
+            'content': content,
+        })
+        return True
+    except Exception as e:
+        logging.exception(e)
+        return False
 
 
 ### Notify User - Create Notification  
@@ -42,6 +59,12 @@ def create_notification(user, title, content, type = "default"):
         icon_notification = icon,
         id_utilisateur = user
     )
+
+    channel_layer_send_data(group_name = user.info_utilisateur.username, content = {
+        'title': title,
+        'content': content,
+        'icon': icon,
+    })
     
     notif.save()
     return notif

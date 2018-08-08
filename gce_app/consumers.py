@@ -3,35 +3,36 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 class MainConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
-        await self.channel_layer.group_add('connectedUsers', self.channel_name)
-        await self.accept()
-
-        print('connected')
+        if self.scope['user'].is_anonymous:
+            self.close()
+        else:
+            await self.channel_layer.group_add(self.scope['user'].username, self.channel_name)
+            await self.channel_layer.group_add('connected_users', self.channel_name)
+            await self.accept()
+            # print('connected')
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard('connectedUsers',self.channel_name)
-        print('disconnected')
+        await self.channel_layer.group_discard('connected_users',self.channel_name)
+        # print('disconnected')
         
 
 
     async def receive_json(self, content, **kwargs):
-        print('received')
-        await self.channel_layer.group_send(
-            'connectedUsers', {
-                'type': 'connectedUsers.notify',
-                'content': 'this is a group message'
-            })
+        # print('received')
+        print(content['text'])
+        # await self.channel_layer.group_send(
+        #     'connected_users', {
+        #         'type': 'user.notify',
+        #         'content': 'this is for all connected users'
+        #     })
 
-        await self.send_json({
-                'content': 'this is a message for the one making the call'
-            })
+        # await self.channel_layer.group_send(
+        #     self.scope['user'].username, {
+        #         'type': 'user.notify',
+        #         'content': 'this is for the one making the call'
+        #     })
 
-    async def connectedUsers_notify(self, event):
-        print(event)
+    async def user_notify(self, event):
         await self.send_json({
-                'content': event['content']
+                'data': event['content']
             })
-        # await self.send({
-        #     'type': 'connectedUsers_notify',
-        #     'text': event['text']
-        # })
