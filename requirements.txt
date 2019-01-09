@@ -7,3 +7,4 @@
  channels==2.1.2
  channels-redis
  django-channels-presence
+ xlrd
